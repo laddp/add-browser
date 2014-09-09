@@ -16,6 +16,7 @@ import javax.swing.JOptionPane;
 
 import com.camick.FormatRenderer;
 import com.camick.NumberRenderer;
+import com.sybase.jdbcx.SybDriver;
 
 /**
  * @author Patrick
@@ -25,6 +26,7 @@ public class ADDBrowser {
 	
 	protected static MainWindow mainWindow;
 	protected static Connection dataSource = null;
+	protected static String     tablePrefix = "";
 
 	protected static BatchTable batchDetail = null;
 
@@ -60,19 +62,33 @@ public class ADDBrowser {
 					databaseName + "?" +
 					"user=" + userName + "&" +
 					"password=" + password;
+			tablePrefix = "";
 		}
 		else if (dbType.compareTo(ConnectDialog.SYBASE_STRING) == 0)
 		{
+			try
+	        {
+	            SybDriver sybDriver = 
+	                (SybDriver)Class.forName("com.sybase.jdbc3.jdbc.SybDriver").newInstance();
+	            sybDriver.setVersion(com.sybase.jdbcx.SybDriver.VERSION_6);
+	            DriverManager.registerDriver(sybDriver);
+	        }
+	        catch (Exception e)
+	        {
+	            System.out.println(e);
+	        }
 			conStr = "jdbc:sybase:Tds:" +
 					serverName + ":" + 
 					serverPort +"/" + 
 					databaseName + "?" +
 					"USER=" + userName + "&" +
 					"PASSWORD=" + password;
+			tablePrefix = "dbo.";
 		}
 		else
 		{
 			conStr = "";
+			tablePrefix = "";
 		}
 
 		try {
@@ -99,19 +115,30 @@ public class ADDBrowser {
 			Statement stmt = dataSource.createStatement();
 			String query =
 					"SELECT " + 
-							"trans_main.event_date, trans_main.posting_date, trans_main.batch_num, " +
-							"full_account.full_account, accounts.name, " +
-							"trans_main.posting_code, post_code.long_desc, " +
-							"trans_main.net_amount, trans_main.last_maintenance_userid, trans_main.last_maintenance_dt " +
+							tablePrefix + "TRANS_MAIN.event_date, " +
+							tablePrefix + "TRANS_MAIN.posting_date, " +
+							tablePrefix + "TRANS_MAIN.batch_num, " +
+							tablePrefix + "FULL_ACCOUNT.full_account, " +
+							tablePrefix + "ACCOUNTS.name, " +
+							tablePrefix + "TRANS_MAIN.posting_code, " +
+							tablePrefix + "POST_CODE.long_desc, " +
+							tablePrefix + "TRANS_MAIN.net_amount, " +
+							tablePrefix + "TRANS_MAIN.last_maintenance_userid, " +
+							tablePrefix + "TRANS_MAIN.last_maintenance_dt " +
 					"FROM " +
-						"trans_main inner join full_account ON trans_main.account_num = full_account.account_num " +
-						"inner join accounts ON trans_main.account_num = accounts.account_num "+
-						"inner join post_code ON trans_main.posting_code = post_code.posting_code " +
+						tablePrefix + "TRANS_MAIN inner join " + tablePrefix + "FULL_ACCOUNT ON " +
+							tablePrefix + "TRANS_MAIN.account_num = " + tablePrefix + "FULL_ACCOUNT.account_num " +
+						"inner join " + tablePrefix + "ACCOUNTS ON " +
+							tablePrefix + "TRANS_MAIN.account_num = " + tablePrefix + "ACCOUNTS.account_num "+
+						"inner join " + tablePrefix + "POST_CODE ON " +
+							tablePrefix + "TRANS_MAIN.posting_code = " + tablePrefix + "POST_CODE.posting_code " +
 					"WHERE " +
-						"trans_main.posting_date = \"" + postingDate + "\" " +
-						"and trans_main.batch_num = " + batchNum + " " +
+						tablePrefix + "TRANS_MAIN.posting_date = '" + postingDate + "' " + "and " + 
+						tablePrefix + "TRANS_MAIN.batch_num = " + batchNum + " " +
 					"ORDER BY " +
-						"trans_main.posting_date, trans_main.batch_num, trans_main.account_num";
+						tablePrefix + "TRANS_MAIN.posting_date, " +
+						tablePrefix + "TRANS_MAIN.batch_num, " +
+						tablePrefix + "TRANS_MAIN.account_num";
 			ResultSet results = stmt.executeQuery(query);
 			
 			if (batchDetail == null)
