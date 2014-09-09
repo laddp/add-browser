@@ -7,10 +7,12 @@ import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
+
 import com.jgoodies.forms.layout.FormLayout;
 import com.jgoodies.forms.layout.ColumnSpec;
 import com.jgoodies.forms.layout.RowSpec;
 import com.jgoodies.forms.factories.FormFactory;
+
 import javax.swing.JCheckBox;
 import javax.swing.JTextField;
 import javax.swing.JList;
@@ -25,6 +27,10 @@ public class TransactionQueryDialog extends JDialog {
 	private JTextField startDate;
 	private JTextField endDate;
 	private JTextField accountNum;
+	private JCheckBox chckbxDateRange;
+	private JCheckBox chckbxPostingCodes;
+	private JList<?> list;
+	private JCheckBox chckbxAccountNumber;
 
 	/**
 	 * Launch the application.
@@ -62,7 +68,7 @@ public class TransactionQueryDialog extends JDialog {
 				FormFactory.RELATED_GAP_ROWSPEC,
 				FormFactory.DEFAULT_ROWSPEC,}));
 		{
-			JCheckBox chckbxDateRange = new JCheckBox("Date Range");
+			chckbxDateRange = new JCheckBox("Date Range");
 			contentPanel.add(chckbxDateRange, "2, 2");
 		}
 		{
@@ -76,15 +82,15 @@ public class TransactionQueryDialog extends JDialog {
 			endDate.setColumns(10);
 		}
 		{
-			JCheckBox chckbxPostingCodes = new JCheckBox("Posting Codes");
+			chckbxPostingCodes = new JCheckBox("Posting Codes");
 			contentPanel.add(chckbxPostingCodes, "2, 4");
 		}
 		{
-			JList list = new JList();
+			list = new JList<Object>();
 			contentPanel.add(list, "4, 4, fill, fill");
 		}
 		{
-			JCheckBox chckbxAccountNumber = new JCheckBox("Account Number");
+			chckbxAccountNumber = new JCheckBox("Account Number");
 			contentPanel.add(chckbxAccountNumber, "2, 6");
 		}
 		{
