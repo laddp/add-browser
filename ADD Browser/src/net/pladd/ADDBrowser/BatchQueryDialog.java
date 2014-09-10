@@ -6,17 +6,18 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JDialog;
 import javax.swing.JPanel;
+import javax.swing.JTextField;
 import javax.swing.border.EmptyBorder;
 
-import com.jgoodies.forms.layout.FormLayout;
-import com.jgoodies.forms.layout.ColumnSpec;
-import com.jgoodies.forms.layout.RowSpec;
 import com.jgoodies.forms.factories.FormFactory;
-
-import javax.swing.JLabel;
-import javax.swing.JTextField;
+import com.jgoodies.forms.layout.ColumnSpec;
+import com.jgoodies.forms.layout.FormLayout;
+import com.jgoodies.forms.layout.RowSpec;
+import javax.swing.event.ChangeListener;
+import javax.swing.event.ChangeEvent;
 
 public class BatchQueryDialog extends JDialog {
 
@@ -24,13 +25,17 @@ public class BatchQueryDialog extends JDialog {
 	 * 
 	 */
 	private static final long serialVersionUID = -2937888841036174027L;
+	private final BatchQueryDialog thisDialog;
 	private final JPanel contentPanel = new JPanel();
 
+	protected boolean OKpressed = false;
+
+	protected JCheckBox  chkPostingDate;
 	protected JTextField postingDate;
+	
+	protected JCheckBox  chkBatchNumber;
 	protected JTextField batchNumber;
 
-	protected boolean OKpressed = false;
-	private final BatchQueryDialog thisDialog;
 
 	/**
 	 * Launch the application.
@@ -68,20 +73,32 @@ public class BatchQueryDialog extends JDialog {
 				FormFactory.RELATED_GAP_ROWSPEC,
 				FormFactory.DEFAULT_ROWSPEC,}));
 		{
-			JLabel lblPostingDate = new JLabel("Posting Date");
-			contentPanel.add(lblPostingDate, "2, 2, right, default");
+			chkPostingDate = new JCheckBox("Posting Date");
+			chkPostingDate.addChangeListener(new ChangeListener() {
+				public void stateChanged(ChangeEvent e) {
+					postingDate.setEnabled(chkPostingDate.isSelected());
+				}
+			});
+			contentPanel.add(chkPostingDate, "2, 2, left, default");
 		}
 		{
 			postingDate = new JTextField();
+			postingDate.setEnabled(false);
 			contentPanel.add(postingDate, "4, 2, fill, default");
 			postingDate.setColumns(10);
 		}
 		{
-			JLabel lblBatchNumber = new JLabel("Batch Number");
-			contentPanel.add(lblBatchNumber, "2, 4, right, default");
+			chkBatchNumber = new JCheckBox("Batch Number");
+			chkBatchNumber.addChangeListener(new ChangeListener() {
+				public void stateChanged(ChangeEvent e) {
+					batchNumber.setEnabled(chkBatchNumber.isSelected());
+				}
+			});
+			contentPanel.add(chkBatchNumber, "2, 4, left, default");
 		}
 		{
 			batchNumber = new JTextField();
+			batchNumber.setEnabled(false);
 			contentPanel.add(batchNumber, "4, 4, fill, default");
 			batchNumber.setColumns(10);
 		}
@@ -114,5 +131,4 @@ public class BatchQueryDialog extends JDialog {
 			}
 		}
 	}
-
 }

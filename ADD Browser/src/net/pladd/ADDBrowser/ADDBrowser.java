@@ -27,6 +27,8 @@ public class ADDBrowser {
 	protected static MainWindow mainWindow;
 	protected static Connection dataSource = null;
 	protected static String     tablePrefix = "";
+	protected static int		maxDebitPC;
+	protected static int		maxPC;
 
 	protected static BatchTable batchDetail = null;
 
@@ -50,7 +52,8 @@ public class ADDBrowser {
 	}
 
 	public static void doConnect(String dbType, String serverName, String serverPort,
-			String databaseName, String userName, String password)
+			String databaseName, String userName, String password,
+			int maxDebit, int maxPost)
 	{
 		String conStr;
 		if (dbType.compareTo(ConnectDialog.MYSQL_STRING) == 0)
@@ -97,6 +100,10 @@ public class ADDBrowser {
 			if (dataSource != null)
 				dataSource.close();
 			dataSource = newConnection;
+			
+			maxDebitPC = maxDebit;
+			maxPC      = maxPost;
+			
 			JOptionPane.showMessageDialog(mainWindow.frmAddDataBrowser, "Connection succeeded", "Connection Succeeded", JOptionPane.INFORMATION_MESSAGE);
 			mainWindow.enableQueries(true);
 		}
@@ -111,9 +118,11 @@ public class ADDBrowser {
 	}
 
 	public static void doBatchQuery(String postingDate, String batchNum) {
+		if (postingDate == null && batchNum == null)
+			JOptionPane.showMessageDialog(mainWindow.frmAddDataBrowser, "No query specified", "Batch Query error", JOptionPane.ERROR_MESSAGE);
 		try {
 			Statement stmt = dataSource.createStatement();
-			String query =
+			String queryPrefix =
 					"SELECT " + 
 							tablePrefix + "TRANS_MAIN.event_date, " +
 							tablePrefix + "TRANS_MAIN.posting_date, " +
@@ -131,15 +140,20 @@ public class ADDBrowser {
 						"inner join " + tablePrefix + "ACCOUNTS ON " +
 							tablePrefix + "TRANS_MAIN.account_num = " + tablePrefix + "ACCOUNTS.account_num "+
 						"inner join " + tablePrefix + "POST_CODE ON " +
-							tablePrefix + "TRANS_MAIN.posting_code = " + tablePrefix + "POST_CODE.posting_code " +
-					"WHERE " +
-						tablePrefix + "TRANS_MAIN.posting_date = '" + postingDate + "' " + "and " + 
-						tablePrefix + "TRANS_MAIN.batch_num = " + batchNum + " " +
+							tablePrefix + "TRANS_MAIN.posting_code = " + tablePrefix + "POST_CODE.posting_code ";
+
+			String queryWhere = "WHERE " + tablePrefix + "TRANS_MAIN.posting_code <= " + maxPC + " ";
+			if (postingDate != null)
+				queryWhere += " and " + tablePrefix + "TRANS_MAIN.posting_date = '" + postingDate + "' ";
+			if (batchNum != null)
+				queryWhere += " and " + tablePrefix + "TRANS_MAIN.batch_num = " + batchNum + " ";
+			
+			String querySuffix =
 					"ORDER BY " +
 						tablePrefix + "TRANS_MAIN.posting_date, " +
 						tablePrefix + "TRANS_MAIN.batch_num, " +
 						tablePrefix + "TRANS_MAIN.account_num";
-			ResultSet results = stmt.executeQuery(query);
+			ResultSet results = stmt.executeQuery(queryPrefix + queryWhere + querySuffix);
 			
 			if (batchDetail == null)
 			{

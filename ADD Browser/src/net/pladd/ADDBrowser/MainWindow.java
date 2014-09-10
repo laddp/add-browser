@@ -203,7 +203,16 @@ public class MainWindow {
 		batchQueryDialog.setVisible(true);
 		if (batchQueryDialog.OKpressed)
 		{
-			ADDBrowser.doBatchQuery(batchQueryDialog.postingDate.getText(), batchQueryDialog.batchNumber.getText());
+			String postingDate = null;
+			String batchNumber = null;
+			
+			if (batchQueryDialog.chkPostingDate.isSelected())
+				postingDate = batchQueryDialog.postingDate.getText();
+			
+			if (batchQueryDialog.chkBatchNumber.isSelected())
+				batchNumber = batchQueryDialog.batchNumber.getText();
+			
+			ADDBrowser.doBatchQuery(postingDate, batchNumber);
 		}
 	}
 
@@ -220,7 +229,9 @@ public class MainWindow {
 					connectDialog.serverPort.getText(),
 					connectDialog.databaseName.getText(),
 					connectDialog.userName.getText(),
-					new String(connectDialog.password.getPassword()));
+					new String(connectDialog.password.getPassword()),
+					Integer.parseInt(connectDialog.maxDebitPosting.getText()),
+					Integer.parseInt(connectDialog.maxPostingCode.getText()));
 		}
 		connectDialog.setVisible(false);
 	}

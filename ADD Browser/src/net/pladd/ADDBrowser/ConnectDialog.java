@@ -35,6 +35,8 @@ public class ConnectDialog extends JDialog {
 	protected JPasswordField password;
 	protected JTextField databaseName;
 	protected JComboBox<String> jdbcDriver;
+	protected JTextField maxPostingCode;
+	protected JTextField maxDebitPosting;
 	
 	protected boolean OKpressed = false;
 	private final ConnectDialog thisDialog;
@@ -52,9 +54,9 @@ public class ConnectDialog extends JDialog {
 		contentPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
 		getContentPane().add(contentPanel, BorderLayout.CENTER);
 		GridBagLayout gbl_contentPanel = new GridBagLayout();
-		gbl_contentPanel.rowHeights = new int[]{20, 0, 0, 0, 0, 0, 0};
+		gbl_contentPanel.rowHeights = new int[]{20, 0, 0, 0, 0, 0, 0, 0, 0};
 		gbl_contentPanel.columnWeights = new double[]{0.0, 1.0};
-		gbl_contentPanel.rowWeights = new double[]{0.0, 0.0, 0.0, 0.0, 0.0, 0.0, Double.MIN_VALUE};
+		gbl_contentPanel.rowWeights = new double[]{0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, Double.MIN_VALUE};
 		contentPanel.setLayout(gbl_contentPanel);
 		{
 			JLabel lblConnectionType = new JLabel("Connection Type:");
@@ -154,7 +156,7 @@ public class ConnectDialog extends JDialog {
 			JLabel lblDatabase = new JLabel("Database:");
 			GridBagConstraints gbc_lblDatabase = new GridBagConstraints();
 			gbc_lblDatabase.anchor = GridBagConstraints.EAST;
-			gbc_lblDatabase.insets = new Insets(0, 0, 0, 5);
+			gbc_lblDatabase.insets = new Insets(0, 0, 5, 5);
 			gbc_lblDatabase.gridx = 0;
 			gbc_lblDatabase.gridy = 5;
 			contentPanel.add(lblDatabase, gbc_lblDatabase);
@@ -162,11 +164,51 @@ public class ConnectDialog extends JDialog {
 		{
 			databaseName = new JTextField();
 			GridBagConstraints gbc_databaseName = new GridBagConstraints();
+			gbc_databaseName.insets = new Insets(0, 0, 5, 0);
 			gbc_databaseName.fill = GridBagConstraints.HORIZONTAL;
 			gbc_databaseName.gridx = 1;
 			gbc_databaseName.gridy = 5;
 			contentPanel.add(databaseName, gbc_databaseName);
 			databaseName.setColumns(10);
+		}
+		{
+			JLabel lblMaxPostingCode = new JLabel("Max Posting Code");
+			GridBagConstraints gbc_lblMaxPostingCode = new GridBagConstraints();
+			gbc_lblMaxPostingCode.insets = new Insets(0, 0, 5, 5);
+			gbc_lblMaxPostingCode.anchor = GridBagConstraints.EAST;
+			gbc_lblMaxPostingCode.gridx = 0;
+			gbc_lblMaxPostingCode.gridy = 6;
+			contentPanel.add(lblMaxPostingCode, gbc_lblMaxPostingCode);
+		}
+		{
+			maxPostingCode = new JTextField();
+			maxPostingCode.setText("255");
+			GridBagConstraints gbc_maxPostingCode = new GridBagConstraints();
+			gbc_maxPostingCode.anchor = GridBagConstraints.WEST;
+			gbc_maxPostingCode.insets = new Insets(0, 0, 5, 0);
+			gbc_maxPostingCode.gridx = 1;
+			gbc_maxPostingCode.gridy = 6;
+			contentPanel.add(maxPostingCode, gbc_maxPostingCode);
+			maxPostingCode.setColumns(5);
+		}
+		{
+			JLabel lblCreditDebit = new JLabel("Max Debit Posting Code");
+			GridBagConstraints gbc_lblCreditDebit = new GridBagConstraints();
+			gbc_lblCreditDebit.anchor = GridBagConstraints.EAST;
+			gbc_lblCreditDebit.insets = new Insets(0, 0, 0, 5);
+			gbc_lblCreditDebit.gridx = 0;
+			gbc_lblCreditDebit.gridy = 7;
+			contentPanel.add(lblCreditDebit, gbc_lblCreditDebit);
+		}
+		{
+			maxDebitPosting = new JTextField();
+			maxDebitPosting.setText("199");
+			GridBagConstraints gbc_maxDebitPosting = new GridBagConstraints();
+			gbc_maxDebitPosting.anchor = GridBagConstraints.WEST;
+			gbc_maxDebitPosting.gridx = 1;
+			gbc_maxDebitPosting.gridy = 7;
+			contentPanel.add(maxDebitPosting, gbc_maxDebitPosting);
+			maxDebitPosting.setColumns(5);
 		}
 		{
 			JPanel buttonPane = new JPanel();
