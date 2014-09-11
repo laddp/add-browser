@@ -119,7 +119,10 @@ public class ADDBrowser {
 
 	public static void doBatchQuery(String postingDate, String batchNum) {
 		if (postingDate == null && batchNum == null)
+		{
 			JOptionPane.showMessageDialog(mainWindow.frmAddDataBrowser, "No query specified", "Batch Query error", JOptionPane.ERROR_MESSAGE);
+			return;
+		}
 		try {
 			Statement stmt = dataSource.createStatement();
 			String queryPrefix =
