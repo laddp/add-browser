@@ -8,6 +8,7 @@ import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.Vector;
 
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
@@ -45,7 +46,8 @@ public class MainWindow {
 	protected JTabbedPane tabbedPane;
 	private JButton btnExport;
 
-	JFileChooser chooser = null; 
+	JFileChooser chooser = null;
+	private TransactionQueryDialog transactionQueryDialog; 
 
 	/**
 	 * Create the application.
@@ -57,10 +59,11 @@ public class MainWindow {
 	/**
 	 * Initialize the contents of the frame.
 	 */
-	private void initialize() {
+	private void initialize()
+	{
 		frmAddDataBrowser = new JFrame();
 		frmAddDataBrowser.setSize(new Dimension(800, 600));
-		frmAddDataBrowser.setTitle("ADD Data Browser");
+		frmAddDataBrowser.setTitle("ADD Data Browser v1.1");
 		frmAddDataBrowser.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		
 		JMenuBar menuBar = new JMenuBar();
@@ -163,6 +166,11 @@ public class MainWindow {
 		
 		btnTransactions = new JButton("Transactions");
 		btnTransactions.setEnabled(false);
+		btnTransactions.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				doTransactionQuery();
+			}
+		});
 		btnTransactions.setIcon(new ImageIcon(MainWindow.class.getResource("/com/sun/java/swing/plaf/windows/icons/Question.gif")));
 		toolBar.add(btnTransactions);
 		
@@ -191,12 +199,17 @@ public class MainWindow {
 		tabbedPane.setMnemonicAt(2, KeyEvent.VK_B);
 		
 		transactionsTable = new JTable();
-		tabbedPane.addTab("Transactions", null, transactionsTable, null);
+		transactionsTable.setRowSelectionAllowed(false);
+		transactionsTable.setFillsViewportHeight(true);
+
+		JScrollPane transPane = new JScrollPane(transactionsTable);
+		tabbedPane.addTab("Transactions", null, transPane, null);
 		tabbedPane.setMnemonicAt(3, KeyEvent.VK_T);
 	}
 
 	
-	protected void doBatchQuery() {
+	protected void doBatchQuery()
+	{
 		if (batchQueryDialog == null)
 			batchQueryDialog = new BatchQueryDialog();
 		batchQueryDialog.OKpressed = false;
@@ -212,10 +225,61 @@ public class MainWindow {
 			if (batchQueryDialog.chkBatchNumber.isSelected())
 				batchNumber = batchQueryDialog.batchNumber.getText();
 			
+			if (postingDate == null && batchNumber == null)
+			{
+				JOptionPane.showMessageDialog(frmAddDataBrowser, "No query specified", "Batch Query error", JOptionPane.ERROR_MESSAGE);
+				return;
+			}
+
 			ADDBrowser.doBatchQuery(postingDate, batchNumber);
 		}
 	}
 
+	
+	protected void doTransactionQuery()
+	{
+		if (transactionQueryDialog == null)
+			transactionQueryDialog = new TransactionQueryDialog(ADDBrowser.postingCodes);
+		transactionQueryDialog.OKpressed = false;
+		transactionQueryDialog.setVisible(true);
+		if (transactionQueryDialog.OKpressed)
+		{
+			String startDate = null;
+			String endDate   = null;
+			String acctNum   = null;
+			String postCodes = null;
+			
+			if (transactionQueryDialog.chckbxStartDate.isSelected())
+				startDate = transactionQueryDialog.startDate.getText();
+
+			if (transactionQueryDialog.chckbxEndDate.isSelected())
+				endDate = transactionQueryDialog.endDate.getText();
+			
+			if (transactionQueryDialog.chckbxAccountNumber.isSelected())
+				acctNum = transactionQueryDialog.accountNum.getText();
+
+			if (transactionQueryDialog.chckbxPostingCodes.isSelected())
+			{
+				for (PostingCode pc : transactionQueryDialog.postingCodes.getSelectedValuesList())
+				{
+					if (postCodes == null)
+						postCodes = "" + pc.postingCode;
+					else
+						postCodes += ", " + pc.postingCode;
+				}
+			}
+			
+			if (startDate == null && endDate == null && acctNum == null && postCodes == null)
+			{
+				JOptionPane.showMessageDialog(frmAddDataBrowser, "No query specified", "Transactoin Query error", JOptionPane.ERROR_MESSAGE);
+				return;
+			}
+
+			ADDBrowser.doTransactionQuery(startDate, endDate, acctNum, postCodes);
+		}
+	}
+
+	
 	private void doConnect()
 	{
 		if (connectDialog == null)
@@ -246,7 +310,7 @@ public class MainWindow {
 //		btnAccounts.setEnabled(b);
 //		btnLogs.setEnabled(b);
 		btnBatches.setEnabled(b);
-//		btnTransactions.setEnabled(b);
+		btnTransactions.setEnabled(b);
 	}
 
 	public JTable getSelectedTable()
@@ -311,5 +375,11 @@ public class MainWindow {
 				JOptionPane.showMessageDialog(frmAddDataBrowser, "File write failed:" + e, "File write failed", JOptionPane.ERROR_MESSAGE);
 			}
 		}
+	}
+
+	public void newPostCodes(Vector<PostingCode> postingCodes)
+	{
+		if (transactionQueryDialog != null)
+			transactionQueryDialog.newPostingCodes(postingCodes);
 	}
 }
