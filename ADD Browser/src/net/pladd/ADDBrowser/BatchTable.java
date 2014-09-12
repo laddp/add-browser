@@ -24,7 +24,7 @@ public class BatchTable extends AbstractTableModel {
 
 	protected static List<String> header =
 			Arrays.asList("Event Date", "Posting Date", "Last Modified", "Batch #", 
-					"Full Account", "Name", 
+					"Full Account", "Name", "Type", 
 					"Posting Code", "Posting Code Descr",
 					"Net Amount", "Credit Amount", "Debit Amount", "User ID");
 	int rowCount;
@@ -35,6 +35,7 @@ public class BatchTable extends AbstractTableModel {
 	private Vector<Integer>    batchNums;
 	private Vector<Integer>    fullAccounts;
 	private Vector<String>     names;
+	private Vector<String>     types;
 	private Vector<Integer>    postCodes;
 	private Vector<String>     postDescrs;
 	private Vector<BigDecimal> netAmounts;
@@ -48,6 +49,7 @@ public class BatchTable extends AbstractTableModel {
 		batchNums    = new Vector<Integer>();
 		fullAccounts = new Vector<Integer>();
 		names        = new Vector<String>();
+		types        = new Vector<String>();
 		postCodes    = new Vector<Integer>();
 		postDescrs   = new Vector<String>();
 		netAmounts   = new Vector<BigDecimal>();
@@ -77,12 +79,13 @@ public class BatchTable extends AbstractTableModel {
 		case 3: return Integer.class;
 		case 4: return Integer.class;
 		case 5: return String.class;
-		case 6: return Integer.class;
-		case 7: return String.class;
-		case 8: return BigDecimal.class;
+		case 6: return String.class;
+		case 7: return Integer.class;
+		case 8: return String.class;
 		case 9: return BigDecimal.class;
 		case 10: return BigDecimal.class;
-		case 11: return String.class;
+		case 11: return BigDecimal.class;
+		case 12: return String.class;
 		default: return null;
 		}
 	}
@@ -109,20 +112,21 @@ public class BatchTable extends AbstractTableModel {
 		case 3: return batchNums.get(row);
 		case 4: return fullAccounts.get(row);
 		case 5: return names.get(row);
-		case 6: return postCodes.get(row);
-		case 7: return postDescrs.get(row);
-		case 8: return amt;
-		case 9:
+		case 6: return types.get(row);
+		case 7: return postCodes.get(row);
+		case 8: return postDescrs.get(row);
+		case 9: return amt;
+		case 10:
 			if (amt.compareTo(BigDecimal.ZERO) < 0)
 				return amt.negate();
 			else
 				return BigDecimal.ZERO;
-		case 10:
+		case 11:
 			if (amt.compareTo(BigDecimal.ZERO) > 0)
 				return amt;
 			else
 				return BigDecimal.ZERO;
-		case 11: return userIDs.get(row);
+		case 12: return userIDs.get(row);
 		default: return null;
 		}
 	}
@@ -134,6 +138,7 @@ public class BatchTable extends AbstractTableModel {
 		batchNums.clear();
 		fullAccounts.clear();
 		names.clear();
+		types.clear();
 		postCodes.clear();
 		postDescrs.clear();
 		netAmounts.clear();
@@ -166,20 +171,23 @@ public class BatchTable extends AbstractTableModel {
 				names.add(results.getString(5));
 			}
 			{
-				Integer i = new Integer(results.getInt(6));
+				types.add(results.getString(6));
+			}
+			{
+				Integer i = new Integer(results.getInt(7));
 				postCodes.add(i);
 			}
 			{
-				postDescrs.add(results.getString(7));
+				postDescrs.add(results.getString(8));
 			}
 			{
-				netAmounts.add(results.getBigDecimal(8));
+				netAmounts.add(results.getBigDecimal(9));
 			}
 			{
-				userIDs.add(results.getString(9));
+				userIDs.add(results.getString(10));
 			}
 			{
-				Timestamp ts = results.getTimestamp(10);
+				Timestamp ts = results.getTimestamp(11);
 				transDates.add(new Date(ts.getTime()));
 			}
 		}

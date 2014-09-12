@@ -132,6 +132,7 @@ public class ADDBrowser {
 							tablePrefix + "TRANS_MAIN.batch_num, " +
 							tablePrefix + "FULL_ACCOUNT.full_account, " +
 							tablePrefix + "ACCOUNTS.name, " +
+							tablePrefix + "TYPE_INFO.name as \"TYPE\", " +
 							tablePrefix + "TRANS_MAIN.posting_code, " +
 							tablePrefix + "POST_CODE.long_desc, " +
 							tablePrefix + "TRANS_MAIN.net_amount, " +
@@ -143,7 +144,10 @@ public class ADDBrowser {
 						"inner join " + tablePrefix + "ACCOUNTS ON " +
 							tablePrefix + "TRANS_MAIN.account_num = " + tablePrefix + "ACCOUNTS.account_num "+
 						"inner join " + tablePrefix + "POST_CODE ON " +
-							tablePrefix + "TRANS_MAIN.posting_code = " + tablePrefix + "POST_CODE.posting_code ";
+							tablePrefix + "TRANS_MAIN.posting_code = " + tablePrefix + "POST_CODE.posting_code " +
+						"inner join " + tablePrefix + "TYPE_INFO ON " +
+							tablePrefix + "ACCOUNTS.type = " + tablePrefix + " TYPE_INFO.type and " +
+							tablePrefix + "ACCOUNTS.division = " + tablePrefix + " TYPE_INFO.division ";
 
 			String queryWhere = "WHERE " + tablePrefix + "TRANS_MAIN.posting_code <= " + maxPC + " ";
 			if (postingDate != null)
