@@ -294,7 +294,7 @@ public class MainWindow {
 					connectDialog.databaseName.getText(),
 					connectDialog.userName.getText(),
 					new String(connectDialog.password.getPassword()),
-					Integer.parseInt(connectDialog.maxDebitPosting.getText()),
+					Integer.parseInt(connectDialog.maxDebitPostingCode.getText()),
 					Integer.parseInt(connectDialog.maxPostingCode.getText()));
 		}
 		connectDialog.setVisible(false);

@@ -3,6 +3,7 @@
  */
 package net.pladd.ADDBrowser;
 
+import java.awt.Cursor;
 import java.awt.EventQueue;
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -28,9 +29,6 @@ public class ADDBrowser {
 	protected static MainWindow mainWindow;
 	protected static Connection dataSource = null;
 	protected static String     tablePrefix = "";
-	protected static int		maxDebitPC;
-	protected static int		maxPC;
-
 	protected static BatchTable batchDetail = null;
 	protected static BatchTable transDetail = null;
 
@@ -99,14 +97,15 @@ public class ADDBrowser {
 		}
 
 		try {
+			mainWindow.frmAddDataBrowser.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
 			Connection newConnection = DriverManager.getConnection(conStr);
 
 			if (dataSource != null)
 				dataSource.close();
 			dataSource = newConnection;
 			
-			maxDebitPC = maxDebit;
-			maxPC      = maxPost;
+			PostingCode.maxDebitPC = maxDebit;
+			PostingCode.maxPC      = maxPost;
 			
 			JOptionPane.showMessageDialog(mainWindow.frmAddDataBrowser, "Connection succeeded", "Connection Succeeded", JOptionPane.INFORMATION_MESSAGE);
 			mainWindow.enableQueries(true);
@@ -138,6 +137,10 @@ public class ADDBrowser {
 			System.out.println(e);
 			JOptionPane.showMessageDialog(mainWindow.frmAddDataBrowser, "Error fetching posting codes:" + e, "Setup problem", JOptionPane.ERROR_MESSAGE);
 		}
+		finally
+		{
+			mainWindow.frmAddDataBrowser.setCursor(Cursor.getDefaultCursor());
+		}
 	}
 
 	public static void doBatchQuery(String postingDate, String batchNum)
@@ -168,7 +171,7 @@ public class ADDBrowser {
 							tablePrefix + "ACCOUNTS.type = " + tablePrefix + " TYPE_INFO.type and " +
 							tablePrefix + "ACCOUNTS.division = " + tablePrefix + " TYPE_INFO.division ";
 
-			String queryWhere = "WHERE " + tablePrefix + "TRANS_MAIN.posting_code <= " + maxPC + " ";
+			String queryWhere = "WHERE " + tablePrefix + "TRANS_MAIN.posting_code <= " + PostingCode.maxPC + " ";
 			if (postingDate != null)
 				queryWhere += " and " + tablePrefix + "TRANS_MAIN.posting_date = '" + postingDate + "' ";
 			if (batchNum != null)
@@ -179,6 +182,7 @@ public class ADDBrowser {
 						tablePrefix + "TRANS_MAIN.posting_date, " +
 						tablePrefix + "TRANS_MAIN.batch_num, " +
 						tablePrefix + "TRANS_MAIN.account_num";
+			mainWindow.frmAddDataBrowser.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
 			ResultSet results = stmt.executeQuery(queryPrefix + queryWhere + querySuffix);
 			
 			if (batchDetail == null)
@@ -202,6 +206,10 @@ public class ADDBrowser {
 		catch (SQLException e) {
 			e.printStackTrace();
 			JOptionPane.showMessageDialog(mainWindow.frmAddDataBrowser, "Query failed:" + e, "Query Failed", JOptionPane.ERROR_MESSAGE);
+		}
+		finally
+		{
+			mainWindow.frmAddDataBrowser.setCursor(Cursor.getDefaultCursor());
 		}
 	}
 
@@ -233,7 +241,7 @@ public class ADDBrowser {
 							tablePrefix + "ACCOUNTS.type = " + tablePrefix + " TYPE_INFO.type and " +
 							tablePrefix + "ACCOUNTS.division = " + tablePrefix + " TYPE_INFO.division ";
 
-			String queryWhere = "WHERE " + tablePrefix + "TRANS_MAIN.posting_code <= " + maxPC + " ";
+			String queryWhere = "WHERE " + tablePrefix + "TRANS_MAIN.posting_code <= " + PostingCode.maxPC + " ";
 			if (startDate != null)
 				queryWhere += " and " + tablePrefix + "TRANS_MAIN.posting_date >= '" + startDate + "' ";
 			if (endDate != null)
@@ -248,6 +256,8 @@ public class ADDBrowser {
 						tablePrefix + "TRANS_MAIN.posting_date, " +
 						tablePrefix + "TRANS_MAIN.batch_num, " +
 						tablePrefix + "TRANS_MAIN.account_num";
+
+			mainWindow.frmAddDataBrowser.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
 			ResultSet results = stmt.executeQuery(queryPrefix + queryWhere + querySuffix);
 			
 			if (transDetail == null)
@@ -271,6 +281,10 @@ public class ADDBrowser {
 		catch (SQLException e) {
 			e.printStackTrace();
 			JOptionPane.showMessageDialog(mainWindow.frmAddDataBrowser, "Query failed:" + e, "Query Failed", JOptionPane.ERROR_MESSAGE);
+		}
+		finally
+		{
+			mainWindow.frmAddDataBrowser.setCursor(Cursor.getDefaultCursor());
 		}
 	}
 }
