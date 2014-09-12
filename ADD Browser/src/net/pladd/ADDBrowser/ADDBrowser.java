@@ -123,7 +123,7 @@ public class ADDBrowser {
 			Statement stmt = dataSource.createStatement();
 			ResultSet results = stmt.executeQuery(
 					"SELECT posting_code, long_desc " +
-							"FROM " + tablePrefix + "post_code " +
+							"FROM " + tablePrefix + "POST_CODE " +
 							"WHERE posting_code < " + maxPost +
 							" and " + "short_desc <> '" + PostingCode.invalLabel + "'");
 
