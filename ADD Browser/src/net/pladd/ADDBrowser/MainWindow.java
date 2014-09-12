@@ -295,7 +295,8 @@ public class MainWindow {
 					connectDialog.userName.getText(),
 					new String(connectDialog.password.getPassword()),
 					Integer.parseInt(connectDialog.maxDebitPostingCode.getText()),
-					Integer.parseInt(connectDialog.maxPostingCode.getText()));
+					Integer.parseInt(connectDialog.maxPostingCode.getText()),
+					connectDialog.invalidPClabel.getText());
 		}
 		connectDialog.setVisible(false);
 	}

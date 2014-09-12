@@ -41,6 +41,7 @@ public class ConnectDialog extends JDialog {
 	private final ConnectDialog thisDialog;
 	protected JTextField maxPostingCode;
 	protected JTextField maxDebitPostingCode;
+	protected JTextField invalidPClabel;
 
 	/**
 	 * Create the dialog.
@@ -180,9 +181,9 @@ public class ConnectDialog extends JDialog {
 				tabbedPane.addTab("Database Settings", null, panel, null);
 				GridBagLayout gbl_panel = new GridBagLayout();
 				gbl_panel.columnWidths = new int[]{0, 0, 0};
-				gbl_panel.rowHeights = new int[]{0, 0, 0};
+				gbl_panel.rowHeights = new int[]{0, 0, 0, 0};
 				gbl_panel.columnWeights = new double[]{0.0, 1.0, Double.MIN_VALUE};
-				gbl_panel.rowWeights = new double[]{0.0, 0.0, Double.MIN_VALUE};
+				gbl_panel.rowWeights = new double[]{0.0, 0.0, 0.0, Double.MIN_VALUE};
 				panel.setLayout(gbl_panel);
 				{
 					JLabel label = new JLabel("Max Posting Code");
@@ -208,7 +209,7 @@ public class ConnectDialog extends JDialog {
 					JLabel label = new JLabel("Max Debit Posting Code");
 					GridBagConstraints gbc_label = new GridBagConstraints();
 					gbc_label.anchor = GridBagConstraints.EAST;
-					gbc_label.insets = new Insets(0, 0, 0, 5);
+					gbc_label.insets = new Insets(0, 0, 5, 5);
 					gbc_label.gridx = 0;
 					gbc_label.gridy = 1;
 					panel.add(label, gbc_label);
@@ -218,10 +219,30 @@ public class ConnectDialog extends JDialog {
 					maxDebitPostingCode.setText("199");
 					maxDebitPostingCode.setColumns(5);
 					GridBagConstraints gbc_maxDebitPostingCode = new GridBagConstraints();
+					gbc_maxDebitPostingCode.insets = new Insets(0, 0, 5, 0);
 					gbc_maxDebitPostingCode.fill = GridBagConstraints.HORIZONTAL;
 					gbc_maxDebitPostingCode.gridx = 1;
 					gbc_maxDebitPostingCode.gridy = 1;
 					panel.add(maxDebitPostingCode, gbc_maxDebitPostingCode);
+				}
+				{
+					JLabel lblInvalidPcLabel = new JLabel("Invalid PC Label");
+					GridBagConstraints gbc_lblInvalidPcLabel = new GridBagConstraints();
+					gbc_lblInvalidPcLabel.anchor = GridBagConstraints.EAST;
+					gbc_lblInvalidPcLabel.insets = new Insets(0, 0, 0, 5);
+					gbc_lblInvalidPcLabel.gridx = 0;
+					gbc_lblInvalidPcLabel.gridy = 2;
+					panel.add(lblInvalidPcLabel, gbc_lblInvalidPcLabel);
+				}
+				{
+					invalidPClabel = new JTextField();
+					invalidPClabel.setText("INVAL");
+					GridBagConstraints gbc_invalidPClabel = new GridBagConstraints();
+					gbc_invalidPClabel.fill = GridBagConstraints.HORIZONTAL;
+					gbc_invalidPClabel.gridx = 1;
+					gbc_invalidPClabel.gridy = 2;
+					panel.add(invalidPClabel, gbc_invalidPClabel);
+					invalidPClabel.setColumns(10);
 				}
 			}
 		}

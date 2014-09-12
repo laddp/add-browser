@@ -101,7 +101,7 @@ public class BatchTable extends AbstractTableModel {
 	{
 		BigDecimal amt = netAmounts.get(row);
 		int postCode = postCodes.get(row).intValue();
-		if (postCode > PostingCode.maxDebitPC)
+		if (postCode > PostingCode.maxDebit)
 			amt = amt.negate();
 
 		switch (col)

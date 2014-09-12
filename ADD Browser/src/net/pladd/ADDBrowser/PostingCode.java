@@ -12,8 +12,9 @@ public class PostingCode {
 	public final int    postingCode;
 	public final String description;
 	
-	protected static int		maxPC;
-	protected static int		maxDebitPC;
+	protected static int	max;
+	protected static int	maxDebit;
+	protected static String invalLabel;
 	
 	public PostingCode(int code, String desc)
 	{

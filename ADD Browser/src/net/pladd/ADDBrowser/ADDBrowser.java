@@ -12,6 +12,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Vector;
 
 import javax.swing.JOptionPane;
@@ -55,7 +56,7 @@ public class ADDBrowser {
 
 	public static void doConnect(String dbType, String serverName, String serverPort,
 			String databaseName, String userName, String password,
-			int maxDebit, int maxPost)
+			int maxDebit, int maxPost, String invalPost)
 	{
 		String conStr;
 		if (dbType.compareTo(ConnectDialog.MYSQL_STRING) == 0)
@@ -104,10 +105,10 @@ public class ADDBrowser {
 				dataSource.close();
 			dataSource = newConnection;
 			
-			PostingCode.maxDebitPC = maxDebit;
-			PostingCode.maxPC      = maxPost;
+			PostingCode.maxDebit   = maxDebit;
+			PostingCode.max        = maxPost;
+			PostingCode.invalLabel = invalPost;
 			
-			JOptionPane.showMessageDialog(mainWindow.frmAddDataBrowser, "Connection succeeded", "Connection Succeeded", JOptionPane.INFORMATION_MESSAGE);
 			mainWindow.enableQueries(true);
 		}
 		catch (SQLException e)
@@ -123,7 +124,8 @@ public class ADDBrowser {
 			ResultSet results = stmt.executeQuery(
 					"SELECT posting_code, long_desc " +
 							"FROM " + tablePrefix + "post_code " +
-							"WHERE posting_code < " + maxPost);
+							"WHERE posting_code < " + maxPost +
+							" and " + "short_desc <> '" + PostingCode.invalLabel + "'");
 
 			postingCodes.clear();
 			while (results.next())
@@ -131,6 +133,26 @@ public class ADDBrowser {
 				postingCodes.add(new PostingCode(results.getInt(1), results.getString(2)));
 			}
 			mainWindow.newPostCodes(postingCodes);
+		}
+		catch (SQLException e)
+		{
+			System.out.println(e);
+			JOptionPane.showMessageDialog(mainWindow.frmAddDataBrowser, "Error fetching posting codes:" + e, "Setup problem", JOptionPane.ERROR_MESSAGE);
+		}
+
+		try {
+			Statement stmt = dataSource.createStatement();
+			ResultSet results = stmt.executeQuery(
+					"SELECT min(posting_date), max(posting_date) " +
+							"FROM " + tablePrefix + "TRANS_MAIN");
+
+			if (!results.next())
+				throw new SQLException("no results");
+			Date min = results.getDate(1);
+			Date max = results.getDate(2);
+			JOptionPane.showMessageDialog(mainWindow.frmAddDataBrowser, 
+					"Connection succeeded - Min Date " + min + " Max Date " + max, 
+					"Connection Succeeded", JOptionPane.INFORMATION_MESSAGE);
 		}
 		catch (SQLException e)
 		{
@@ -171,7 +193,7 @@ public class ADDBrowser {
 							tablePrefix + "ACCOUNTS.type = " + tablePrefix + " TYPE_INFO.type and " +
 							tablePrefix + "ACCOUNTS.division = " + tablePrefix + " TYPE_INFO.division ";
 
-			String queryWhere = "WHERE " + tablePrefix + "TRANS_MAIN.posting_code <= " + PostingCode.maxPC + " ";
+			String queryWhere = "WHERE " + tablePrefix + "TRANS_MAIN.posting_code <= " + PostingCode.max + " ";
 			if (postingDate != null)
 				queryWhere += " and " + tablePrefix + "TRANS_MAIN.posting_date = '" + postingDate + "' ";
 			if (batchNum != null)
@@ -241,7 +263,7 @@ public class ADDBrowser {
 							tablePrefix + "ACCOUNTS.type = " + tablePrefix + " TYPE_INFO.type and " +
 							tablePrefix + "ACCOUNTS.division = " + tablePrefix + " TYPE_INFO.division ";
 
-			String queryWhere = "WHERE " + tablePrefix + "TRANS_MAIN.posting_code <= " + PostingCode.maxPC + " ";
+			String queryWhere = "WHERE " + tablePrefix + "TRANS_MAIN.posting_code <= " + PostingCode.max + " ";
 			if (startDate != null)
 				queryWhere += " and " + tablePrefix + "TRANS_MAIN.posting_date >= '" + startDate + "' ";
 			if (endDate != null)
