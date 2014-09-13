@@ -65,7 +65,7 @@ public class MainWindow {
 	{
 		frmAddDataBrowser = new JFrame();
 		frmAddDataBrowser.setSize(new Dimension(800, 600));
-		frmAddDataBrowser.setTitle("ADD Data Browser v1.1");
+		frmAddDataBrowser.setTitle("ADD Data Browser v1.2");
 		frmAddDataBrowser.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		
 		JMenuBar menuBar = new JMenuBar();
