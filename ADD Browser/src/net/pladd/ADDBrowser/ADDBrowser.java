@@ -179,6 +179,7 @@ public class ADDBrowser {
 							tablePrefix + "TYPE_INFO.name as \"TYPE\", " +
 							tablePrefix + "TRANS_MAIN.posting_code, " +
 							tablePrefix + "POST_CODE.long_desc, " +
+							tablePrefix + "TRANS_MAIN.reference_num, " +
 							tablePrefix + "TRANS_MAIN.net_amount, " +
 							tablePrefix + "TRANS_MAIN.last_maintenance_userid, " +
 							tablePrefix + "TRANS_MAIN.last_maintenance_dt " +
@@ -249,6 +250,7 @@ public class ADDBrowser {
 							tablePrefix + "TYPE_INFO.name as \"TYPE\", " +
 							tablePrefix + "TRANS_MAIN.posting_code, " +
 							tablePrefix + "POST_CODE.long_desc, " +
+							tablePrefix + "TRANS_MAIN.reference_num, " +
 							tablePrefix + "TRANS_MAIN.net_amount, " +
 							tablePrefix + "TRANS_MAIN.last_maintenance_userid, " +
 							tablePrefix + "TRANS_MAIN.last_maintenance_dt " +
