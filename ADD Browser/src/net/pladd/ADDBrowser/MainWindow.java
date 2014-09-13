@@ -6,6 +6,8 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Vector;
@@ -201,6 +203,21 @@ public class MainWindow {
 		transactionsTable = new JTable();
 		transactionsTable.setRowSelectionAllowed(false);
 		transactionsTable.setFillsViewportHeight(true);
+		transactionsTable.addMouseListener(new MouseAdapter()
+		{
+			public void mousePressed(MouseEvent evt)
+			{
+				if (evt.getClickCount() == 2)
+				{
+					int row = transactionsTable.rowAtPoint(evt.getPoint());
+					int col = transactionsTable.columnAtPoint(evt.getPoint());
+					if (col == 3)
+						ADDBrowser.doBatchQuery(
+							ADDBrowser.df.format(transactionsTable.getValueAt(row, 1)), 
+							transactionsTable.getValueAt(row, 3).toString());
+				}
+			}
+		});
 
 		JScrollPane transPane = new JScrollPane(transactionsTable);
 		tabbedPane.addTab("Transactions", null, transPane, null);
@@ -248,6 +265,7 @@ public class MainWindow {
 			String endDate   = null;
 			String acctNum   = null;
 			String postCodes = null;
+			String refNum    = null;
 			
 			if (transactionQueryDialog.chckbxStartDate.isSelected())
 				startDate = transactionQueryDialog.startDate.getText();
@@ -269,13 +287,16 @@ public class MainWindow {
 				}
 			}
 			
-			if (startDate == null && endDate == null && acctNum == null && postCodes == null)
+			if (transactionQueryDialog.chckbxReferenceNum.isSelected())
+				refNum = transactionQueryDialog.referenceNumber.getText();
+			
+			if (startDate == null && endDate == null && acctNum == null && postCodes == null && refNum == null)
 			{
 				JOptionPane.showMessageDialog(frmAddDataBrowser, "No query specified", "Transactoin Query error", JOptionPane.ERROR_MESSAGE);
 				return;
 			}
 
-			ADDBrowser.doTransactionQuery(startDate, endDate, acctNum, postCodes);
+			ADDBrowser.doTransactionQuery(startDate, endDate, acctNum, postCodes, refNum);
 		}
 	}
 

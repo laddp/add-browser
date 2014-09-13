@@ -33,6 +33,9 @@ public class ADDBrowser {
 	protected static BatchTable batchDetail = null;
 	protected static BatchTable transDetail = null;
 
+	protected static DateFormat df = new SimpleDateFormat("yyyy-MM-dd");
+	protected static DateFormat tm = new SimpleDateFormat("yyyy-MM-dd kk:mm:ss");
+	
 	protected static Vector<PostingCode> postingCodes = new Vector<PostingCode>();
 	
 	/**
@@ -176,7 +179,7 @@ public class ADDBrowser {
 							tablePrefix + "TRANS_MAIN.batch_num, " +
 							tablePrefix + "FULL_ACCOUNT.full_account, " +
 							tablePrefix + "ACCOUNTS.name, " +
-							tablePrefix + "TYPE_INFO.name as \"TYPE\", " +
+							tablePrefix + "TYPE_INFO.name as \"type\", " +
 							tablePrefix + "TRANS_MAIN.posting_code, " +
 							tablePrefix + "POST_CODE.long_desc, " +
 							tablePrefix + "TRANS_MAIN.reference_num, " +
@@ -215,14 +218,12 @@ public class ADDBrowser {
 				mainWindow.batchTable.setModel(batchDetail);
 			}
 			batchDetail.newResults(results);
-			DateFormat df = new SimpleDateFormat("yyyy-MM-dd");
-			DateFormat tm = new SimpleDateFormat("yyyy-MM-dd kk:mm:ss");
 			mainWindow.batchTable.getColumnModel().getColumn(0).setCellRenderer(new FormatRenderer(df));
 			mainWindow.batchTable.getColumnModel().getColumn(1).setCellRenderer(new FormatRenderer(df));
 			mainWindow.batchTable.getColumnModel().getColumn(2).setCellRenderer(new FormatRenderer(tm));
-			mainWindow.batchTable.getColumnModel().getColumn(9).setCellRenderer(NumberRenderer.getCurrencyRenderer());
 			mainWindow.batchTable.getColumnModel().getColumn(10).setCellRenderer(NumberRenderer.getCurrencyRenderer());
 			mainWindow.batchTable.getColumnModel().getColumn(11).setCellRenderer(NumberRenderer.getCurrencyRenderer());
+			mainWindow.batchTable.getColumnModel().getColumn(12).setCellRenderer(NumberRenderer.getCurrencyRenderer());
 			mainWindow.tabbedPane.setSelectedIndex(2);
 			mainWindow.setExportButtonState();
 		} 
@@ -236,7 +237,7 @@ public class ADDBrowser {
 		}
 	}
 
-	public static void doTransactionQuery(String startDate, String endDate, String acctNum, String postCodes)
+	public static void doTransactionQuery(String startDate, String endDate, String acctNum, String postCodes, String refNum)
 	{
 		try {
 			Statement stmt = dataSource.createStatement();
@@ -247,7 +248,7 @@ public class ADDBrowser {
 							tablePrefix + "TRANS_MAIN.batch_num, " +
 							tablePrefix + "FULL_ACCOUNT.full_account, " +
 							tablePrefix + "ACCOUNTS.name, " +
-							tablePrefix + "TYPE_INFO.name as \"TYPE\", " +
+							tablePrefix + "TYPE_INFO.name as \"type\", " +
 							tablePrefix + "TRANS_MAIN.posting_code, " +
 							tablePrefix + "POST_CODE.long_desc, " +
 							tablePrefix + "TRANS_MAIN.reference_num, " +
@@ -274,6 +275,8 @@ public class ADDBrowser {
 				queryWhere += " and " + tablePrefix + "FULL_ACCOUNT.full_account = " + acctNum + " ";
 			if (postCodes != null)
 				queryWhere += " and " + tablePrefix + "TRANS_MAIN.posting_code in (" + postCodes + ") ";
+			if (refNum != null)
+				queryWhere += " and " + tablePrefix + "TRANS_MAIN.reference_num = '" + refNum + "' ";
 			
 			String querySuffix =
 					"ORDER BY " +
@@ -291,14 +294,12 @@ public class ADDBrowser {
 				mainWindow.transactionsTable.setModel(transDetail);
 			}
 			transDetail.newResults(results);
-			DateFormat df = new SimpleDateFormat("yyyy-MM-dd");
-			DateFormat tm = new SimpleDateFormat("yyyy-MM-dd kk:mm:ss");
 			mainWindow.transactionsTable.getColumnModel().getColumn(0).setCellRenderer(new FormatRenderer(df));
 			mainWindow.transactionsTable.getColumnModel().getColumn(1).setCellRenderer(new FormatRenderer(df));
 			mainWindow.transactionsTable.getColumnModel().getColumn(2).setCellRenderer(new FormatRenderer(tm));
-			mainWindow.transactionsTable.getColumnModel().getColumn(9).setCellRenderer(NumberRenderer.getCurrencyRenderer());
 			mainWindow.transactionsTable.getColumnModel().getColumn(10).setCellRenderer(NumberRenderer.getCurrencyRenderer());
 			mainWindow.transactionsTable.getColumnModel().getColumn(11).setCellRenderer(NumberRenderer.getCurrencyRenderer());
+			mainWindow.transactionsTable.getColumnModel().getColumn(12).setCellRenderer(NumberRenderer.getCurrencyRenderer());
 			mainWindow.tabbedPane.setSelectedIndex(3);
 			mainWindow.setExportButtonState();
 		} 

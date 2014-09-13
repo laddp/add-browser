@@ -30,6 +30,8 @@ public class TransactionQueryDialog extends JDialog {
 	private static final long serialVersionUID = 4425113802994773769L;
 	private TransactionQueryDialog thisDialog;
 	private final JPanel contentPanel = new JPanel();
+	private JScrollPane scrollPane;
+	
 	protected JTextField startDate;
 	protected JTextField endDate;
 	protected JTextField accountNum;
@@ -39,7 +41,8 @@ public class TransactionQueryDialog extends JDialog {
 	protected JCheckBox chckbxAccountNumber;
 	protected JCheckBox chckbxEndDate;
 	protected boolean OKpressed;
-	private JScrollPane scrollPane;
+	protected JCheckBox chckbxReferenceNum;
+	protected JTextField referenceNumber;
 
 	/**
 	 * Create the dialog.
@@ -67,6 +70,8 @@ public class TransactionQueryDialog extends JDialog {
 				FormFactory.DEFAULT_ROWSPEC,
 				FormFactory.RELATED_GAP_ROWSPEC,
 				RowSpec.decode("default:grow"),
+				FormFactory.RELATED_GAP_ROWSPEC,
+				FormFactory.DEFAULT_ROWSPEC,
 				FormFactory.RELATED_GAP_ROWSPEC,}));
 		{
 			chckbxAccountNumber = new JCheckBox("Account Number");
@@ -130,6 +135,21 @@ public class TransactionQueryDialog extends JDialog {
 				scrollPane.setViewportView(postingCodes);
 				postingCodes.setEnabled(false);
 			}
+		}
+		{
+			chckbxReferenceNum = new JCheckBox("Reference Num");
+			chckbxReferenceNum.addChangeListener(new ChangeListener() {
+				public void stateChanged(ChangeEvent arg0) {
+					referenceNumber.setEnabled(chckbxReferenceNum.isSelected());
+				}
+			});
+			contentPanel.add(chckbxReferenceNum, "2, 10");
+		}
+		{
+			referenceNumber = new JTextField();
+			referenceNumber.setEnabled(false);
+			contentPanel.add(referenceNumber, "4, 10, fill, default");
+			referenceNumber.setColumns(10);
 		}
 		{
 			JPanel buttonPane = new JPanel();

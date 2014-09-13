@@ -102,11 +102,16 @@ public class BatchTable extends AbstractTableModel {
 	@Override
 	public Object getValueAt(int row, int col)
 	{
-		BigDecimal amt = netAmounts.get(row);
-		int postCode = postCodes.get(row).intValue();
-		if (postCode > PostingCode.maxDebit)
-			amt = amt.negate();
 
+		BigDecimal amt = null;
+		if (col == 10 || col == 11 || col == 12)
+		{
+			amt = netAmounts.get(row);
+			int postCode = postCodes.get(row).intValue();
+			if (postCode > PostingCode.maxDebit)
+				amt = amt.negate();
+		}
+		
 		switch (col)
 		{
 		case 0: return eventDates.get(row).getTime();
