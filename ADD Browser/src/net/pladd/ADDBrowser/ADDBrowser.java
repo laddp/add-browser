@@ -17,8 +17,6 @@ import java.util.Vector;
 
 import javax.swing.JOptionPane;
 
-import com.camick.FormatRenderer;
-import com.camick.NumberRenderer;
 import com.sybase.jdbcx.SybDriver;
 
 /**
@@ -34,7 +32,7 @@ public class ADDBrowser {
 	protected static BatchTable transDetail = null;
 
 	protected static DateFormat df = new SimpleDateFormat("yyyy-MM-dd");
-	protected static DateFormat tm = new SimpleDateFormat("yyyy-MM-dd kk:mm:ss");
+	protected static DateFormat tm = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 	
 	protected static Vector<PostingCode> postingCodes = new Vector<PostingCode>();
 	
@@ -122,6 +120,11 @@ public class ADDBrowser {
 			dataSource = null;
 			
 		}
+		finally
+		{
+			mainWindow.frmAddDataBrowser.setCursor(Cursor.getDefaultCursor());
+		}
+
 		try {
 			Statement stmt = dataSource.createStatement();
 			ResultSet results = stmt.executeQuery(
@@ -162,10 +165,6 @@ public class ADDBrowser {
 			System.out.println(e);
 			JOptionPane.showMessageDialog(mainWindow.frmAddDataBrowser, "Error fetching posting codes:" + e, "Setup problem", JOptionPane.ERROR_MESSAGE);
 		}
-		finally
-		{
-			mainWindow.frmAddDataBrowser.setCursor(Cursor.getDefaultCursor());
-		}
 	}
 
 	public static void doBatchQuery(String postingDate, String batchNum)
@@ -176,6 +175,7 @@ public class ADDBrowser {
 					"SELECT " + 
 							tablePrefix + "TRANS_MAIN.event_date, " +
 							tablePrefix + "TRANS_MAIN.posting_date, " +
+							tablePrefix + "TRANS_MAIN.last_maintenance_dt, " +
 							tablePrefix + "TRANS_MAIN.batch_num, " +
 							tablePrefix + "FULL_ACCOUNT.full_account, " +
 							tablePrefix + "ACCOUNTS.name, " +
@@ -184,8 +184,9 @@ public class ADDBrowser {
 							tablePrefix + "POST_CODE.long_desc, " +
 							tablePrefix + "TRANS_MAIN.reference_num, " +
 							tablePrefix + "TRANS_MAIN.net_amount, " +
-							tablePrefix + "TRANS_MAIN.last_maintenance_userid, " +
-							tablePrefix + "TRANS_MAIN.last_maintenance_dt " +
+							tablePrefix + "TRANS_MAIN.units, " +
+							tablePrefix + "TRANS_MAIN.ppg, " +
+							tablePrefix + "TRANS_MAIN.last_maintenance_userid " +
 					"FROM " +
 						tablePrefix + "TRANS_MAIN inner join " + tablePrefix + "FULL_ACCOUNT ON " +
 							tablePrefix + "TRANS_MAIN.account_num = " + tablePrefix + "FULL_ACCOUNT.account_num " +
@@ -197,7 +198,9 @@ public class ADDBrowser {
 							tablePrefix + "ACCOUNTS.type = " + tablePrefix + " TYPE_INFO.type and " +
 							tablePrefix + "ACCOUNTS.division = " + tablePrefix + " TYPE_INFO.division ";
 
-			String queryWhere = "WHERE " + tablePrefix + "TRANS_MAIN.posting_code <= " + PostingCode.max + " ";
+			String queryWhere = "WHERE "+
+					tablePrefix + "TRANS_MAIN.posting_code <= " + PostingCode.max + " and " +
+					tablePrefix + "TRANS_MAIN.status = 'A' ";
 			if (postingDate != null)
 				queryWhere += " and " + tablePrefix + "TRANS_MAIN.posting_date = '" + postingDate + "' ";
 			if (batchNum != null)
@@ -217,14 +220,8 @@ public class ADDBrowser {
 				mainWindow.batchTable.setAutoCreateRowSorter(true);
 				mainWindow.batchTable.setModel(batchDetail);
 			}
-			batchDetail.newResults(results);
-			mainWindow.batchTable.getColumnModel().getColumn(0).setCellRenderer(new FormatRenderer(df));
-			mainWindow.batchTable.getColumnModel().getColumn(1).setCellRenderer(new FormatRenderer(df));
-			mainWindow.batchTable.getColumnModel().getColumn(2).setCellRenderer(new FormatRenderer(tm));
-			mainWindow.batchTable.getColumnModel().getColumn(10).setCellRenderer(NumberRenderer.getCurrencyRenderer());
-			mainWindow.batchTable.getColumnModel().getColumn(11).setCellRenderer(NumberRenderer.getCurrencyRenderer());
-			mainWindow.batchTable.getColumnModel().getColumn(12).setCellRenderer(NumberRenderer.getCurrencyRenderer());
-			mainWindow.tabbedPane.setSelectedIndex(2);
+			batchDetail.newResults(results, mainWindow.batchTable);
+			mainWindow.tabbedPane.setSelectedIndex(MainWindow.BATCH_TAB_INDEX);
 			mainWindow.setExportButtonState();
 		} 
 		catch (SQLException e) {
@@ -245,6 +242,7 @@ public class ADDBrowser {
 					"SELECT " + 
 							tablePrefix + "TRANS_MAIN.event_date, " +
 							tablePrefix + "TRANS_MAIN.posting_date, " +
+							tablePrefix + "TRANS_MAIN.last_maintenance_dt, " +
 							tablePrefix + "TRANS_MAIN.batch_num, " +
 							tablePrefix + "FULL_ACCOUNT.full_account, " +
 							tablePrefix + "ACCOUNTS.name, " +
@@ -253,8 +251,9 @@ public class ADDBrowser {
 							tablePrefix + "POST_CODE.long_desc, " +
 							tablePrefix + "TRANS_MAIN.reference_num, " +
 							tablePrefix + "TRANS_MAIN.net_amount, " +
-							tablePrefix + "TRANS_MAIN.last_maintenance_userid, " +
-							tablePrefix + "TRANS_MAIN.last_maintenance_dt " +
+							tablePrefix + "TRANS_MAIN.units, " +
+							tablePrefix + "TRANS_MAIN.ppg, " +
+							tablePrefix + "TRANS_MAIN.last_maintenance_userid " +
 					"FROM " +
 						tablePrefix + "TRANS_MAIN inner join " + tablePrefix + "FULL_ACCOUNT ON " +
 							tablePrefix + "TRANS_MAIN.account_num = " + tablePrefix + "FULL_ACCOUNT.account_num " +
@@ -266,7 +265,9 @@ public class ADDBrowser {
 							tablePrefix + "ACCOUNTS.type = " + tablePrefix + " TYPE_INFO.type and " +
 							tablePrefix + "ACCOUNTS.division = " + tablePrefix + " TYPE_INFO.division ";
 
-			String queryWhere = "WHERE " + tablePrefix + "TRANS_MAIN.posting_code <= " + PostingCode.max + " ";
+			String queryWhere = "WHERE "+
+					tablePrefix + "TRANS_MAIN.posting_code <= " + PostingCode.max + " and " +
+					tablePrefix + "TRANS_MAIN.status = 'A' ";
 			if (startDate != null)
 				queryWhere += " and " + tablePrefix + "TRANS_MAIN.posting_date >= '" + startDate + "' ";
 			if (endDate != null)
@@ -293,14 +294,8 @@ public class ADDBrowser {
 				mainWindow.transactionsTable.setAutoCreateRowSorter(true);
 				mainWindow.transactionsTable.setModel(transDetail);
 			}
-			transDetail.newResults(results);
-			mainWindow.transactionsTable.getColumnModel().getColumn(0).setCellRenderer(new FormatRenderer(df));
-			mainWindow.transactionsTable.getColumnModel().getColumn(1).setCellRenderer(new FormatRenderer(df));
-			mainWindow.transactionsTable.getColumnModel().getColumn(2).setCellRenderer(new FormatRenderer(tm));
-			mainWindow.transactionsTable.getColumnModel().getColumn(10).setCellRenderer(NumberRenderer.getCurrencyRenderer());
-			mainWindow.transactionsTable.getColumnModel().getColumn(11).setCellRenderer(NumberRenderer.getCurrencyRenderer());
-			mainWindow.transactionsTable.getColumnModel().getColumn(12).setCellRenderer(NumberRenderer.getCurrencyRenderer());
-			mainWindow.tabbedPane.setSelectedIndex(3);
+			transDetail.newResults(results, mainWindow.transactionsTable);
+			mainWindow.tabbedPane.setSelectedIndex(MainWindow.TRANS_TAB_INDEX);
 			mainWindow.setExportButtonState();
 		} 
 		catch (SQLException e) {
@@ -311,5 +306,10 @@ public class ADDBrowser {
 		{
 			mainWindow.frmAddDataBrowser.setCursor(Cursor.getDefaultCursor());
 		}
+	}
+
+	public static void doSearch()
+	{
+		
 	}
 }

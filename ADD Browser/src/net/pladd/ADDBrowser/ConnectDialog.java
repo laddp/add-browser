@@ -59,9 +59,9 @@ public class ConnectDialog extends JDialog {
 			tabbedPane.addTab("Connection Details", null, connectionPanel, null);
 			connectionPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
 			GridBagLayout gbl_connectionPanel = new GridBagLayout();
-			gbl_connectionPanel.rowHeights = new int[]{20, 0, 0, 0, 0, 0, 0, 0, 0};
+			gbl_connectionPanel.rowHeights = new int[]{20, 0, 0, 0, 0, 0, 0};
 			gbl_connectionPanel.columnWeights = new double[]{0.0, 1.0};
-			gbl_connectionPanel.rowWeights = new double[]{0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, Double.MIN_VALUE};
+			gbl_connectionPanel.rowWeights = new double[]{0.0, 0.0, 0.0, 0.0, 0.0, 0.0, Double.MIN_VALUE};
 			connectionPanel.setLayout(gbl_connectionPanel);
 			{
 				JLabel lblConnectionType = new JLabel("Connection Type:");
@@ -161,15 +161,15 @@ public class ConnectDialog extends JDialog {
 				JLabel lblDatabase = new JLabel("Database:");
 				GridBagConstraints gbc_lblDatabase = new GridBagConstraints();
 				gbc_lblDatabase.anchor = GridBagConstraints.EAST;
-				gbc_lblDatabase.insets = new Insets(0, 0, 5, 5);
+				gbc_lblDatabase.insets = new Insets(0, 0, 0, 5);
 				gbc_lblDatabase.gridx = 0;
 				gbc_lblDatabase.gridy = 5;
 				connectionPanel.add(lblDatabase, gbc_lblDatabase);
 			}
 			{
 				databaseName = new JTextField();
+				databaseName.setText("AR1");
 				GridBagConstraints gbc_databaseName = new GridBagConstraints();
-				gbc_databaseName.insets = new Insets(0, 0, 5, 0);
 				gbc_databaseName.fill = GridBagConstraints.HORIZONTAL;
 				gbc_databaseName.gridx = 1;
 				gbc_databaseName.gridy = 5;

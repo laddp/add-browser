@@ -3,17 +3,24 @@
  */
 package net.pladd.ADDBrowser;
 
+import java.io.FileWriter;
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
+import java.text.NumberFormat;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.Vector;
 
+import javax.swing.JTable;
 import javax.swing.table.AbstractTableModel;
+
+import com.camick.FormatRenderer;
+import com.camick.NumberRenderer;
 
 /**
  * @author Patrick
@@ -26,7 +33,24 @@ public class BatchTable extends AbstractTableModel {
 			Arrays.asList("Event Date", "Posting Date", "Last Modified", "Batch #", 
 					"Full Account", "Name", "Type", 
 					"Posting Code", "Posting Code Descr", "Ref Num",
-					"Net Amount", "Credit Amount", "Debit Amount", "User ID");
+					"Net Amount", "Credit Amount", "Debit Amount", "Units", "Price Per Gal", "User ID");
+	protected static final int COL_EVENT_DATE = 0;
+	protected static final int COL_POST_DATE  = 1;
+	protected static final int COL_TRANS_DATE = 2;
+	protected static final int COL_BATCH_NUM  = 3;
+	protected static final int COL_FULL_ACCT  = 4;
+	protected static final int COL_NAME       = 5;
+	protected static final int COL_TYPE       = 6;
+	protected static final int COL_POST_CODE  = 7;
+	protected static final int COL_POST_DESC  = 8;
+	protected static final int COL_REF_NUM    = 9;
+	protected static final int COL_AMT_NET    = 10;
+	protected static final int COL_AMT_CRED   = 11;
+	protected static final int COL_AMT_DEBIT  = 12;
+	protected static final int COL_UNITS      = 13;
+	protected static final int COL_PPG        = 14;
+	protected static final int COL_USERID     = 15;
+
 	int rowCount;
 	
 	private Vector<Calendar>   eventDates;
@@ -40,10 +64,13 @@ public class BatchTable extends AbstractTableModel {
 	private Vector<String>     postDescrs;
 	private Vector<String>     refNums;
 	private Vector<BigDecimal> netAmounts;
+	private Vector<BigDecimal> units;
+	private Vector<BigDecimal> ppgs;
 	private Vector<String>     userIDs;
 
 	public BatchTable()
 	{
+		rowCount = 0;
 		eventDates   = new Vector<Calendar>();
 		postingDates = new Vector<Calendar>();
 		transDates   = new Vector<Date>();
@@ -55,6 +82,8 @@ public class BatchTable extends AbstractTableModel {
 		postDescrs   = new Vector<String>();
 		refNums      = new Vector<String>();
 		netAmounts   = new Vector<BigDecimal>();
+		units        = new Vector<BigDecimal>();
+		ppgs         = new Vector<BigDecimal>();
 		userIDs      = new Vector<String>();
 	}
 	
@@ -75,20 +104,22 @@ public class BatchTable extends AbstractTableModel {
 	{
 		switch (col)
 		{
-		case 0: return Date.class;
-		case 1: return Date.class;
-		case 2: return Date.class;
-		case 3: return Integer.class;
-		case 4: return Integer.class;
-		case 5: return String.class;
-		case 6: return String.class;
-		case 7: return Integer.class;
-		case 8: return String.class;
-		case 9: return String.class;
-		case 10: return BigDecimal.class;
-		case 11: return BigDecimal.class;
-		case 12: return BigDecimal.class;
-		case 13: return String.class;
+		case COL_EVENT_DATE: return Date.class;
+		case COL_POST_DATE:  return Date.class;
+		case COL_TRANS_DATE: return Date.class;
+		case COL_BATCH_NUM:  return Integer.class;
+		case COL_FULL_ACCT:  return Integer.class;
+		case COL_NAME:       return String.class;
+		case COL_TYPE:       return String.class;
+		case COL_POST_CODE:  return Integer.class;
+		case COL_POST_DESC:  return String.class;
+		case COL_REF_NUM:    return String.class;
+		case COL_AMT_NET:    return BigDecimal.class;
+		case COL_AMT_CRED:   return BigDecimal.class;
+		case COL_AMT_DEBIT:  return BigDecimal.class;
+		case COL_UNITS:      return BigDecimal.class;
+		case COL_PPG:        return BigDecimal.class;
+		case COL_USERID:     return String.class;
 		default: return null;
 		}
 	}
@@ -96,54 +127,66 @@ public class BatchTable extends AbstractTableModel {
 	@Override
 	public int getRowCount()
 	{
-		return eventDates.size();
+		return rowCount;
 	}
 
+	private BigDecimal amtToNet(BigDecimal amt, int pc)
+	{
+		if (pc > PostingCode.maxDebit)
+			return amt.negate();
+		else
+			return amt;
+	}
+	
+	private BigDecimal amtToCredit(BigDecimal amt, int pc)
+	{
+		BigDecimal net = amtToNet(amt, pc);
+		if (net.compareTo(BigDecimal.ZERO) < 0)
+			return net.negate();
+		else
+			return BigDecimal.ZERO;
+	}
+	
+	private BigDecimal amtToDebit(BigDecimal amt, int pc)
+	{
+		BigDecimal net = amtToNet(amt, pc);
+		if (net.compareTo(BigDecimal.ZERO) > 0)
+			return net;
+		else
+			return BigDecimal.ZERO;
+	}
+	
 	@Override
 	public Object getValueAt(int row, int col)
 	{
-
-		BigDecimal amt = null;
-		if (col == 10 || col == 11 || col == 12)
-		{
-			amt = netAmounts.get(row);
-			int postCode = postCodes.get(row).intValue();
-			if (postCode > PostingCode.maxDebit)
-				amt = amt.negate();
-		}
-		
 		switch (col)
 		{
-		case 0: return eventDates.get(row).getTime();
-		case 1: return postingDates.get(row).getTime();
-		case 2: return transDates.get(row);
-		case 3: return batchNums.get(row);
-		case 4: return fullAccounts.get(row);
-		case 5: return names.get(row);
-		case 6: return types.get(row);
-		case 7: return postCodes.get(row);
-		case 8: return postDescrs.get(row);
-		case 9: return refNums.get(row);
-		case 10: return amt;
-		case 11:
-			if (amt.compareTo(BigDecimal.ZERO) < 0)
-				return amt.negate();
-			else
-				return BigDecimal.ZERO;
-		case 12:
-			if (amt.compareTo(BigDecimal.ZERO) > 0)
-				return amt;
-			else
-				return BigDecimal.ZERO;
-		case 13: return userIDs.get(row);
+		case COL_EVENT_DATE: return eventDates.get(row).getTime();
+		case COL_POST_DATE:  return postingDates.get(row).getTime();
+		case COL_TRANS_DATE: return transDates.get(row);
+		case COL_BATCH_NUM:  return batchNums.get(row);
+		case COL_FULL_ACCT:  return fullAccounts.get(row);
+		case COL_NAME:       return names.get(row);
+		case COL_TYPE:       return types.get(row);
+		case COL_POST_CODE:  return postCodes.get(row);
+		case COL_POST_DESC:  return postDescrs.get(row);
+		case COL_REF_NUM:    return refNums.get(row);
+		case COL_AMT_NET:    return amtToNet   (netAmounts.get(row), postCodes.get(row));
+		case COL_AMT_CRED:   return amtToCredit(netAmounts.get(row), postCodes.get(row));
+		case COL_AMT_DEBIT:  return amtToDebit (netAmounts.get(row), postCodes.get(row));
+		case COL_UNITS:      return units.get(row);
+		case COL_PPG:        return ppgs.get(row);
+		case COL_USERID:     return userIDs.get(row);
 		default: return null;
 		}
 	}
 
-	public void newResults(ResultSet results) throws SQLException 
+	public void newResults(ResultSet results, JTable table) throws SQLException 
 	{
+		rowCount = 0;
 		eventDates.clear();
 		postingDates.clear();
+		transDates.clear();
 		batchNums.clear();
 		fullAccounts.clear();
 		names.clear();
@@ -152,61 +195,120 @@ public class BatchTable extends AbstractTableModel {
 		postDescrs.clear();
 		refNums.clear();
 		netAmounts.clear();
+		units.clear();
+		ppgs.clear();
 		userIDs.clear();
-		transDates.clear();
 		
-		rowCount = 0;
 		while (results.next())
 		{
 			rowCount++;
 			{
 				Calendar cal = Calendar.getInstance();
-				cal.setTime(results.getDate(1));
+				cal.setTime(results.getDate(COL_EVENT_DATE+1));
+				cal.set(Calendar.HOUR_OF_DAY, 0);
+				cal.set(Calendar.MINUTE,      0);
+				cal.set(Calendar.SECOND,      0);
 				eventDates.add(cal);
 			}
 			{
 				Calendar cal = Calendar.getInstance();
-				cal.setTime(results.getDate(2));
+				cal.setTime(results.getDate(COL_POST_DATE+1));
+				cal.set(Calendar.HOUR_OF_DAY, 0);
+				cal.set(Calendar.MINUTE,      0);
+				cal.set(Calendar.SECOND,      0);
 				postingDates.add(cal);
 			}
 			{
-				Integer i = new Integer(results.getInt(3));
+				Timestamp ts = results.getTimestamp(COL_TRANS_DATE+1);
+				transDates.add(new Date(ts.getTime()));
+			}
+			{
+				Integer i = new Integer(results.getInt(COL_BATCH_NUM+1));
 				batchNums.add(i);
 			}
 			{
-				Integer i = new Integer(results.getInt(4));
+				Integer i = new Integer(results.getInt(COL_FULL_ACCT+1));
 				fullAccounts.add(i);
 			}
 			{
-				names.add(results.getString(5));
+				names.add(results.getString(COL_NAME+1));
 			}
 			{
-				types.add(results.getString(6));
+				types.add(results.getString(COL_TYPE+1));
 			}
 			{
-				Integer i = new Integer(results.getInt(7));
+				Integer i = new Integer(results.getInt(COL_POST_CODE+1));
 				postCodes.add(i);
 			}
 			{
-				postDescrs.add(results.getString(8));
+				postDescrs.add(results.getString(COL_POST_DESC+1));
 			}
 			{
-				refNums.add(results.getString(9));
+				refNums.add(results.getString(COL_REF_NUM+1));
 			}
 			{
-				netAmounts.add(results.getBigDecimal(10));
+				netAmounts.add(results.getBigDecimal(COL_AMT_NET+1));
+			}
+			// NOTE DIFFERENT CONSTANTS FROM HERE ON!!! columns don't match up because of calculated cols for amounts			
+			{
+				units.add(results.getBigDecimal(COL_AMT_NET+2));
 			}
 			{
-				userIDs.add(results.getString(11));
+				ppgs.add(results.getBigDecimal(COL_AMT_NET+3).movePointLeft(2));
 			}
 			{
-				Timestamp ts = results.getTimestamp(12);
-				transDates.add(new Date(ts.getTime()));
+				userIDs.add(results.getString(COL_AMT_NET+4));
 			}
 		}
 		fireTableDataChanged();
 
 		if (rowCount == 0)
 			throw new SQLException("No results");
+		table.getColumnModel().getColumn(BatchTable.COL_EVENT_DATE).setCellRenderer(new FormatRenderer(ADDBrowser.df));
+		table.getColumnModel().getColumn(BatchTable.COL_POST_DATE ).setCellRenderer(new FormatRenderer(ADDBrowser.df));
+		table.getColumnModel().getColumn(BatchTable.COL_TRANS_DATE).setCellRenderer(new FormatRenderer(ADDBrowser.tm));
+		table.getColumnModel().getColumn(BatchTable.COL_AMT_NET   ).setCellRenderer(NumberRenderer.getCurrencyRenderer());
+		table.getColumnModel().getColumn(BatchTable.COL_AMT_CRED  ).setCellRenderer(NumberRenderer.getCurrencyRenderer());
+		table.getColumnModel().getColumn(BatchTable.COL_AMT_DEBIT ).setCellRenderer(NumberRenderer.getCurrencyRenderer());
+		
+		NumberFormat nf1 = NumberFormat.getNumberInstance();
+		nf1.setMaximumFractionDigits(1);
+		nf1.setMinimumFractionDigits(1);
+		table.getColumnModel().getColumn(BatchTable.COL_UNITS     ).setCellRenderer(new NumberRenderer(nf1));
+
+		NumberFormat nf5 = NumberFormat.getCurrencyInstance();
+		nf5.setMinimumFractionDigits(5);
+		table.getColumnModel().getColumn(BatchTable.COL_PPG       ).setCellRenderer(new NumberRenderer(nf5));
+	}
+	
+	protected void doExport(FileWriter out) throws IOException
+	{
+		for(int col = 0; col < this.getColumnCount(); col++)
+		{
+			out.write(this.getColumnName(col) + "\t");
+		}
+		out.write("\n");
+
+		for(int row = 0; row < this.getRowCount(); row++)
+		{
+			out.write(ADDBrowser.tm.format(eventDates.get(row).getTime())+"\t");
+			out.write(ADDBrowser.tm.format(postingDates.get(row).getTime())+"\t");
+			out.write(ADDBrowser.tm.format(transDates.get(row))+"\t");
+			out.write(batchNums.get(row)+"\t");
+			out.write(fullAccounts.get(row)+"\t");
+			out.write(names.get(row)+"\t");
+			out.write(types.get(row)+"\t");
+			out.write(postCodes.get(row)+"\t");
+			out.write(postDescrs.get(row)+"\t");
+			out.write(refNums.get(row)+"\t");
+			out.write("$"+amtToNet   (netAmounts.get(row), postCodes.get(row))+"\t");
+			out.write("$"+amtToCredit(netAmounts.get(row), postCodes.get(row))+"\t");
+			out.write("$"+amtToDebit (netAmounts.get(row), postCodes.get(row))+"\t");
+			out.write(units.get(row)+"\t");
+			out.write("$"+ppgs.get(row)+"\t");
+			out.write(userIDs.get(row)+"\t");
+			out.write("\n");
+		}
+		out.close();
 	}
 }
