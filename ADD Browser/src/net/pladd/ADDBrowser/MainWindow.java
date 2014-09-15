@@ -108,7 +108,7 @@ public class MainWindow {
 	{
 		frmAddDataBrowser = new JFrame();
 		frmAddDataBrowser.setSize(new Dimension(1200, 600));
-		frmAddDataBrowser.setTitle("ADD Data Browser v1.2");
+		frmAddDataBrowser.setTitle("ADD Data Browser v1.2.1");
 		frmAddDataBrowser.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		
 		JMenuBar menuBar = new JMenuBar();
@@ -723,17 +723,17 @@ public class MainWindow {
 
 	public void enableQueries(boolean b)
 	{
-		btnAccounts.setEnabled(b);
+//		btnAccounts.setEnabled(b);
 //		btnLogs.setEnabled(b);
 //		btnDocuments.setEnabled(b);
 		btnBatches.setEnabled(b);
 		btnTransactions.setEnabled(b);
 
-		btnAcctSearch.setEnabled(b);
-		btnAcctClear.setEnabled(b);
-		btnAcctLogs.setEnabled(b);
-		btnAcctDocuments.setEnabled(b);
-		btnAcctTransactions.setEnabled(b);
+//		btnAcctSearch.setEnabled(b);
+//		btnAcctClear.setEnabled(b);
+//		btnAcctLogs.setEnabled(b);
+//		btnAcctDocuments.setEnabled(b);
+//		btnAcctTransactions.setEnabled(b);
 	}
 
 	public JTable getSelectedTable()
