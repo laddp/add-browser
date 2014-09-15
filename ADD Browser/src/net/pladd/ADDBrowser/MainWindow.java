@@ -93,6 +93,10 @@ public class MainWindow {
 	protected JTextField division;
 	private JTextField state;
 	private JTextField zipCode;
+	private JLabel lblBalance;
+	private JTextField balance;
+	private JButton categoryButton;
+	private JButton divisionButton;
 
 	/**
 	 * Create the application.
@@ -222,9 +226,9 @@ public class MainWindow {
 		tabbedPane.addTab("Accounts", null, accountsTab, null);
 		GridBagLayout gbl_accountsTab = new GridBagLayout();
 		gbl_accountsTab.columnWidths = new int[]{0, 0, 0};
-		gbl_accountsTab.rowHeights = new int[]{15, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+		gbl_accountsTab.rowHeights = new int[]{15, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 		gbl_accountsTab.columnWeights = new double[]{0.0, 1.0, Double.MIN_VALUE};
-		gbl_accountsTab.rowWeights = new double[]{0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, Double.MIN_VALUE};
+		gbl_accountsTab.rowWeights = new double[]{0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, Double.MIN_VALUE};
 		accountsTab.setLayout(gbl_accountsTab);
 		
 		JPanel buttonPanel = new JPanel();
@@ -531,30 +535,89 @@ public class MainWindow {
 		gbc_lblCategory.gridy = 10;
 		accountsTab.add(lblCategory, gbc_lblCategory);
 		
+		JPanel categoryPanel = new JPanel();
+		GridBagConstraints gbc_categoryPanel = new GridBagConstraints();
+		gbc_categoryPanel.fill = GridBagConstraints.BOTH;
+		gbc_categoryPanel.insets = new Insets(0, 0, 5, 0);
+		gbc_categoryPanel.gridx = 1;
+		gbc_categoryPanel.gridy = 10;
+		accountsTab.add(categoryPanel, gbc_categoryPanel);
+		GridBagLayout gbl_categoryPanel = new GridBagLayout();
+		gbl_categoryPanel.columnWidths = new int[]{0, 0, 0};
+		gbl_categoryPanel.rowHeights = new int[]{0, 0};
+		gbl_categoryPanel.columnWeights = new double[]{0.0, 0.0, Double.MIN_VALUE};
+		gbl_categoryPanel.rowWeights = new double[]{0.0, Double.MIN_VALUE};
+		categoryPanel.setLayout(gbl_categoryPanel);
+		
 		category = new JTextField();
 		GridBagConstraints gbc_category = new GridBagConstraints();
-		gbc_category.insets = new Insets(0, 0, 5, 0);
+		gbc_category.insets = new Insets(0, 0, 0, 5);
 		gbc_category.anchor = GridBagConstraints.WEST;
-		gbc_category.gridx = 1;
-		gbc_category.gridy = 10;
-		accountsTab.add(category, gbc_category);
+		gbc_category.gridx = 0;
+		gbc_category.gridy = 0;
+		categoryPanel.add(category, gbc_category);
 		category.setColumns(46);
+		
+		categoryButton = new JButton("...");
+		categoryButton.setEnabled(false);
+		GridBagConstraints gbc_categoryButton = new GridBagConstraints();
+		gbc_categoryButton.gridx = 1;
+		gbc_categoryButton.gridy = 0;
+		categoryPanel.add(categoryButton, gbc_categoryButton);
 		
 		JLabel lblDivison = new JLabel("Divison");
 		GridBagConstraints gbc_lblDivison = new GridBagConstraints();
 		gbc_lblDivison.anchor = GridBagConstraints.EAST;
-		gbc_lblDivison.insets = new Insets(0, 0, 0, 5);
+		gbc_lblDivison.insets = new Insets(0, 0, 5, 5);
 		gbc_lblDivison.gridx = 0;
 		gbc_lblDivison.gridy = 11;
 		accountsTab.add(lblDivison, gbc_lblDivison);
 		
+		JPanel divisionPanel = new JPanel();
+		GridBagConstraints gbc_divisionPanel = new GridBagConstraints();
+		gbc_divisionPanel.fill = GridBagConstraints.BOTH;
+		gbc_divisionPanel.insets = new Insets(0, 0, 5, 0);
+		gbc_divisionPanel.gridx = 1;
+		gbc_divisionPanel.gridy = 11;
+		accountsTab.add(divisionPanel, gbc_divisionPanel);
+		GridBagLayout gbl_divisionPanel = new GridBagLayout();
+		gbl_divisionPanel.columnWidths = new int[]{0, 0, 0};
+		gbl_divisionPanel.rowHeights = new int[]{0, 0};
+		gbl_divisionPanel.columnWeights = new double[]{0.0, 0.0, Double.MIN_VALUE};
+		gbl_divisionPanel.rowWeights = new double[]{0.0, Double.MIN_VALUE};
+		divisionPanel.setLayout(gbl_divisionPanel);
+		
 		division = new JTextField();
 		GridBagConstraints gbc_division = new GridBagConstraints();
+		gbc_division.insets = new Insets(0, 0, 0, 5);
 		gbc_division.anchor = GridBagConstraints.WEST;
-		gbc_division.gridx = 1;
-		gbc_division.gridy = 11;
-		accountsTab.add(division, gbc_division);
+		gbc_division.gridx = 0;
+		gbc_division.gridy = 0;
+		divisionPanel.add(division, gbc_division);
 		division.setColumns(47);
+		
+		divisionButton = new JButton("...");
+		divisionButton.setEnabled(false);
+		GridBagConstraints gbc_divisionButton = new GridBagConstraints();
+		gbc_divisionButton.gridx = 1;
+		gbc_divisionButton.gridy = 0;
+		divisionPanel.add(divisionButton, gbc_divisionButton);
+		
+		lblBalance = new JLabel("Balance");
+		GridBagConstraints gbc_lblBalance = new GridBagConstraints();
+		gbc_lblBalance.anchor = GridBagConstraints.EAST;
+		gbc_lblBalance.insets = new Insets(0, 0, 0, 5);
+		gbc_lblBalance.gridx = 0;
+		gbc_lblBalance.gridy = 12;
+		accountsTab.add(lblBalance, gbc_lblBalance);
+		
+		balance = new JTextField();
+		GridBagConstraints gbc_balance = new GridBagConstraints();
+		gbc_balance.anchor = GridBagConstraints.SOUTHWEST;
+		gbc_balance.gridx = 1;
+		gbc_balance.gridy = 12;
+		accountsTab.add(balance, gbc_balance);
+		balance.setColumns(20);
 		tabbedPane.setMnemonicAt(0, KeyEvent.VK_A);
 		
 		logsTable = new JTable();
