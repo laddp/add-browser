@@ -97,6 +97,9 @@ public class MainWindow {
 	private JTextField balance;
 	private JButton categoryButton;
 	private JButton divisionButton;
+	private JMenuItem mntmExport;
+	private JMenu mnHelp;
+	private JMenuItem mntmAbout;
 
 	/**
 	 * Create the application.
@@ -110,15 +113,17 @@ public class MainWindow {
 	 */
 	private void initialize()
 	{
+		final String VersionStr = "v1.2.1";
 		frmAddDataBrowser = new JFrame();
 		frmAddDataBrowser.setSize(new Dimension(1200, 600));
-		frmAddDataBrowser.setTitle("ADD Data Browser v1.2.1");
+		frmAddDataBrowser.setTitle("ADD Data Browser " + VersionStr);
 		frmAddDataBrowser.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		
 		JMenuBar menuBar = new JMenuBar();
 		frmAddDataBrowser.setJMenuBar(menuBar);
 		
 		JMenu mnFile = new JMenu("File");
+		mnFile.setMnemonic(KeyEvent.VK_F);
 		menuBar.add(mnFile);
 		
 		JMenuItem mntmConnect = new JMenuItem("Connect...");
@@ -131,20 +136,39 @@ public class MainWindow {
 			}
 		});
 		
+		mntmExport = new JMenuItem("Export...");
+		mntmExport.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				doExport();
+			}
+		});
+		mntmExport.setEnabled(false);
+		mntmExport.setMnemonic(KeyEvent.VK_E);
+		mntmExport.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_E, InputEvent.CTRL_MASK));
+		mnFile.add(mntmExport);
+
 		JMenuItem mntmExit = new JMenuItem("Exit");
+		mntmExit.setMnemonic(KeyEvent.VK_X);
+		mntmExit.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_X, InputEvent.CTRL_MASK));
 		mntmExit.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				doExit();
 			}
 		});
-		
-		JMenuItem mntmExport = new JMenuItem("Export...");
-		mntmExport.setMnemonic(KeyEvent.VK_E);
-		mntmExport.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_E, InputEvent.CTRL_MASK));
-		mnFile.add(mntmExport);
-		mntmExit.setMnemonic(KeyEvent.VK_X);
-		mntmExit.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_X, InputEvent.CTRL_MASK));
 		mnFile.add(mntmExit);
+		
+		mnHelp = new JMenu("Help");
+		mnHelp.setMnemonic(KeyEvent.VK_H);
+		menuBar.add(mnHelp);
+		
+		mntmAbout = new JMenuItem("About...");
+		mntmAbout.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				JOptionPane.showMessageDialog(frmAddDataBrowser, "ADD Data Browser " + VersionStr, "About ADD Data Browser", JOptionPane.INFORMATION_MESSAGE);
+			}
+		});
+		mntmAbout.setMnemonic(KeyEvent.VK_A);
+		mnHelp.add(mntmAbout);
 		
 		JToolBar toolBar = new JToolBar();
 		frmAddDataBrowser.getContentPane().add(toolBar, BorderLayout.NORTH);
@@ -626,6 +650,7 @@ public class MainWindow {
 		
 		documentsTable = new JTable();
 		tabbedPane.addTab("Documents", null, documentsTable, null);
+		tabbedPane.setMnemonicAt(2, KeyEvent.VK_D);
 		
 		batchTable = new JTable();
 		batchTable.setRowSelectionAllowed(false);
@@ -749,7 +774,7 @@ public class MainWindow {
 			
 			if (startDate == null && endDate == null && acctNum == null && postCodes == null && refNum == null)
 			{
-				JOptionPane.showMessageDialog(frmAddDataBrowser, "No query specified", "Transactoin Query error", JOptionPane.ERROR_MESSAGE);
+				JOptionPane.showMessageDialog(frmAddDataBrowser, "No query specified", "Transaction Query error", JOptionPane.ERROR_MESSAGE);
 				return;
 			}
 
@@ -817,9 +842,15 @@ public class MainWindow {
 		if (selected == null)
 			btnExport.setEnabled(false);
 		else if (selected.getModel().getRowCount() > 0)
+		{
 			btnExport.setEnabled(true);
+			mntmExport.setEnabled(true);
+		}
 		else
+		{
 			btnExport.setEnabled(false);
+			mntmExport.setEnabled(false);
+		}
 	}
 	
 
