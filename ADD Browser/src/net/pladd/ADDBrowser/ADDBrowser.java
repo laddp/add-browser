@@ -13,6 +13,7 @@ import java.sql.Statement;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Map;
 import java.util.Vector;
 
 import javax.swing.JOptionPane;
@@ -308,7 +309,7 @@ public class ADDBrowser {
 		}
 	}
 
-	public static void doSearch()
+	public static void doAcctSearch(Map<String, String> acctQuery)
 	{
 		
 	}

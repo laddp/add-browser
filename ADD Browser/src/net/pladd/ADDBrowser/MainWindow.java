@@ -14,6 +14,10 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 import java.util.Vector;
 
 import javax.swing.ImageIcon;
@@ -41,6 +45,9 @@ public class MainWindow {
 	protected JFrame frmAddDataBrowser;
 	protected JTabbedPane tabbedPane;
 
+	private JMenuItem mntmExport;
+	protected static final String VersionStr = "v1.2.1";
+
 	protected JPanel accountsTab;
 	protected JTable logsTable;
 	protected JTable documentsTable;
@@ -54,6 +61,7 @@ public class MainWindow {
 	protected static final int TRANS_TAB_INDEX = 4;
 
 	// Dialogs
+	private AboutDialog aboutDialog = null;
 	private ConnectDialog connectDialog = null;
 	private TransactionQueryDialog transactionQueryDialog = null; 
 	private BatchQueryDialog batchQueryDialog = null;
@@ -91,16 +99,14 @@ public class MainWindow {
 	protected JTextField lastName;
 	protected JTextField nameSuffix;
 	protected JTextField division;
-	private JTextField state;
-	private JTextField zipCode;
-	private JLabel lblBalance;
-	private JTextField balance;
+	protected JTextField state;
+	protected JTextField zipCode;
+	protected JTextField balance;
 	private JButton categoryButton;
 	private JButton divisionButton;
-	private JMenuItem mntmExport;
-	private JMenu mnHelp;
-	private JMenuItem mntmAbout;
 
+	private Set<JTextField> accountQueryFields = new HashSet<JTextField>();
+	
 	/**
 	 * Create the application.
 	 */
@@ -113,7 +119,6 @@ public class MainWindow {
 	 */
 	private void initialize()
 	{
-		final String VersionStr = "v1.2.1";
 		frmAddDataBrowser = new JFrame();
 		frmAddDataBrowser.setSize(new Dimension(1200, 600));
 		frmAddDataBrowser.setTitle("ADD Data Browser " + VersionStr);
@@ -157,14 +162,17 @@ public class MainWindow {
 		});
 		mnFile.add(mntmExit);
 		
-		mnHelp = new JMenu("Help");
+		JMenu mnHelp = new JMenu("Help");
 		mnHelp.setMnemonic(KeyEvent.VK_H);
 		menuBar.add(mnHelp);
 		
-		mntmAbout = new JMenuItem("About...");
+		JMenuItem mntmAbout = new JMenuItem("About...");
 		mntmAbout.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				JOptionPane.showMessageDialog(frmAddDataBrowser, "ADD Data Browser " + VersionStr, "About ADD Data Browser", JOptionPane.INFORMATION_MESSAGE);
+			public void actionPerformed(ActionEvent e)
+			{
+				if (aboutDialog == null)
+					aboutDialog = new AboutDialog();
+				aboutDialog.setVisible(true);
 			}
 		});
 		mntmAbout.setMnemonic(KeyEvent.VK_A);
@@ -269,7 +277,7 @@ public class MainWindow {
 		btnAcctSearch.setEnabled(false);
 		btnAcctSearch.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				ADDBrowser.doSearch();
+				doAcctSearch();
 			}
 		});
 		buttonPanel.add(btnAcctSearch);
@@ -627,7 +635,7 @@ public class MainWindow {
 		gbc_divisionButton.gridy = 0;
 		divisionPanel.add(divisionButton, gbc_divisionButton);
 		
-		lblBalance = new JLabel("Balance");
+		JLabel lblBalance = new JLabel("Balance");
 		GridBagConstraints gbc_lblBalance = new GridBagConstraints();
 		gbc_lblBalance.anchor = GridBagConstraints.EAST;
 		gbc_lblBalance.insets = new Insets(0, 0, 0, 5);
@@ -682,29 +690,57 @@ public class MainWindow {
 		JScrollPane transPane = new JScrollPane(transactionsTable);
 		tabbedPane.addTab("Transactions", null, transPane, null);
 		tabbedPane.setMnemonicAt(4, KeyEvent.VK_T);
+		
+		accountQueryFields.add(accountNumber);
+		accountQueryFields.add(sortCode);
+		accountQueryFields.add(name);
+		accountQueryFields.add(title);
+		accountQueryFields.add(firstName);
+		accountQueryFields.add(middleInitial);
+		accountQueryFields.add(lastName);
+		accountQueryFields.add(nameSuffix);
+		accountQueryFields.add(address1);
+		accountQueryFields.add(address2);
+		accountQueryFields.add(city);
+		accountQueryFields.add(state);
+		accountQueryFields.add(zipCode);
+		accountQueryFields.add(telephone);
+		accountQueryFields.add(email);
+		accountQueryFields.add(type);
+		accountQueryFields.add(category);
+		accountQueryFields.add(division);
+		accountQueryFields.add(balance);
+
 	}
 
 	
+	protected void doAcctSearch()
+	{
+		Map<String, String> acctQuery = new HashMap<String, String>();
+		
+		for (JTextField fld : accountQueryFields)
+		{
+			String val  = fld.getText();
+			if (val != null && val.length() != 0)
+			{
+				acctQuery.put(fld.getName(), val);
+			}
+		}
+		
+		if (acctQuery.size() == 0)
+		{
+			JOptionPane.showMessageDialog(frmAddDataBrowser, "No query specified", "Account Query error", JOptionPane.ERROR_MESSAGE);
+			return;
+		}
+		ADDBrowser.doAcctSearch(acctQuery);
+	}
+
 	protected void doClearAcct()
 	{
-		accountNumber.setText("");
-		sortCode.setText("");
-		name.setText("");
-		title.setText("");
-		firstName.setText("");
-		middleInitial.setText("");
-		lastName.setText("");
-		nameSuffix.setText("");
-		address1.setText("");
-		address2.setText("");
-		city.setText("");
-		state.setText("");
-		zipCode.setText("");
-		telephone.setText("");
-		email.setText("");
-		type.setText("");
-		category.setText("");
-		division.setText("");
+		for (JTextField field : accountQueryFields)
+		{
+			field.setText("");
+		}
 	}
 
 	protected void doBatchQuery()
