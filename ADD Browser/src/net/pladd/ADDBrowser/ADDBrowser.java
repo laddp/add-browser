@@ -274,13 +274,13 @@ public class ADDBrowser {
 			if (startDate != null)
 				queryWhere += " and " + tablePrefix + "TRANS_MAIN.posting_date >= '" + startDate + "' ";
 			if (endDate != null)
-				queryWhere += " and " + tablePrefix + "TRANS_MAIN.posting_date <  '" + endDate + "' ";
+				queryWhere += " and " + tablePrefix + "TRANS_MAIN.posting_date <=  '" + endDate + "' ";
 			if (acctNum != null)
-				queryWhere += " and " + tablePrefix + "FULL_ACCOUNT.full_account = " + acctNum + " ";
+				queryWhere += " and " + tablePrefix + "FULL_ACCOUNT.full_account = '" + acctNum + "' ";
 			if (postCodes != null)
 				queryWhere += " and " + tablePrefix + "TRANS_MAIN.posting_code in (" + postCodes + ") ";
 			if (refNum != null)
-				queryWhere += " and " + tablePrefix + "TRANS_MAIN.reference_num = '" + refNum + "' ";
+				queryWhere += " and " + tablePrefix + "TRANS_MAIN.reference_num = " + refNum + " ";
 			
 			String querySuffix =
 					"ORDER BY " +
