@@ -311,6 +311,18 @@ public class ADDBrowser {
 
 	public static void doAcctSearch(Map<String, String> acctQuery)
 	{
+		String queryWhere = null;
 		
+		for (Map.Entry<String, String> item : acctQuery.entrySet())
+		{
+			switch (item.getKey())
+			{
+			case "full_account":
+				queryWhere += " and " + tablePrefix + item.getKey() + " = " + item.getValue();
+				break;
+			default:
+				break;
+			}
+		}
 	}
 }

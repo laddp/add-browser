@@ -326,6 +326,7 @@ public class MainWindow {
 		accountInfoPanel.setLayout(gbl_accountInfoPanel);
 		
 		accountNumber = new JTextField();
+		accountNumber.setName("full_account");
 		GridBagConstraints gbc_accountNumber = new GridBagConstraints();
 		gbc_accountNumber.anchor = GridBagConstraints.NORTHWEST;
 		gbc_accountNumber.insets = new Insets(0, 0, 0, 5);
@@ -343,6 +344,7 @@ public class MainWindow {
 		accountInfoPanel.add(lblSortCode, gbc_lblSortCode);
 		
 		sortCode = new JTextField();
+		sortCode.setName("sort_code");
 		GridBagConstraints gbc_sortCode = new GridBagConstraints();
 		gbc_sortCode.anchor = GridBagConstraints.NORTHWEST;
 		gbc_sortCode.gridx = 2;
@@ -359,6 +361,7 @@ public class MainWindow {
 		accountsTab.add(lblName, gbc_lblName);
 		
 		name = new JTextField();
+		name.setName("name");
 		GridBagConstraints gbc_name = new GridBagConstraints();
 		gbc_name.anchor = GridBagConstraints.WEST;
 		gbc_name.insets = new Insets(0, 0, 5, 0);
@@ -383,6 +386,7 @@ public class MainWindow {
 		nameComponentPanel.setLayout(gbl_nameComponentPanel);
 		
 		title = new JTextField();
+		title.setName("title");
 		GridBagConstraints gbc_title = new GridBagConstraints();
 		gbc_title.insets = new Insets(0, 0, 0, 5);
 		gbc_title.anchor = GridBagConstraints.NORTHWEST;
@@ -392,6 +396,7 @@ public class MainWindow {
 		title.setColumns(4);
 		
 		firstName = new JTextField();
+		firstName.setName("first_name");
 		GridBagConstraints gbc_firstName = new GridBagConstraints();
 		gbc_firstName.insets = new Insets(0, 0, 0, 5);
 		gbc_firstName.fill = GridBagConstraints.HORIZONTAL;
@@ -401,6 +406,7 @@ public class MainWindow {
 		firstName.setColumns(40);
 		
 		middleInitial = new JTextField();
+		middleInitial.setName("middle_initial");
 		middleInitial.setColumns(1);
 		GridBagConstraints gbc_middleInitial = new GridBagConstraints();
 		gbc_middleInitial.insets = new Insets(0, 0, 0, 5);
@@ -410,6 +416,7 @@ public class MainWindow {
 		nameComponentPanel.add(middleInitial, gbc_middleInitial);
 		
 		lastName = new JTextField();
+		lastName.setName("last_name");
 		GridBagConstraints gbc_lastName = new GridBagConstraints();
 		gbc_lastName.insets = new Insets(0, 0, 0, 5);
 		gbc_lastName.fill = GridBagConstraints.HORIZONTAL;
@@ -847,17 +854,22 @@ public class MainWindow {
 
 	public void enableQueries(boolean b)
 	{
-//		btnAccounts.setEnabled(b);
+		btnAccounts.setEnabled(b);
 //		btnLogs.setEnabled(b);
 //		btnDocuments.setEnabled(b);
 		btnBatches.setEnabled(b);
 		btnTransactions.setEnabled(b);
 
-//		btnAcctSearch.setEnabled(b);
-//		btnAcctClear.setEnabled(b);
-//		btnAcctLogs.setEnabled(b);
-//		btnAcctDocuments.setEnabled(b);
-//		btnAcctTransactions.setEnabled(b);
+		btnAcctSearch.setEnabled(b);
+		btnAcctClear.setEnabled(b);
+		btnAcctLogs.setEnabled(b);
+		btnAcctDocuments.setEnabled(b);
+		btnAcctTransactions.setEnabled(b);
+		
+		for (JTextField fld : accountQueryFields)
+		{
+			fld.setEnabled(b);
+		}
 	}
 
 	public JTable getSelectedTable()
