@@ -20,19 +20,6 @@ public class AboutDialog extends JDialog {
 	private final JPanel contentPanel = new JPanel();
 
 	/**
-	 * Launch the application.
-	 */
-	public static void main(String[] args) {
-		try {
-			AboutDialog dialog = new AboutDialog();
-			dialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
-			dialog.setVisible(true);
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-	}
-
-	/**
 	 * Create the dialog.
 	 */
 	public AboutDialog() {
@@ -43,7 +30,12 @@ public class AboutDialog extends JDialog {
 		contentPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
 		getContentPane().add(contentPanel, BorderLayout.CENTER);
 		{
-			JLabel aboutLabel = new JLabel("<html><h1>ADD Data Browser " + MainWindow.VersionStr + "<h1>");
+			JLabel aboutLabel = new JLabel(
+					"<html><h1>ADD Data Browser " + MainWindow.VersionStr + "<h1>" +
+					"<br/>" +
+					"<p>Browser for ADD Systems E3 databases</p>" +
+					"<p>Written by Patrick Ladd (c)2014</p>" + 
+					"<p>Get the latest version from https://github.com/laddp/add-browser/releases</p>");
 			contentPanel.add(aboutLabel);
 		}
 		{
