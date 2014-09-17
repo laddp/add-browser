@@ -13,7 +13,9 @@ import java.sql.Statement;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.Vector;
 
 import javax.swing.JOptionPane;
@@ -311,18 +313,99 @@ public class ADDBrowser {
 
 	public static void doAcctSearch(Map<String, String> acctQuery)
 	{
+		String queryPrefix =
+			"SELECT " + 
+				tablePrefix + "FULL_ACCOUNT.full_account, " +
+				tablePrefix + "ACCOUNTS.sort_code, " +
+				tablePrefix + "ACCOUNTS.name, " +
+				tablePrefix + "ACCOUNTS.title, " +
+				tablePrefix + "ACCOUNTS.first_name, " +
+				tablePrefix + "ACCOUNTS.middle_initial, " +
+				tablePrefix + "ACCOUNTS.last_name, " +
+				tablePrefix + "ACCOUNTS.name_suffix, " +
+				tablePrefix + "ACCOUNTS.street1, " +
+				tablePrefix + "ACCOUNTS.street2, " +
+				tablePrefix + "ACCOUNTS.city, " +
+				tablePrefix + "ACCOUNTS.state, " +
+				tablePrefix + "ACCOUNTS.postal_code " +
+			" FROM " +
+				tablePrefix + "FULL_ACCOUNT inner join " + tablePrefix + "ACCOUNTS ON " +
+					tablePrefix + "ACCOUNTS.account_num = " + tablePrefix + "FULL_ACCOUNT.account_num " +
+				"inner join " + tablePrefix + "DIVISION_INFO ON " +
+					tablePrefix + "ACCOUNTS.division = " + tablePrefix + " DIVISION_INFO.division " +
+				"inner join " + tablePrefix + "TYPE_INFO ON " +
+					tablePrefix + "ACCOUNTS.type = " + tablePrefix + " TYPE_INFO.type and " +
+					tablePrefix + "ACCOUNTS.division = " + tablePrefix + " TYPE_INFO.division ";
+
 		String queryWhere = null;
-		
 		for (Map.Entry<String, String> item : acctQuery.entrySet())
 		{
+			if (queryWhere != null)
+				queryWhere += " and ";
+			else
+				queryWhere = " WHERE ";
 			switch (item.getKey())
 			{
 			case "full_account":
-				queryWhere += " and " + tablePrefix + item.getKey() + " = " + item.getValue();
+				queryWhere += tablePrefix + "FULL_ACCOUNT." + item.getKey() + " like '" + item.getValue() + "' ";
+				break;
+			case "sort_code":
+			case "name":
+			case "title":
+			case "first_name":
+			case "middle_initial":
+			case "last_name":
+			case "name_suffix":
+			case "street1":
+			case "street2":
+			case "city":
+			case "state":
+			case "postal_code":
+				queryWhere += tablePrefix + "ACCOUNTS." + item.getKey() + " like '" + item.getValue() + "' ";
 				break;
 			default:
 				break;
 			}
+		}
+		
+		try
+		{
+			Statement stmt = dataSource.createStatement();
+			mainWindow.frmAddDataBrowser.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+			ResultSet results = stmt.executeQuery(queryPrefix + queryWhere);
+			
+			Set<Account> accounts = new HashSet<Account>();
+			
+			while (results.next())
+			{
+				accounts.add(new Account(
+						results.getString(1),
+						results.getString(2),
+						results.getString(3),
+						results.getString(4),
+						results.getString(5),
+						results.getString(6),
+						results.getString(7),
+						results.getString(8),
+						results.getString(9),
+						results.getString(10),
+						results.getString(11),
+						results.getString(12),
+						results.getString(13)));
+			}
+			
+			if (accounts.size() == 0)
+				throw new SQLException("No results");
+			mainWindow.accountResults(accounts);
+		}
+		catch (SQLException e)
+		{
+			e.printStackTrace();
+			JOptionPane.showMessageDialog(mainWindow.frmAddDataBrowser, "Query failed:" + e, "Query Failed", JOptionPane.ERROR_MESSAGE);
+		}
+		finally
+		{
+			mainWindow.frmAddDataBrowser.setCursor(Cursor.getDefaultCursor());
 		}
 	}
 }

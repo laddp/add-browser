@@ -85,19 +85,19 @@ public class MainWindow {
 	// Account tab fields
 	protected JTextField accountNumber;
 	protected JTextField name;
-	protected JTextField address1;
-	protected JTextField address2;
+	protected JTextField title;
+	protected JTextField firstName;
+	protected JTextField middleInitial;
+	protected JTextField lastName;
+	protected JTextField nameSuffix;
+	protected JTextField street1;
+	protected JTextField street2;
 	protected JTextField city;
 	protected JTextField type;
 	protected JTextField category;
 	protected JTextField sortCode;
 	protected JTextField telephone;
 	protected JTextField email;
-	protected JTextField title;
-	protected JTextField firstName;
-	protected JTextField middleInitial;
-	protected JTextField lastName;
-	protected JTextField nameSuffix;
 	protected JTextField division;
 	protected JTextField state;
 	protected JTextField zipCode;
@@ -120,7 +120,7 @@ public class MainWindow {
 	private void initialize()
 	{
 		frmAddDataBrowser = new JFrame();
-		frmAddDataBrowser.setSize(new Dimension(1200, 600));
+		frmAddDataBrowser.setSize(new Dimension(800, 600));
 		frmAddDataBrowser.setTitle("ADD Data Browser " + VersionStr);
 		frmAddDataBrowser.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		
@@ -258,9 +258,9 @@ public class MainWindow {
 		tabbedPane.addTab("Accounts", null, accountsTab, null);
 		GridBagLayout gbl_accountsTab = new GridBagLayout();
 		gbl_accountsTab.columnWidths = new int[]{0, 0, 0};
-		gbl_accountsTab.rowHeights = new int[]{15, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+		gbl_accountsTab.rowHeights = new int[]{15, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 		gbl_accountsTab.columnWeights = new double[]{0.0, 1.0, Double.MIN_VALUE};
-		gbl_accountsTab.rowWeights = new double[]{0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, Double.MIN_VALUE};
+		gbl_accountsTab.rowWeights = new double[]{0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, Double.MIN_VALUE};
 		accountsTab.setLayout(gbl_accountsTab);
 		
 		JPanel buttonPanel = new JPanel();
@@ -291,10 +291,6 @@ public class MainWindow {
 		});
 		buttonPanel.add(btnAcctClear);
 		
-		btnAcctTransactions = new JButton("Transactions");
-		btnAcctTransactions.setEnabled(false);
-		buttonPanel.add(btnAcctTransactions);
-		
 		btnAcctLogs = new JButton("Logs");
 		btnAcctLogs.setEnabled(false);
 		buttonPanel.add(btnAcctLogs);
@@ -302,6 +298,15 @@ public class MainWindow {
 		btnAcctDocuments = new JButton("Documents");
 		btnAcctDocuments.setEnabled(false);
 		buttonPanel.add(btnAcctDocuments);
+		
+		btnAcctTransactions = new JButton("Transactions");
+		btnAcctTransactions.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				ADDBrowser.doTransactionQuery(null, null, accountNumber.getText(), null, null);
+			}
+		});
+		btnAcctTransactions.setEnabled(false);
+		buttonPanel.add(btnAcctTransactions);
 		
 		JLabel lblAccountNumber = new JLabel("Account Number");
 		GridBagConstraints gbc_lblAccountNumber = new GridBagConstraints();
@@ -370,20 +375,27 @@ public class MainWindow {
 		accountsTab.add(name, gbc_name);
 		name.setColumns(40);
 		
-		JPanel nameComponentPanel = new JPanel();
-		GridBagConstraints gbc_nameComponentPanel = new GridBagConstraints();
-		gbc_nameComponentPanel.anchor = GridBagConstraints.WEST;
-		gbc_nameComponentPanel.insets = new Insets(0, 0, 5, 0);
-		gbc_nameComponentPanel.fill = GridBagConstraints.BOTH;
-		gbc_nameComponentPanel.gridx = 1;
-		gbc_nameComponentPanel.gridy = 3;
-		accountsTab.add(nameComponentPanel, gbc_nameComponentPanel);
-		GridBagLayout gbl_nameComponentPanel = new GridBagLayout();
-		gbl_nameComponentPanel.columnWidths = new int[]{0, 86, 0, 0, 0, 0};
-		gbl_nameComponentPanel.rowHeights = new int[]{0, 0};
-		gbl_nameComponentPanel.columnWeights = new double[]{0.0, 0.0, 0.0, 0.0, 0.0, Double.MIN_VALUE};
-		gbl_nameComponentPanel.rowWeights = new double[]{0.0, Double.MIN_VALUE};
-		nameComponentPanel.setLayout(gbl_nameComponentPanel);
+		JLabel lblTitleFn = new JLabel("Title / First Name / MI");
+		GridBagConstraints gbc_lblTitleFn = new GridBagConstraints();
+		gbc_lblTitleFn.insets = new Insets(0, 0, 5, 5);
+		gbc_lblTitleFn.gridx = 0;
+		gbc_lblTitleFn.gridy = 3;
+		accountsTab.add(lblTitleFn, gbc_lblTitleFn);
+		
+		JPanel nameComponentPanel1 = new JPanel();
+		GridBagConstraints gbc_nameComponentPanel1 = new GridBagConstraints();
+		gbc_nameComponentPanel1.anchor = GridBagConstraints.WEST;
+		gbc_nameComponentPanel1.insets = new Insets(0, 0, 5, 0);
+		gbc_nameComponentPanel1.fill = GridBagConstraints.BOTH;
+		gbc_nameComponentPanel1.gridx = 1;
+		gbc_nameComponentPanel1.gridy = 3;
+		accountsTab.add(nameComponentPanel1, gbc_nameComponentPanel1);
+		GridBagLayout gbl_nameComponentPanel1 = new GridBagLayout();
+		gbl_nameComponentPanel1.columnWidths = new int[]{0, 86, 0, 0, 0, 0};
+		gbl_nameComponentPanel1.rowHeights = new int[]{0, 0};
+		gbl_nameComponentPanel1.columnWeights = new double[]{0.0, 0.0, 0.0, 0.0, 0.0, Double.MIN_VALUE};
+		gbl_nameComponentPanel1.rowWeights = new double[]{0.0, Double.MIN_VALUE};
+		nameComponentPanel1.setLayout(gbl_nameComponentPanel1);
 		
 		title = new JTextField();
 		title.setName("title");
@@ -392,7 +404,7 @@ public class MainWindow {
 		gbc_title.anchor = GridBagConstraints.NORTHWEST;
 		gbc_title.gridx = 0;
 		gbc_title.gridy = 0;
-		nameComponentPanel.add(title, gbc_title);
+		nameComponentPanel1.add(title, gbc_title);
 		title.setColumns(4);
 		
 		firstName = new JTextField();
@@ -402,77 +414,92 @@ public class MainWindow {
 		gbc_firstName.fill = GridBagConstraints.HORIZONTAL;
 		gbc_firstName.gridx = 1;
 		gbc_firstName.gridy = 0;
-		nameComponentPanel.add(firstName, gbc_firstName);
+		nameComponentPanel1.add(firstName, gbc_firstName);
 		firstName.setColumns(40);
 		
-		middleInitial = new JTextField();
-		middleInitial.setName("middle_initial");
-		middleInitial.setColumns(1);
-		GridBagConstraints gbc_middleInitial = new GridBagConstraints();
-		gbc_middleInitial.insets = new Insets(0, 0, 0, 5);
-		gbc_middleInitial.fill = GridBagConstraints.HORIZONTAL;
-		gbc_middleInitial.gridx = 2;
-		gbc_middleInitial.gridy = 0;
-		nameComponentPanel.add(middleInitial, gbc_middleInitial);
+		JLabel lblLastName = new JLabel("Last Name / Suffix");
+		GridBagConstraints gbc_lblLastName = new GridBagConstraints();
+		gbc_lblLastName.insets = new Insets(0, 0, 5, 5);
+		gbc_lblLastName.gridx = 0;
+		gbc_lblLastName.gridy = 4;
+		accountsTab.add(lblLastName, gbc_lblLastName);
+		
+		JPanel nameComponentPanel2 = new JPanel();
+		GridBagConstraints gbc_nameComponentPanel2 = new GridBagConstraints();
+		gbc_nameComponentPanel2.anchor = GridBagConstraints.WEST;
+		gbc_nameComponentPanel2.fill = GridBagConstraints.VERTICAL;
+		gbc_nameComponentPanel2.insets = new Insets(0, 0, 5, 0);
+		gbc_nameComponentPanel2.gridx = 1;
+		gbc_nameComponentPanel2.gridy = 4;
+		accountsTab.add(nameComponentPanel2, gbc_nameComponentPanel2);
+		GridBagLayout gbl_nameComponentPanel2 = new GridBagLayout();
+		gbl_nameComponentPanel2.columnWidths = new int[]{0, 0, 0, 0};
+		gbl_nameComponentPanel2.rowHeights = new int[]{0, 0};
+		gbl_nameComponentPanel2.columnWeights = new double[]{1.0, 0.0, 0.0, Double.MIN_VALUE};
+		gbl_nameComponentPanel2.rowWeights = new double[]{0.0, Double.MIN_VALUE};
+		nameComponentPanel2.setLayout(gbl_nameComponentPanel2);
 		
 		lastName = new JTextField();
 		lastName.setName("last_name");
+		lastName.setColumns(40);
 		GridBagConstraints gbc_lastName = new GridBagConstraints();
 		gbc_lastName.insets = new Insets(0, 0, 0, 5);
 		gbc_lastName.fill = GridBagConstraints.HORIZONTAL;
-		gbc_lastName.gridx = 3;
 		gbc_lastName.gridy = 0;
-		nameComponentPanel.add(lastName, gbc_lastName);
-		lastName.setColumns(40);
-		
+		gbc_lastName.gridx = 1;
+		nameComponentPanel2.add(lastName, gbc_lastName);
+
 		nameSuffix = new JTextField();
 		GridBagConstraints gbc_nameSuffix = new GridBagConstraints();
-		gbc_nameSuffix.fill = GridBagConstraints.HORIZONTAL;
-		gbc_nameSuffix.gridx = 4;
 		gbc_nameSuffix.gridy = 0;
-		nameComponentPanel.add(nameSuffix, gbc_nameSuffix);
+		gbc_nameSuffix.gridx = 2;
+		nameComponentPanel2.add(nameSuffix, gbc_nameSuffix);
+		nameSuffix.setName("name_suffix");
 		nameSuffix.setColumns(3);
+		accountQueryFields.add(nameSuffix);
 		
-		JLabel lblAddress = new JLabel("Address 1");
-		GridBagConstraints gbc_lblAddress = new GridBagConstraints();
-		gbc_lblAddress.anchor = GridBagConstraints.EAST;
-		gbc_lblAddress.insets = new Insets(0, 0, 5, 5);
-		gbc_lblAddress.gridx = 0;
-		gbc_lblAddress.gridy = 4;
-		accountsTab.add(lblAddress, gbc_lblAddress);
+		JLabel lblStreet1 = new JLabel("Street 1");
+		GridBagConstraints gbc_lblStreet1 = new GridBagConstraints();
+		gbc_lblStreet1.anchor = GridBagConstraints.EAST;
+		gbc_lblStreet1.insets = new Insets(0, 0, 5, 5);
+		gbc_lblStreet1.gridx = 0;
+		gbc_lblStreet1.gridy = 5;
+		accountsTab.add(lblStreet1, gbc_lblStreet1);
 		
-		address1 = new JTextField();
-		GridBagConstraints gbc_address1 = new GridBagConstraints();
-		gbc_address1.anchor = GridBagConstraints.WEST;
-		gbc_address1.insets = new Insets(0, 0, 5, 0);
-		gbc_address1.gridx = 1;
-		gbc_address1.gridy = 4;
-		accountsTab.add(address1, gbc_address1);
-		address1.setColumns(40);
+		street1 = new JTextField();
+		street1.setName("street1");
+		GridBagConstraints gbc_street1 = new GridBagConstraints();
+		gbc_street1.anchor = GridBagConstraints.WEST;
+		gbc_street1.insets = new Insets(0, 0, 5, 0);
+		gbc_street1.gridx = 1;
+		gbc_street1.gridy = 5;
+		accountsTab.add(street1, gbc_street1);
+		street1.setColumns(40);
 		
-		JLabel lblAddress_1 = new JLabel("Address 2");
-		GridBagConstraints gbc_lblAddress_1 = new GridBagConstraints();
-		gbc_lblAddress_1.anchor = GridBagConstraints.EAST;
-		gbc_lblAddress_1.insets = new Insets(0, 0, 5, 5);
-		gbc_lblAddress_1.gridx = 0;
-		gbc_lblAddress_1.gridy = 5;
-		accountsTab.add(lblAddress_1, gbc_lblAddress_1);
+		JLabel lblStreet2 = new JLabel("Street 2");
+		GridBagConstraints gbc_lblStreet2 = new GridBagConstraints();
+		gbc_lblStreet2.anchor = GridBagConstraints.EAST;
+		gbc_lblStreet2.insets = new Insets(0, 0, 5, 5);
+		gbc_lblStreet2.gridx = 0;
+		gbc_lblStreet2.gridy = 6;
+		accountsTab.add(lblStreet2, gbc_lblStreet2);
 		
-		address2 = new JTextField();
-		GridBagConstraints gbc_address2 = new GridBagConstraints();
-		gbc_address2.insets = new Insets(0, 0, 5, 0);
-		gbc_address2.anchor = GridBagConstraints.ABOVE_BASELINE_LEADING;
-		gbc_address2.gridx = 1;
-		gbc_address2.gridy = 5;
-		accountsTab.add(address2, gbc_address2);
-		address2.setColumns(40);
+		street2 = new JTextField();
+		street2.setName("street2");
+		GridBagConstraints gbc_street2 = new GridBagConstraints();
+		gbc_street2.insets = new Insets(0, 0, 5, 0);
+		gbc_street2.anchor = GridBagConstraints.ABOVE_BASELINE_LEADING;
+		gbc_street2.gridx = 1;
+		gbc_street2.gridy = 6;
+		accountsTab.add(street2, gbc_street2);
+		street2.setColumns(40);
 		
 		JLabel lblCityStateZip = new JLabel("City / State / Zip Code");
 		GridBagConstraints gbc_lblCityStateZip = new GridBagConstraints();
 		gbc_lblCityStateZip.anchor = GridBagConstraints.EAST;
 		gbc_lblCityStateZip.insets = new Insets(0, 0, 5, 5);
 		gbc_lblCityStateZip.gridx = 0;
-		gbc_lblCityStateZip.gridy = 6;
+		gbc_lblCityStateZip.gridy = 7;
 		accountsTab.add(lblCityStateZip, gbc_lblCityStateZip);
 		
 		JPanel cityStateZipPanel = new JPanel();
@@ -480,7 +507,7 @@ public class MainWindow {
 		gbc_cityStateZipPanel.fill = GridBagConstraints.BOTH;
 		gbc_cityStateZipPanel.insets = new Insets(0, 0, 5, 0);
 		gbc_cityStateZipPanel.gridx = 1;
-		gbc_cityStateZipPanel.gridy = 6;
+		gbc_cityStateZipPanel.gridy = 7;
 		accountsTab.add(cityStateZipPanel, gbc_cityStateZipPanel);
 		GridBagLayout gbl_cityStateZipPanel = new GridBagLayout();
 		gbl_cityStateZipPanel.columnWidths = new int[]{0, 0, 0, 0};
@@ -490,6 +517,7 @@ public class MainWindow {
 		cityStateZipPanel.setLayout(gbl_cityStateZipPanel);
 		
 		city = new JTextField();
+		city.setName("city");
 		GridBagConstraints gbc_city = new GridBagConstraints();
 		gbc_city.insets = new Insets(0, 0, 0, 5);
 		gbc_city.anchor = GridBagConstraints.WEST;
@@ -499,6 +527,7 @@ public class MainWindow {
 		city.setColumns(38);
 		
 		state = new JTextField();
+		state.setName("state");
 		state.setColumns(4);
 		GridBagConstraints gbc_state = new GridBagConstraints();
 		gbc_state.anchor = GridBagConstraints.WEST;
@@ -508,6 +537,7 @@ public class MainWindow {
 		cityStateZipPanel.add(state, gbc_state);
 		
 		zipCode = new JTextField();
+		zipCode.setName("postal_code");
 		zipCode.setColumns(10);
 		GridBagConstraints gbc_zipCode = new GridBagConstraints();
 		gbc_zipCode.fill = GridBagConstraints.HORIZONTAL;
@@ -520,7 +550,7 @@ public class MainWindow {
 		gbc_lblTelephone.anchor = GridBagConstraints.EAST;
 		gbc_lblTelephone.insets = new Insets(0, 0, 5, 5);
 		gbc_lblTelephone.gridx = 0;
-		gbc_lblTelephone.gridy = 7;
+		gbc_lblTelephone.gridy = 8;
 		accountsTab.add(lblTelephone, gbc_lblTelephone);
 		
 		telephone = new JTextField();
@@ -528,7 +558,7 @@ public class MainWindow {
 		gbc_telephone.anchor = GridBagConstraints.WEST;
 		gbc_telephone.insets = new Insets(0, 0, 5, 0);
 		gbc_telephone.gridx = 1;
-		gbc_telephone.gridy = 7;
+		gbc_telephone.gridy = 8;
 		accountsTab.add(telephone, gbc_telephone);
 		telephone.setColumns(10);
 		
@@ -537,7 +567,7 @@ public class MainWindow {
 		gbc_lblEmail.anchor = GridBagConstraints.EAST;
 		gbc_lblEmail.insets = new Insets(0, 0, 5, 5);
 		gbc_lblEmail.gridx = 0;
-		gbc_lblEmail.gridy = 8;
+		gbc_lblEmail.gridy = 9;
 		accountsTab.add(lblEmail, gbc_lblEmail);
 		
 		email = new JTextField();
@@ -545,7 +575,7 @@ public class MainWindow {
 		gbc_email.anchor = GridBagConstraints.WEST;
 		gbc_email.insets = new Insets(0, 0, 5, 0);
 		gbc_email.gridx = 1;
-		gbc_email.gridy = 8;
+		gbc_email.gridy = 9;
 		accountsTab.add(email, gbc_email);
 		email.setColumns(40);
 		
@@ -554,7 +584,7 @@ public class MainWindow {
 		gbc_lblType.anchor = GridBagConstraints.EAST;
 		gbc_lblType.insets = new Insets(0, 0, 5, 5);
 		gbc_lblType.gridx = 0;
-		gbc_lblType.gridy = 9;
+		gbc_lblType.gridy = 10;
 		accountsTab.add(lblType, gbc_lblType);
 		
 		type = new JTextField();
@@ -562,7 +592,7 @@ public class MainWindow {
 		gbc_type.anchor = GridBagConstraints.WEST;
 		gbc_type.insets = new Insets(0, 0, 5, 0);
 		gbc_type.gridx = 1;
-		gbc_type.gridy = 9;
+		gbc_type.gridy = 10;
 		accountsTab.add(type, gbc_type);
 		type.setColumns(46);
 		
@@ -571,7 +601,7 @@ public class MainWindow {
 		gbc_lblCategory.anchor = GridBagConstraints.EAST;
 		gbc_lblCategory.insets = new Insets(0, 0, 5, 5);
 		gbc_lblCategory.gridx = 0;
-		gbc_lblCategory.gridy = 10;
+		gbc_lblCategory.gridy = 11;
 		accountsTab.add(lblCategory, gbc_lblCategory);
 		
 		JPanel categoryPanel = new JPanel();
@@ -579,7 +609,7 @@ public class MainWindow {
 		gbc_categoryPanel.fill = GridBagConstraints.BOTH;
 		gbc_categoryPanel.insets = new Insets(0, 0, 5, 0);
 		gbc_categoryPanel.gridx = 1;
-		gbc_categoryPanel.gridy = 10;
+		gbc_categoryPanel.gridy = 11;
 		accountsTab.add(categoryPanel, gbc_categoryPanel);
 		GridBagLayout gbl_categoryPanel = new GridBagLayout();
 		gbl_categoryPanel.columnWidths = new int[]{0, 0, 0};
@@ -609,7 +639,7 @@ public class MainWindow {
 		gbc_lblDivison.anchor = GridBagConstraints.EAST;
 		gbc_lblDivison.insets = new Insets(0, 0, 5, 5);
 		gbc_lblDivison.gridx = 0;
-		gbc_lblDivison.gridy = 11;
+		gbc_lblDivison.gridy = 12;
 		accountsTab.add(lblDivison, gbc_lblDivison);
 		
 		JPanel divisionPanel = new JPanel();
@@ -617,7 +647,7 @@ public class MainWindow {
 		gbc_divisionPanel.fill = GridBagConstraints.BOTH;
 		gbc_divisionPanel.insets = new Insets(0, 0, 5, 0);
 		gbc_divisionPanel.gridx = 1;
-		gbc_divisionPanel.gridy = 11;
+		gbc_divisionPanel.gridy = 12;
 		accountsTab.add(divisionPanel, gbc_divisionPanel);
 		GridBagLayout gbl_divisionPanel = new GridBagLayout();
 		gbl_divisionPanel.columnWidths = new int[]{0, 0, 0};
@@ -647,14 +677,14 @@ public class MainWindow {
 		gbc_lblBalance.anchor = GridBagConstraints.EAST;
 		gbc_lblBalance.insets = new Insets(0, 0, 0, 5);
 		gbc_lblBalance.gridx = 0;
-		gbc_lblBalance.gridy = 12;
+		gbc_lblBalance.gridy = 13;
 		accountsTab.add(lblBalance, gbc_lblBalance);
 		
 		balance = new JTextField();
 		GridBagConstraints gbc_balance = new GridBagConstraints();
 		gbc_balance.anchor = GridBagConstraints.SOUTHWEST;
 		gbc_balance.gridx = 1;
-		gbc_balance.gridy = 12;
+		gbc_balance.gridy = 13;
 		accountsTab.add(balance, gbc_balance);
 		balance.setColumns(20);
 		tabbedPane.setMnemonicAt(0, KeyEvent.VK_A);
@@ -670,6 +700,7 @@ public class MainWindow {
 		batchTable = new JTable();
 		batchTable.setRowSelectionAllowed(false);
 		batchTable.setFillsViewportHeight(true);
+		batchTable.addMouseListener(new TransactionMouseAdapter());
 		
 		JScrollPane batchPane = new JScrollPane(batchTable);
 		tabbedPane.addTab("Batches", batchPane);
@@ -678,21 +709,7 @@ public class MainWindow {
 		transactionsTable = new JTable();
 		transactionsTable.setRowSelectionAllowed(false);
 		transactionsTable.setFillsViewportHeight(true);
-		transactionsTable.addMouseListener(new MouseAdapter()
-		{
-			public void mousePressed(MouseEvent evt)
-			{
-				if (evt.getClickCount() == 2)
-				{
-					int row = transactionsTable.rowAtPoint(evt.getPoint());
-					int col = transactionsTable.columnAtPoint(evt.getPoint());
-					if (col == 3)
-						ADDBrowser.doBatchQuery(
-							ADDBrowser.df.format(transactionsTable.getValueAt(row, 1)), 
-							transactionsTable.getValueAt(row, 3).toString());
-				}
-			}
-		});
+		transactionsTable.addMouseListener(new TransactionMouseAdapter());
 
 		JScrollPane transPane = new JScrollPane(transactionsTable);
 		tabbedPane.addTab("Transactions", null, transPane, null);
@@ -703,11 +720,18 @@ public class MainWindow {
 		accountQueryFields.add(name);
 		accountQueryFields.add(title);
 		accountQueryFields.add(firstName);
-		accountQueryFields.add(middleInitial);
-		accountQueryFields.add(lastName);
-		accountQueryFields.add(nameSuffix);
-		accountQueryFields.add(address1);
-		accountQueryFields.add(address2);
+		
+		middleInitial = new JTextField();
+		middleInitial.setName("middle_initial");
+		middleInitial.setColumns(1);
+		GridBagConstraints gbc_middleInitial = new GridBagConstraints();
+		gbc_middleInitial.insets = new Insets(0, 0, 0, 5);
+		gbc_middleInitial.fill = GridBagConstraints.HORIZONTAL;
+		gbc_middleInitial.gridx = 2;
+		gbc_middleInitial.gridy = 0;
+		nameComponentPanel1.add(middleInitial, gbc_middleInitial);
+		accountQueryFields.add(street1);
+		accountQueryFields.add(street2);
 		accountQueryFields.add(city);
 		accountQueryFields.add(state);
 		accountQueryFields.add(zipCode);
@@ -862,8 +886,8 @@ public class MainWindow {
 
 		btnAcctSearch.setEnabled(b);
 		btnAcctClear.setEnabled(b);
-		btnAcctLogs.setEnabled(b);
-		btnAcctDocuments.setEnabled(b);
+//		btnAcctLogs.setEnabled(b);
+//		btnAcctDocuments.setEnabled(b);
 		btnAcctTransactions.setEnabled(b);
 		
 		for (JTextField fld : accountQueryFields)
@@ -937,5 +961,56 @@ public class MainWindow {
 	{
 		if (transactionQueryDialog != null)
 			transactionQueryDialog.newPostingCodes(postingCodes);
+	}
+
+	public void accountResults(Set<Account> accounts)
+	{
+		Account toDisplay = null;
+		if (accounts.size() == 1)
+			toDisplay = (Account)accounts.toArray()[0];
+	
+		if (toDisplay == null)
+			return;
+
+		accountNumber.setText(toDisplay.full_account);
+		sortCode.setText(toDisplay.sort_code);
+		name.setText(toDisplay.name);
+		title.setText(toDisplay.title);
+		firstName.setText(toDisplay.first_name);
+		middleInitial.setText(toDisplay.middle_initial);
+		lastName.setText(toDisplay.last_name);
+		nameSuffix.setText(toDisplay.name_suffix);
+		street1.setText(toDisplay.street1);
+		street2.setText(toDisplay.street2);
+		city.setText(toDisplay.city);
+		state.setText(toDisplay.state);
+		zipCode.setText(toDisplay.postal_code);
+	}
+
+	private class TransactionMouseAdapter extends MouseAdapter 
+	{
+		public void mousePressed(MouseEvent evt)
+		{
+			if (evt.getClickCount() == 2)
+			{
+				JTable table = (JTable)evt.getSource();
+				int row = table.rowAtPoint(evt.getPoint());
+				int col = table.columnAtPoint(evt.getPoint());
+				if (col == 3)
+				{
+					ADDBrowser.doBatchQuery(
+						ADDBrowser.df.format(table.getValueAt(row, 1)), 
+						table.getValueAt(row, 3).toString());
+					tabbedPane.setSelectedIndex(BATCH_TAB_INDEX);
+				}
+				if (col == 4)
+				{
+					Map<String, String> acctQuery = new HashMap<String, String>();
+					acctQuery.put("full_account", table.getValueAt(row, 4).toString());
+					ADDBrowser.doAcctSearch(acctQuery);
+					tabbedPane.setSelectedIndex(ACCT_TAB_INDEX);
+				}
+			}
+		}
 	}
 }
