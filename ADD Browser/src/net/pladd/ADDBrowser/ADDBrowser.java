@@ -11,6 +11,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.text.DateFormat;
+import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashSet;
@@ -224,6 +225,12 @@ public class ADDBrowser {
 				mainWindow.batchTable.setModel(batchDetail);
 			}
 			batchDetail.newResults(results, mainWindow.batchTable);
+			mainWindow.batchTotals.setText(
+					"Total: "   + NumberFormat.getCurrencyInstance().format(batchDetail.totalAmt) + " " +
+					"Credits: " + NumberFormat.getCurrencyInstance().format(batchDetail.credAmt)  + " " +
+					"Debits: "  + NumberFormat.getCurrencyInstance().format(batchDetail.debAmt)   + " " +
+					"Count: "    + batchDetail.rowCount
+					);
 			mainWindow.tabbedPane.setSelectedIndex(MainWindow.BATCH_TAB_INDEX);
 			mainWindow.setExportButtonState();
 		} 
@@ -294,10 +301,16 @@ public class ADDBrowser {
 			if (transDetail == null)
 			{
 				transDetail = new BatchTable();
-				mainWindow.transactionsTable.setAutoCreateRowSorter(true);
-				mainWindow.transactionsTable.setModel(transDetail);
+				mainWindow.transTable.setAutoCreateRowSorter(true);
+				mainWindow.transTable.setModel(transDetail);
 			}
-			transDetail.newResults(results, mainWindow.transactionsTable);
+			transDetail.newResults(results, mainWindow.transTable);
+			mainWindow.transTotals.setText(
+					"Total: "   + NumberFormat.getCurrencyInstance().format(batchDetail.totalAmt) + " " +
+					"Credits: " + NumberFormat.getCurrencyInstance().format(batchDetail.credAmt)  + " " +
+					"Debits: "  + NumberFormat.getCurrencyInstance().format(batchDetail.debAmt)   + " " +
+					"Count: "    + transDetail.rowCount
+					);
 			mainWindow.tabbedPane.setSelectedIndex(MainWindow.TRANS_TAB_INDEX);
 			mainWindow.setExportButtonState();
 		} 

@@ -52,7 +52,7 @@ public class MainWindow {
 	protected JTable logsTable;
 	protected JTable documentsTable;
 	protected JTable batchTable;
-	protected JTable transactionsTable;
+	protected JTable transTable;
 	
 	protected static final int ACCT_TAB_INDEX  = 0;
 	protected static final int LOG_TAB_INDEX   = 1;
@@ -106,6 +106,8 @@ public class MainWindow {
 	private JButton divisionButton;
 
 	private Set<JTextField> accountQueryFields = new HashSet<JTextField>();
+	protected JLabel transTotals;
+	protected JLabel batchTotals;
 	
 	/**
 	 * Create the application.
@@ -711,18 +713,40 @@ public class MainWindow {
 		batchTable.setRowSelectionAllowed(false);
 		batchTable.setFillsViewportHeight(true);
 		batchTable.addMouseListener(new TransactionMouseAdapter());
-		
-		JScrollPane batchPane = new JScrollPane(batchTable);
-		tabbedPane.addTab("Batches", batchPane);
-		tabbedPane.setMnemonicAt(3, KeyEvent.VK_B);
-		
-		transactionsTable = new JTable();
-		transactionsTable.setRowSelectionAllowed(false);
-		transactionsTable.setFillsViewportHeight(true);
-		transactionsTable.addMouseListener(new TransactionMouseAdapter());
 
-		JScrollPane transPane = new JScrollPane(transactionsTable);
-		tabbedPane.addTab("Transactions", null, transPane, null);
+		JScrollPane batchPane = new JScrollPane(batchTable);
+
+		JPanel batchSummaryPane = new JPanel();
+		batchSummaryPane.setLayout(new BorderLayout(0, 0));
+		
+		JPanel batchTotalsPanel = new JPanel();
+		batchSummaryPane.add(batchTotalsPanel, BorderLayout.NORTH);
+		
+		batchTotals = new JLabel(" ");
+		batchTotalsPanel.add(batchTotals);
+		batchSummaryPane.add(batchPane);
+		
+		tabbedPane.addTab("Batches", batchSummaryPane);
+		tabbedPane.setMnemonicAt(3, KeyEvent.VK_B);
+
+		JPanel transSummaryPane = new JPanel();
+		
+		tabbedPane.addTab("Transactions", null, transSummaryPane, null);
+		
+		transTable = new JTable();
+		transTable.setRowSelectionAllowed(false);
+		transTable.setFillsViewportHeight(true);
+		transTable.addMouseListener(new TransactionMouseAdapter());
+				transSummaryPane.setLayout(new BorderLayout(0, 0));
+				
+				JPanel transTotalsPane = new JPanel();
+				transSummaryPane.add(transTotalsPane, BorderLayout.NORTH);
+				
+				transTotals = new JLabel(" ");
+				transTotalsPane.add(transTotals);
+		
+				JScrollPane transPane = new JScrollPane(transTable);
+				transSummaryPane.add(transPane);
 		tabbedPane.setMnemonicAt(4, KeyEvent.VK_T);
 		
 
@@ -906,7 +930,7 @@ public class MainWindow {
 		case LOG_TAB_INDEX:   return logsTable;
 		case DOC_TAB_INDEX:   return documentsTable;
 		case BATCH_TAB_INDEX: return batchTable;
-		case TRANS_TAB_INDEX: return transactionsTable;
+		case TRANS_TAB_INDEX: return transTable;
 		}
 		return null;
 	}
@@ -947,7 +971,7 @@ public class MainWindow {
 				if (selected == null)
 					return;
 				FileWriter out = new FileWriter(chooser.getSelectedFile());
-				if (selected == batchTable || selected == transactionsTable)
+				if (selected == batchTable || selected == transTable)
 				{
 					BatchTable tbl = (BatchTable)selected.getModel();
 					tbl.doExport(out);

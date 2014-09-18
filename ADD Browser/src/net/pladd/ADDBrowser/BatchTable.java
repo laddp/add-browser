@@ -51,7 +51,10 @@ public class BatchTable extends AbstractTableModel {
 	protected static final int COL_PPG        = 14;
 	protected static final int COL_USERID     = 15;
 
-	int rowCount;
+	protected int rowCount;
+	protected BigDecimal totalAmt;
+	protected BigDecimal credAmt;
+	protected BigDecimal debAmt;
 	
 	private Vector<Calendar>   eventDates;
 	private Vector<Calendar>   postingDates;
@@ -184,6 +187,10 @@ public class BatchTable extends AbstractTableModel {
 	public void newResults(ResultSet results, JTable table) throws SQLException 
 	{
 		rowCount = 0;
+		totalAmt = new BigDecimal(0);
+		credAmt  = new BigDecimal(0);
+		debAmt   = new BigDecimal(0);
+
 		eventDates.clear();
 		postingDates.clear();
 		transDates.clear();
@@ -202,6 +209,7 @@ public class BatchTable extends AbstractTableModel {
 		while (results.next())
 		{
 			rowCount++;
+			Integer pc;
 			{
 				Calendar cal = Calendar.getInstance();
 				cal.setTime(results.getDate(COL_EVENT_DATE+1));
@@ -237,8 +245,8 @@ public class BatchTable extends AbstractTableModel {
 				types.add(results.getString(COL_TYPE+1));
 			}
 			{
-				Integer i = new Integer(results.getInt(COL_POST_CODE+1));
-				postCodes.add(i);
+				pc = new Integer(results.getInt(COL_POST_CODE+1));
+				postCodes.add(pc);
 			}
 			{
 				postDescrs.add(results.getString(COL_POST_DESC+1));
@@ -247,7 +255,11 @@ public class BatchTable extends AbstractTableModel {
 				refNums.add(results.getString(COL_REF_NUM+1));
 			}
 			{
-				netAmounts.add(results.getBigDecimal(COL_AMT_NET+1));
+				BigDecimal amt = results.getBigDecimal(COL_AMT_NET+1);
+				netAmounts.add(amt);
+				totalAmt = totalAmt.add(amtToNet   (amt, pc));
+				credAmt  = credAmt .add(amtToCredit(amt, pc));
+				debAmt   = debAmt  .add(amtToDebit (amt, pc));
 			}
 			// NOTE DIFFERENT CONSTANTS FROM HERE ON!!! columns don't match up because of calculated cols for amounts			
 			{
@@ -260,10 +272,12 @@ public class BatchTable extends AbstractTableModel {
 				userIDs.add(results.getString(COL_AMT_NET+4));
 			}
 		}
+		
 		fireTableDataChanged();
 
 		if (rowCount == 0)
 			throw new SQLException("No results");
+
 		table.getColumnModel().getColumn(BatchTable.COL_EVENT_DATE).setCellRenderer(new FormatRenderer(ADDBrowser.df));
 		table.getColumnModel().getColumn(BatchTable.COL_POST_DATE ).setCellRenderer(new FormatRenderer(ADDBrowser.df));
 		table.getColumnModel().getColumn(BatchTable.COL_TRANS_DATE).setCellRenderer(new FormatRenderer(ADDBrowser.tm));
