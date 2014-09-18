@@ -417,6 +417,16 @@ public class MainWindow {
 		nameComponentPanel1.add(firstName, gbc_firstName);
 		firstName.setColumns(40);
 		
+		middleInitial = new JTextField();
+		middleInitial.setName("middle_initial");
+		middleInitial.setColumns(1);
+		GridBagConstraints gbc_middleInitial = new GridBagConstraints();
+		gbc_middleInitial.insets = new Insets(0, 0, 0, 5);
+		gbc_middleInitial.fill = GridBagConstraints.HORIZONTAL;
+		gbc_middleInitial.gridx = 2;
+		gbc_middleInitial.gridy = 0;
+		nameComponentPanel1.add(middleInitial, gbc_middleInitial);
+
 		JLabel lblLastName = new JLabel("Last Name / Suffix");
 		GridBagConstraints gbc_lblLastName = new GridBagConstraints();
 		gbc_lblLastName.insets = new Insets(0, 0, 5, 5);
@@ -715,21 +725,15 @@ public class MainWindow {
 		tabbedPane.addTab("Transactions", null, transPane, null);
 		tabbedPane.setMnemonicAt(4, KeyEvent.VK_T);
 		
+
 		accountQueryFields.add(accountNumber);
 		accountQueryFields.add(sortCode);
 		accountQueryFields.add(name);
 		accountQueryFields.add(title);
 		accountQueryFields.add(firstName);
-		
-		middleInitial = new JTextField();
-		middleInitial.setName("middle_initial");
-		middleInitial.setColumns(1);
-		GridBagConstraints gbc_middleInitial = new GridBagConstraints();
-		gbc_middleInitial.insets = new Insets(0, 0, 0, 5);
-		gbc_middleInitial.fill = GridBagConstraints.HORIZONTAL;
-		gbc_middleInitial.gridx = 2;
-		gbc_middleInitial.gridy = 0;
-		nameComponentPanel1.add(middleInitial, gbc_middleInitial);
+		accountQueryFields.add(middleInitial);
+		accountQueryFields.add(lastName);
+		accountQueryFields.add(nameSuffix);
 		accountQueryFields.add(street1);
 		accountQueryFields.add(street2);
 		accountQueryFields.add(city);
@@ -741,7 +745,6 @@ public class MainWindow {
 		accountQueryFields.add(category);
 		accountQueryFields.add(division);
 		accountQueryFields.add(balance);
-
 	}
 
 	
@@ -968,6 +971,11 @@ public class MainWindow {
 		Account toDisplay = null;
 		if (accounts.size() == 1)
 			toDisplay = (Account)accounts.toArray()[0];
+		else
+		{
+			toDisplay = (Account)JOptionPane.showInputDialog(this.frmAddDataBrowser, "Select an account", "Multiple Accounts Matched",
+					JOptionPane.PLAIN_MESSAGE, null, accounts.toArray(), null);
+		}
 	
 		if (toDisplay == null)
 			return;
