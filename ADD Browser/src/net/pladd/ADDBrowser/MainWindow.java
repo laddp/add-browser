@@ -14,6 +14,7 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.text.NumberFormat;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -39,6 +40,12 @@ import javax.swing.KeyStroke;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.filechooser.FileNameExtensionFilter;
+
+import net.pladd.ADDBrowser.E3types.Account;
+import net.pladd.ADDBrowser.E3types.Category;
+import net.pladd.ADDBrowser.E3types.Division;
+import net.pladd.ADDBrowser.E3types.PostingCode;
+import net.pladd.ADDBrowser.E3types.Type;
 
 public class MainWindow {
 	// Top level structure
@@ -108,6 +115,7 @@ public class MainWindow {
 	private Set<JTextField> accountQueryFields = new HashSet<JTextField>();
 	protected JLabel transTotals;
 	protected JLabel batchTotals;
+	private JButton typeButton;
 	
 	/**
 	 * Create the application.
@@ -599,14 +607,42 @@ public class MainWindow {
 		gbc_lblType.gridy = 10;
 		accountsTab.add(lblType, gbc_lblType);
 		
+		JPanel typePanel = new JPanel();
+		GridBagConstraints gbc_typePanel = new GridBagConstraints();
+		gbc_typePanel.fill = GridBagConstraints.BOTH;
+		gbc_typePanel.insets = new Insets(0, 0, 5, 0);
+		gbc_typePanel.gridx = 1;
+		gbc_typePanel.gridy = 10;
+		accountsTab.add(typePanel, gbc_typePanel);
+		GridBagLayout gbl_typePanel = new GridBagLayout();
+		gbl_typePanel.columnWidths = new int[]{0, 0, 0};
+		gbl_typePanel.rowHeights = new int[]{0, 0};
+		gbl_typePanel.columnWeights = new double[]{0.0, 0.0, Double.MIN_VALUE};
+		gbl_typePanel.rowWeights = new double[]{0.0, Double.MIN_VALUE};
+		typePanel.setLayout(gbl_typePanel);
+		
 		type = new JTextField();
+		type.setEditable(false);
 		GridBagConstraints gbc_type = new GridBagConstraints();
+		gbc_type.insets = new Insets(0, 0, 0, 5);
 		gbc_type.anchor = GridBagConstraints.WEST;
-		gbc_type.insets = new Insets(0, 0, 5, 0);
-		gbc_type.gridx = 1;
-		gbc_type.gridy = 10;
-		accountsTab.add(type, gbc_type);
+		gbc_type.gridx = 0;
+		gbc_type.gridy = 0;
+		typePanel.add(type, gbc_type);
 		type.setColumns(46);
+		accountQueryFields.add(type);
+		
+		typeButton = new JButton("...");
+		typeButton.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				doTypeButton();
+			}
+		});
+		typeButton.setEnabled(false);
+		GridBagConstraints gbc_typeButton = new GridBagConstraints();
+		gbc_typeButton.gridx = 1;
+		gbc_typeButton.gridy = 0;
+		typePanel.add(typeButton, gbc_typeButton);
 		
 		JLabel lblCategory = new JLabel("Category");
 		GridBagConstraints gbc_lblCategory = new GridBagConstraints();
@@ -631,6 +667,7 @@ public class MainWindow {
 		categoryPanel.setLayout(gbl_categoryPanel);
 		
 		category = new JTextField();
+		category.setEditable(false);
 		GridBagConstraints gbc_category = new GridBagConstraints();
 		gbc_category.insets = new Insets(0, 0, 0, 5);
 		gbc_category.anchor = GridBagConstraints.WEST;
@@ -640,6 +677,11 @@ public class MainWindow {
 		category.setColumns(46);
 		
 		categoryButton = new JButton("...");
+		categoryButton.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				doCategoryButton();
+			}
+		});
 		categoryButton.setEnabled(false);
 		GridBagConstraints gbc_categoryButton = new GridBagConstraints();
 		gbc_categoryButton.gridx = 1;
@@ -669,6 +711,7 @@ public class MainWindow {
 		divisionPanel.setLayout(gbl_divisionPanel);
 		
 		division = new JTextField();
+		division.setEditable(false);
 		GridBagConstraints gbc_division = new GridBagConstraints();
 		gbc_division.insets = new Insets(0, 0, 0, 5);
 		gbc_division.anchor = GridBagConstraints.WEST;
@@ -678,13 +721,18 @@ public class MainWindow {
 		division.setColumns(47);
 		
 		divisionButton = new JButton("...");
+		divisionButton.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				doDivisionButton();
+			}
+		});
 		divisionButton.setEnabled(false);
 		GridBagConstraints gbc_divisionButton = new GridBagConstraints();
 		gbc_divisionButton.gridx = 1;
 		gbc_divisionButton.gridy = 0;
 		divisionPanel.add(divisionButton, gbc_divisionButton);
 		
-		JLabel lblBalance = new JLabel("Balance");
+		JLabel lblBalance = new JLabel("Balance $");
 		GridBagConstraints gbc_lblBalance = new GridBagConstraints();
 		gbc_lblBalance.anchor = GridBagConstraints.EAST;
 		gbc_lblBalance.insets = new Insets(0, 0, 0, 5);
@@ -693,6 +741,7 @@ public class MainWindow {
 		accountsTab.add(lblBalance, gbc_lblBalance);
 		
 		balance = new JTextField();
+		balance.setEditable(false);
 		GridBagConstraints gbc_balance = new GridBagConstraints();
 		gbc_balance.anchor = GridBagConstraints.SOUTHWEST;
 		gbc_balance.gridx = 1;
@@ -765,13 +814,27 @@ public class MainWindow {
 		accountQueryFields.add(zipCode);
 		accountQueryFields.add(telephone);
 		accountQueryFields.add(email);
-		accountQueryFields.add(type);
 		accountQueryFields.add(category);
 		accountQueryFields.add(division);
 		accountQueryFields.add(balance);
 	}
 
 	
+	protected void doTypeButton() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	protected void doCategoryButton() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	protected void doDivisionButton() {
+		// TODO Auto-generated method stub
+		
+	}
+
 	protected void doAcctSearch()
 	{
 		Map<String, String> acctQuery = new HashMap<String, String>();
@@ -885,15 +948,23 @@ public class MainWindow {
 		connectDialog.setVisible(true);
 		if (connectDialog.OKpressed)
 		{
-			ADDBrowser.doConnect((String)(connectDialog.jdbcDriver.getSelectedItem()),
-					connectDialog.serverName.getText(),
-					connectDialog.serverPort.getText(),
-					connectDialog.databaseName.getText(),
-					connectDialog.userName.getText(),
-					new String(connectDialog.password.getPassword()),
-					Integer.parseInt(connectDialog.maxDebitPostingCode.getText()),
-					Integer.parseInt(connectDialog.maxPostingCode.getText()),
-					connectDialog.invalidPClabel.getText());
+			try {
+				ADDBrowser.doConnect((String)(connectDialog.jdbcDriver.getSelectedItem()),
+						connectDialog.serverName.getText(),
+						connectDialog.serverPort.getText(),
+						connectDialog.databaseName.getText(),
+						connectDialog.userName.getText(),
+						new String(connectDialog.password.getPassword()),
+						Integer.parseInt(connectDialog.maxDebitPostingCode.getText()),
+						Integer.parseInt(connectDialog.maxPostingCode.getText()),
+						connectDialog.invalidPClabel.getText());
+				enableQueries(true);
+			}
+			catch (Exception e)
+			{
+				enableQueries(false);
+			}
+			doClearAcct();
 		}
 		connectDialog.setVisible(false);
 	}
@@ -1017,6 +1088,13 @@ public class MainWindow {
 		city.setText(toDisplay.city);
 		state.setText(toDisplay.state);
 		zipCode.setText(toDisplay.postal_code);
+		division.setText(toDisplay.division.toString());
+		category.setText(toDisplay.category.toString());
+		type.setText(toDisplay.type.toString());
+		NumberFormat nf2 = NumberFormat.getNumberInstance();
+		nf2.setMaximumFractionDigits(2);
+		nf2.setMinimumFractionDigits(2);
+		balance.setText(nf2.format(toDisplay.balance));
 	}
 
 	private class TransactionMouseAdapter extends MouseAdapter 
@@ -1044,5 +1122,17 @@ public class MainWindow {
 				}
 			}
 		}
+	}
+
+	public void newTypes(Map<String, Type> types)
+	{
+	}
+
+	public void newCategories(Map<Integer, Category> categories)
+	{
+	}
+
+	public void newDivisions(Map<Integer, Division> divisions)
+	{
 	}
 }

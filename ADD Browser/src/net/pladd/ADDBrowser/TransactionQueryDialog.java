@@ -20,7 +20,10 @@ import com.jgoodies.forms.factories.FormFactory;
 import com.jgoodies.forms.layout.ColumnSpec;
 import com.jgoodies.forms.layout.FormLayout;
 import com.jgoodies.forms.layout.RowSpec;
+
 import javax.swing.JScrollPane;
+
+import net.pladd.ADDBrowser.E3types.PostingCode;
 
 public class TransactionQueryDialog extends JDialog {
 

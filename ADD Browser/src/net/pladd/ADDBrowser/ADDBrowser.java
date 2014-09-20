@@ -14,12 +14,19 @@ import java.text.DateFormat;
 import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.Vector;
 
 import javax.swing.JOptionPane;
+
+import net.pladd.ADDBrowser.E3types.Account;
+import net.pladd.ADDBrowser.E3types.Category;
+import net.pladd.ADDBrowser.E3types.Division;
+import net.pladd.ADDBrowser.E3types.PostingCode;
+import net.pladd.ADDBrowser.E3types.Type;
 
 import com.sybase.jdbcx.SybDriver;
 
@@ -38,7 +45,10 @@ public class ADDBrowser {
 	protected static DateFormat df = new SimpleDateFormat("yyyy-MM-dd");
 	protected static DateFormat tm = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 	
-	protected static Vector<PostingCode> postingCodes = new Vector<PostingCode>();
+	protected static Vector<PostingCode>    postingCodes = new Vector<PostingCode>();
+	public    static Map<Integer, Division> divisions    = new HashMap<Integer, Division>();
+	public    static Map<Integer, Category> categories   = new HashMap<Integer, Category>();
+	public    static Map<String,  Type>     types        = new HashMap<String, Type>();
 	
 	/**
 	 * @param args
@@ -61,7 +71,7 @@ public class ADDBrowser {
 
 	public static void doConnect(String dbType, String serverName, String serverPort,
 			String databaseName, String userName, String password,
-			int maxDebit, int maxPost, String invalPost)
+			int maxDebit, int maxPost, String invalPost) throws Exception
 	{
 		String conStr;
 		if (dbType.compareTo(ConnectDialog.MYSQL_STRING) == 0)
@@ -113,42 +123,23 @@ public class ADDBrowser {
 			PostingCode.maxDebit   = maxDebit;
 			PostingCode.max        = maxPost;
 			PostingCode.invalLabel = invalPost;
-			
-			mainWindow.enableQueries(true);
 		}
 		catch (SQLException e)
 		{
 			System.out.println(e);
 			JOptionPane.showMessageDialog(mainWindow.frmAddDataBrowser, "Connection failed:" + e, "Connection Failed", JOptionPane.ERROR_MESSAGE);
-			mainWindow.enableQueries(false);
 			dataSource = null;
-			
+			throw e;
 		}
 		finally
 		{
 			mainWindow.frmAddDataBrowser.setCursor(Cursor.getDefaultCursor());
 		}
 
-		try {
-			Statement stmt = dataSource.createStatement();
-			ResultSet results = stmt.executeQuery(
-					"SELECT posting_code, long_desc " +
-							"FROM " + tablePrefix + "POST_CODE " +
-							"WHERE posting_code < " + maxPost +
-							" and " + "short_desc <> '" + PostingCode.invalLabel + "'");
-
-			postingCodes.clear();
-			while (results.next())
-			{
-				postingCodes.add(new PostingCode(results.getInt(1), results.getString(2)));
-			}
-			mainWindow.newPostCodes(postingCodes);
-		}
-		catch (SQLException e)
-		{
-			System.out.println(e);
-			JOptionPane.showMessageDialog(mainWindow.frmAddDataBrowser, "Error fetching posting codes:" + e, "Setup problem", JOptionPane.ERROR_MESSAGE);
-		}
+		fetchPostingCodes();
+		fetchCategories();
+		fetchDivisions();
+		fetchTypes();
 
 		try {
 			Statement stmt = dataSource.createStatement();
@@ -167,7 +158,6 @@ public class ADDBrowser {
 		catch (SQLException e)
 		{
 			System.out.println(e);
-			JOptionPane.showMessageDialog(mainWindow.frmAddDataBrowser, "Error fetching posting codes:" + e, "Setup problem", JOptionPane.ERROR_MESSAGE);
 		}
 	}
 
@@ -340,7 +330,11 @@ public class ADDBrowser {
 				tablePrefix + "ACCOUNTS.street2, " +
 				tablePrefix + "ACCOUNTS.city, " +
 				tablePrefix + "ACCOUNTS.state, " +
-				tablePrefix + "ACCOUNTS.postal_code " +
+				tablePrefix + "ACCOUNTS.postal_code, " +
+				tablePrefix + "ACCOUNTS.division, " +
+				tablePrefix + "ACCOUNTS.type, " +
+				tablePrefix + "ACCOUNTS.category, " +
+				tablePrefix + "ACCOUNTS.balance " +
 			" FROM " +
 				tablePrefix + "FULL_ACCOUNT inner join " + tablePrefix + "ACCOUNTS ON " +
 					tablePrefix + "ACCOUNTS.account_num = " + tablePrefix + "FULL_ACCOUNT.account_num " +
@@ -404,7 +398,11 @@ public class ADDBrowser {
 						results.getString(10),
 						results.getString(11),
 						results.getString(12),
-						results.getString(13)));
+						results.getString(13),
+						results.getInt(14),
+						results.getInt(15),
+						results.getInt(16),
+						results.getBigDecimal(17)));
 			}
 			
 			if (accounts.size() == 0)
@@ -419,6 +417,101 @@ public class ADDBrowser {
 		finally
 		{
 			mainWindow.frmAddDataBrowser.setCursor(Cursor.getDefaultCursor());
+		}
+	}
+
+	private static void fetchPostingCodes() throws SQLException
+	{
+		try {
+			Statement stmt = dataSource.createStatement();
+			ResultSet results = stmt.executeQuery(
+					"SELECT posting_code, long_desc " +
+							"FROM " + tablePrefix + "POST_CODE " +
+							"WHERE posting_code < " + PostingCode.max +
+							" and " + "short_desc <> '" + PostingCode.invalLabel + "'");
+
+			postingCodes.clear();
+			while (results.next())
+			{
+				postingCodes.add(new PostingCode(results.getInt(1), results.getString(2)));
+			}
+			mainWindow.newPostCodes(postingCodes);
+		}
+		catch (SQLException e)
+		{
+			System.out.println(e);
+			JOptionPane.showMessageDialog(mainWindow.frmAddDataBrowser, "Error fetching posting codes:" + e, "Setup problem", JOptionPane.ERROR_MESSAGE);
+			throw e;
+		}
+	}
+
+	private static void fetchTypes() throws SQLException
+	{
+		try {
+			Statement stmt = dataSource.createStatement();
+			ResultSet results = stmt.executeQuery(
+					"SELECT division, type, name " +
+							"FROM " + tablePrefix + "TYPE_INFO ");
+
+			types.clear();
+			while (results.next())
+			{
+				String key = "" + results.getInt(1) + "-" + results.getInt(2);
+				types.put(key, new Type(results.getInt(1), results.getInt(2), results.getString(3)));
+			}
+			mainWindow.newTypes(types);
+		}
+		catch (SQLException e)
+		{
+			System.out.println(e);
+			JOptionPane.showMessageDialog(mainWindow.frmAddDataBrowser, "Error fetching type info:" + e, "Setup problem", JOptionPane.ERROR_MESSAGE);
+			throw e;
+		}
+	}
+
+	private static void fetchDivisions() throws SQLException
+	{
+		try {
+			Statement stmt = dataSource.createStatement();
+			ResultSet results = stmt.executeQuery(
+					"SELECT division, name " +
+							"FROM " + tablePrefix + "DIVISION_INFO ");
+
+			divisions.clear();
+			while (results.next())
+			{
+				divisions.put(results.getInt(1), new Division(results.getInt(1), results.getString(2)));
+			}
+			mainWindow.newDivisions(divisions);
+		}
+		catch (SQLException e)
+		{
+			System.out.println(e);
+			JOptionPane.showMessageDialog(mainWindow.frmAddDataBrowser, "Error fetching division info:" + e, "Setup problem", JOptionPane.ERROR_MESSAGE);
+			throw e;
+		}
+	}
+
+	private static void fetchCategories() throws SQLException
+	{
+		try {
+			Statement stmt = dataSource.createStatement();
+			ResultSet results = stmt.executeQuery(
+					"SELECT category, description " +
+							"FROM " + tablePrefix + "CATEGORY_INFO ");
+
+			categories.clear();
+			while (results.next())
+			{
+				categories.put(results.getInt(1), new Category(results.getInt(1), results.getString(2)));
+			}
+			mainWindow.newCategories(categories);
+		}
+		catch (SQLException e)
+		{
+			System.out.println(e);
+			JOptionPane.showMessageDialog(mainWindow.frmAddDataBrowser, "Error fetching category info:" + e, "Setup problem", JOptionPane.ERROR_MESSAGE);
+			throw e;
 		}
 	}
 }

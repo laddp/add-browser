@@ -19,6 +19,8 @@ import java.util.Vector;
 import javax.swing.JTable;
 import javax.swing.table.AbstractTableModel;
 
+import net.pladd.ADDBrowser.E3types.PostingCode;
+
 import com.camick.FormatRenderer;
 import com.camick.NumberRenderer;
 

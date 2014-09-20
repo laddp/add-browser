@@ -1,7 +1,7 @@
 /**
  * 
  */
-package net.pladd.ADDBrowser;
+package net.pladd.ADDBrowser.E3types;
 
 /**
  * @author Patrick
@@ -12,9 +12,9 @@ public class PostingCode {
 	public final int    postingCode;
 	public final String description;
 	
-	protected static int	max;
-	protected static int	maxDebit;
-	protected static String invalLabel;
+	public static int	 max;
+	public static int	 maxDebit;
+	public static String invalLabel;
 	
 	public PostingCode(int code, String desc)
 	{
