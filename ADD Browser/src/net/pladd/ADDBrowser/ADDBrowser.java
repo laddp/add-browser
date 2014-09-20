@@ -306,9 +306,9 @@ public class ADDBrowser {
 			}
 			transDetail.newResults(results, mainWindow.transTable);
 			mainWindow.transTotals.setText(
-					"Total: "   + NumberFormat.getCurrencyInstance().format(batchDetail.totalAmt) + " " +
-					"Credits: " + NumberFormat.getCurrencyInstance().format(batchDetail.credAmt)  + " " +
-					"Debits: "  + NumberFormat.getCurrencyInstance().format(batchDetail.debAmt)   + " " +
+					"Total: "   + NumberFormat.getCurrencyInstance().format(transDetail.totalAmt) + " " +
+					"Credits: " + NumberFormat.getCurrencyInstance().format(transDetail.credAmt)  + " " +
+					"Debits: "  + NumberFormat.getCurrencyInstance().format(transDetail.debAmt)   + " " +
 					"Count: "    + transDetail.rowCount
 					);
 			mainWindow.tabbedPane.setSelectedIndex(MainWindow.TRANS_TAB_INDEX);
