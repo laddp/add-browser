@@ -14,10 +14,10 @@ import java.text.DateFormat;
 import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
-import java.util.Set;
+import java.util.TreeMap;
 import java.util.Vector;
 
 import javax.swing.JOptionPane;
@@ -46,9 +46,9 @@ public class ADDBrowser {
 	protected static DateFormat tm = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 	
 	protected static Vector<PostingCode>    postingCodes = new Vector<PostingCode>();
-	public    static Map<Integer, Division> divisions    = new HashMap<Integer, Division>();
-	public    static Map<Integer, Category> categories   = new HashMap<Integer, Category>();
-	public    static Map<String,  Type>     types        = new HashMap<String, Type>();
+	public    static Map<Integer, Division> divisions    = new TreeMap<Integer, Division>();
+	public    static Map<Integer, Category> categories   = new TreeMap<Integer, Category>();
+	public    static Map<String,  Type>     types        = new TreeMap<String, Type>();
 	
 	/**
 	 * @param args
@@ -62,6 +62,7 @@ public class ADDBrowser {
 				try {
 					mainWindow = new MainWindow();
 					mainWindow .frmAddDataBrowser.setVisible(true);
+					mainWindow.doConnect();
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
@@ -71,7 +72,7 @@ public class ADDBrowser {
 
 	public static void doConnect(String dbType, String serverName, String serverPort,
 			String databaseName, String userName, String password,
-			int maxDebit, int maxPost, String invalPost) throws Exception
+			int maxDebit, int maxPost, String invalPost, boolean typesUniform) throws Exception
 	{
 		String conStr;
 		if (dbType.compareTo(ConnectDialog.MYSQL_STRING) == 0)
@@ -123,6 +124,7 @@ public class ADDBrowser {
 			PostingCode.maxDebit   = maxDebit;
 			PostingCode.max        = maxPost;
 			PostingCode.invalLabel = invalPost;
+			Type.typesUniform      = typesUniform;
 		}
 		catch (SQLException e)
 		{
@@ -370,21 +372,35 @@ public class ADDBrowser {
 			case "postal_code":
 				queryWhere += tablePrefix + "ACCOUNTS." + item.getKey() + " like '" + item.getValue() + "' ";
 				break;
+			case "division":
+			case "type":
+			case "category":
+				queryWhere += tablePrefix + "ACCOUNTS." + item.getKey() + " in (" + item.getValue() + ") ";
 			default:
 				break;
 			}
 		}
 		
+		String querySuffix = " ORDER BY " + tablePrefix + "ACCOUNTS.account_num";
+		
 		try
 		{
 			Statement stmt = dataSource.createStatement();
 			mainWindow.frmAddDataBrowser.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
-			ResultSet results = stmt.executeQuery(queryPrefix + queryWhere);
+			ResultSet results = stmt.executeQuery(queryPrefix + queryWhere + querySuffix);
 			
-			Set<Account> accounts = new HashSet<Account>();
+			List<Account> accounts = new LinkedList<Account>();
 			
 			while (results.next())
 			{
+				int division = results.getInt(14);
+				int typeNum  = results.getInt(15);
+				Type type;
+				if (Type.typesUniform)
+					type = ADDBrowser.types.get(""+typeNum);
+				else
+					type = ADDBrowser.types.get(""+division+"-"+typeNum);
+				
 				accounts.add(new Account(
 						results.getString(1),
 						results.getString(2),
@@ -399,8 +415,8 @@ public class ADDBrowser {
 						results.getString(11),
 						results.getString(12),
 						results.getString(13),
-						results.getInt(14),
-						results.getInt(15),
+						division,
+						type,
 						results.getInt(16),
 						results.getBigDecimal(17)));
 			}
@@ -449,17 +465,22 @@ public class ADDBrowser {
 	{
 		try {
 			Statement stmt = dataSource.createStatement();
-			ResultSet results = stmt.executeQuery(
-					"SELECT division, type, name " +
-							"FROM " + tablePrefix + "TYPE_INFO ");
+			String query = "SELECT division, type, name " +
+					"FROM " + tablePrefix + "TYPE_INFO ";
+			if (Type.typesUniform)
+				query += "WHERE division = 1";
+			ResultSet results = stmt.executeQuery(query);
 
 			types.clear();
 			while (results.next())
 			{
-				String key = "" + results.getInt(1) + "-" + results.getInt(2);
+				String key;
+				if (Type.typesUniform)
+					key = "" + results.getInt(2);
+				else
+					key = "" + results.getInt(1) + "-" + results.getInt(2);
 				types.put(key, new Type(results.getInt(1), results.getInt(2), results.getString(3)));
 			}
-			mainWindow.newTypes(types);
 		}
 		catch (SQLException e)
 		{
@@ -482,7 +503,6 @@ public class ADDBrowser {
 			{
 				divisions.put(results.getInt(1), new Division(results.getInt(1), results.getString(2)));
 			}
-			mainWindow.newDivisions(divisions);
 		}
 		catch (SQLException e)
 		{
@@ -505,7 +525,6 @@ public class ADDBrowser {
 			{
 				categories.put(results.getInt(1), new Category(results.getInt(1), results.getString(2)));
 			}
-			mainWindow.newCategories(categories);
 		}
 		catch (SQLException e)
 		{

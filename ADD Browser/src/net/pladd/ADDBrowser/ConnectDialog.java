@@ -1,23 +1,25 @@
 package net.pladd.ADDBrowser;
 
 import java.awt.BorderLayout;
+import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JPasswordField;
+import javax.swing.JTabbedPane;
 import javax.swing.JTextField;
 import javax.swing.border.EmptyBorder;
-import java.awt.event.ActionListener;
-import java.awt.event.ActionEvent;
-import javax.swing.JTabbedPane;
 
 public class ConnectDialog extends JDialog {
 
@@ -42,6 +44,7 @@ public class ConnectDialog extends JDialog {
 	protected JTextField maxPostingCode;
 	protected JTextField maxDebitPostingCode;
 	protected JTextField invalidPClabel;
+	protected JCheckBox chckbxTypesUniform;
 
 	/**
 	 * Create the dialog.
@@ -51,7 +54,8 @@ public class ConnectDialog extends JDialog {
 		setModalityType(ModalityType.APPLICATION_MODAL);
 		setModalExclusionType(ModalExclusionType.APPLICATION_EXCLUDE);
 		setDefaultCloseOperation(JDialog.HIDE_ON_CLOSE);
-		setBounds(100, 100, 450, 300);
+		setBounds(100, 100, 315, 254);
+		setMinimumSize(new Dimension(315, 254));
 		getContentPane().setLayout(new BorderLayout());
 		{
 			JTabbedPane tabbedPane = new JTabbedPane(JTabbedPane.TOP);
@@ -181,9 +185,9 @@ public class ConnectDialog extends JDialog {
 				tabbedPane.addTab("Database Settings", null, panel, null);
 				GridBagLayout gbl_panel = new GridBagLayout();
 				gbl_panel.columnWidths = new int[]{0, 0, 0};
-				gbl_panel.rowHeights = new int[]{0, 0, 0, 0};
+				gbl_panel.rowHeights = new int[]{0, 0, 0, 0, 0};
 				gbl_panel.columnWeights = new double[]{0.0, 1.0, Double.MIN_VALUE};
-				gbl_panel.rowWeights = new double[]{0.0, 0.0, 0.0, Double.MIN_VALUE};
+				gbl_panel.rowWeights = new double[]{0.0, 0.0, 0.0, 0.0, Double.MIN_VALUE};
 				panel.setLayout(gbl_panel);
 				{
 					JLabel label = new JLabel("Max Posting Code");
@@ -196,6 +200,7 @@ public class ConnectDialog extends JDialog {
 				}
 				{
 					maxPostingCode = new JTextField();
+					maxPostingCode.setToolTipText("Threshold between posting codes and credit action codes");
 					maxPostingCode.setText("255");
 					maxPostingCode.setColumns(5);
 					GridBagConstraints gbc_maxPostingCode = new GridBagConstraints();
@@ -216,6 +221,7 @@ public class ConnectDialog extends JDialog {
 				}
 				{
 					maxDebitPostingCode = new JTextField();
+					maxDebitPostingCode.setToolTipText("Threshold at which posting codes change over from debits to credits");
 					maxDebitPostingCode.setText("199");
 					maxDebitPostingCode.setColumns(5);
 					GridBagConstraints gbc_maxDebitPostingCode = new GridBagConstraints();
@@ -229,20 +235,41 @@ public class ConnectDialog extends JDialog {
 					JLabel lblInvalidPcLabel = new JLabel("Invalid PC Label");
 					GridBagConstraints gbc_lblInvalidPcLabel = new GridBagConstraints();
 					gbc_lblInvalidPcLabel.anchor = GridBagConstraints.EAST;
-					gbc_lblInvalidPcLabel.insets = new Insets(0, 0, 0, 5);
+					gbc_lblInvalidPcLabel.insets = new Insets(0, 0, 5, 5);
 					gbc_lblInvalidPcLabel.gridx = 0;
 					gbc_lblInvalidPcLabel.gridy = 2;
 					panel.add(lblInvalidPcLabel, gbc_lblInvalidPcLabel);
 				}
 				{
 					invalidPClabel = new JTextField();
+					invalidPClabel.setToolTipText("Don't show posting codes with this value in selection lists");
 					invalidPClabel.setText("INVAL");
 					GridBagConstraints gbc_invalidPClabel = new GridBagConstraints();
+					gbc_invalidPClabel.insets = new Insets(0, 0, 5, 0);
 					gbc_invalidPClabel.fill = GridBagConstraints.HORIZONTAL;
 					gbc_invalidPClabel.gridx = 1;
 					gbc_invalidPClabel.gridy = 2;
 					panel.add(invalidPClabel, gbc_invalidPClabel);
 					invalidPClabel.setColumns(10);
+				}
+				{
+					JLabel lblAssumeTypesUniform = new JLabel("Assume Types Uniform");
+					GridBagConstraints gbc_lblAssumeTypesUniform = new GridBagConstraints();
+					gbc_lblAssumeTypesUniform.anchor = GridBagConstraints.EAST;
+					gbc_lblAssumeTypesUniform.insets = new Insets(0, 0, 0, 5);
+					gbc_lblAssumeTypesUniform.gridx = 0;
+					gbc_lblAssumeTypesUniform.gridy = 3;
+					panel.add(lblAssumeTypesUniform, gbc_lblAssumeTypesUniform);
+				}
+				{
+					chckbxTypesUniform = new JCheckBox("");
+					chckbxTypesUniform.setSelected(true);
+					chckbxTypesUniform.setToolTipText("Assume that types are uniform across divisions and only show selection for Division 1");
+					GridBagConstraints gbc_chckbxTypesUniform = new GridBagConstraints();
+					gbc_chckbxTypesUniform.anchor = GridBagConstraints.WEST;
+					gbc_chckbxTypesUniform.gridx = 1;
+					gbc_chckbxTypesUniform.gridy = 3;
+					panel.add(chckbxTypesUniform, gbc_chckbxTypesUniform);
 				}
 			}
 		}
@@ -274,6 +301,9 @@ public class ConnectDialog extends JDialog {
 				buttonPane.add(cancelButton);
 			}
 		}
+		
+		pack();
+		serverName.requestFocusInWindow();
 	}
 
 }

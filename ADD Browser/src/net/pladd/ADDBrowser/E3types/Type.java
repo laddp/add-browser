@@ -3,6 +3,7 @@
  */
 package net.pladd.ADDBrowser.E3types;
 
+
 /**
  * @author Patrick
  *
@@ -11,6 +12,8 @@ public class Type {
 	public final int    type;
 	public final int    division;
 	public final String description;
+	
+	public static boolean typesUniform;
 
 	/**
 	 * @param type
@@ -26,6 +29,9 @@ public class Type {
 	@Override
 	public String toString() 
 	{
-		return "" + type + " - " + description;
+		if (typesUniform)
+			return "" + type + ": " + description;
+		else
+			return "" + division + "-" + type + ": " + description;
 	}
 }

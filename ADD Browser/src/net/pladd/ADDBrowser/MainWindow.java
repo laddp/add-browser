@@ -6,6 +6,7 @@ import java.awt.FlowLayout;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
+import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.InputEvent;
@@ -17,6 +18,7 @@ import java.io.IOException;
 import java.text.NumberFormat;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.Vector;
@@ -53,7 +55,7 @@ public class MainWindow {
 	protected JTabbedPane tabbedPane;
 
 	private JMenuItem mntmExport;
-	protected static final String VersionStr = "v1.3";
+	protected static final String VersionStr = "v1.4";
 
 	protected JPanel accountsTab;
 	protected JTable logsTable;
@@ -109,13 +111,13 @@ public class MainWindow {
 	protected JTextField state;
 	protected JTextField zipCode;
 	protected JTextField balance;
-	private JButton categoryButton;
-	private JButton divisionButton;
+	private JButton btnDivision;
+	private JButton btnCategory;
+	private JButton btnType;
 
 	private Set<JTextField> accountQueryFields = new HashSet<JTextField>();
 	protected JLabel transTotals;
 	protected JLabel batchTotals;
-	private JButton typeButton;
 	
 	/**
 	 * Create the application.
@@ -622,6 +624,7 @@ public class MainWindow {
 		typePanel.setLayout(gbl_typePanel);
 		
 		type = new JTextField();
+		type.setName("type");
 		type.setEditable(false);
 		GridBagConstraints gbc_type = new GridBagConstraints();
 		gbc_type.insets = new Insets(0, 0, 0, 5);
@@ -632,17 +635,17 @@ public class MainWindow {
 		type.setColumns(46);
 		accountQueryFields.add(type);
 		
-		typeButton = new JButton("...");
-		typeButton.addActionListener(new ActionListener() {
+		btnType = new JButton("...");
+		btnType.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				doTypeButton();
 			}
 		});
-		typeButton.setEnabled(false);
+		btnType.setEnabled(false);
 		GridBagConstraints gbc_typeButton = new GridBagConstraints();
 		gbc_typeButton.gridx = 1;
 		gbc_typeButton.gridy = 0;
-		typePanel.add(typeButton, gbc_typeButton);
+		typePanel.add(btnType, gbc_typeButton);
 		
 		JLabel lblCategory = new JLabel("Category");
 		GridBagConstraints gbc_lblCategory = new GridBagConstraints();
@@ -667,6 +670,7 @@ public class MainWindow {
 		categoryPanel.setLayout(gbl_categoryPanel);
 		
 		category = new JTextField();
+		category.setName("category");
 		category.setEditable(false);
 		GridBagConstraints gbc_category = new GridBagConstraints();
 		gbc_category.insets = new Insets(0, 0, 0, 5);
@@ -676,17 +680,17 @@ public class MainWindow {
 		categoryPanel.add(category, gbc_category);
 		category.setColumns(46);
 		
-		categoryButton = new JButton("...");
-		categoryButton.addActionListener(new ActionListener() {
+		btnCategory = new JButton("...");
+		btnCategory.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				doCategoryButton();
 			}
 		});
-		categoryButton.setEnabled(false);
+		btnCategory.setEnabled(false);
 		GridBagConstraints gbc_categoryButton = new GridBagConstraints();
 		gbc_categoryButton.gridx = 1;
 		gbc_categoryButton.gridy = 0;
-		categoryPanel.add(categoryButton, gbc_categoryButton);
+		categoryPanel.add(btnCategory, gbc_categoryButton);
 		
 		JLabel lblDivison = new JLabel("Divison");
 		GridBagConstraints gbc_lblDivison = new GridBagConstraints();
@@ -711,6 +715,7 @@ public class MainWindow {
 		divisionPanel.setLayout(gbl_divisionPanel);
 		
 		division = new JTextField();
+		division.setName("division");
 		division.setEditable(false);
 		GridBagConstraints gbc_division = new GridBagConstraints();
 		gbc_division.insets = new Insets(0, 0, 0, 5);
@@ -720,17 +725,17 @@ public class MainWindow {
 		divisionPanel.add(division, gbc_division);
 		division.setColumns(47);
 		
-		divisionButton = new JButton("...");
-		divisionButton.addActionListener(new ActionListener() {
+		btnDivision = new JButton("...");
+		btnDivision.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				doDivisionButton();
 			}
 		});
-		divisionButton.setEnabled(false);
+		btnDivision.setEnabled(false);
 		GridBagConstraints gbc_divisionButton = new GridBagConstraints();
 		gbc_divisionButton.gridx = 1;
 		gbc_divisionButton.gridy = 0;
-		divisionPanel.add(divisionButton, gbc_divisionButton);
+		divisionPanel.add(btnDivision, gbc_divisionButton);
 		
 		JLabel lblBalance = new JLabel("Balance $");
 		GridBagConstraints gbc_lblBalance = new GridBagConstraints();
@@ -820,21 +825,91 @@ public class MainWindow {
 	}
 
 	
-	protected void doTypeButton() {
-		// TODO Auto-generated method stub
+	protected void doDivisionButton()
+	{
+		MultiSelectDialog<Division> dlg = 
+				new MultiSelectDialog<Division>((Window)frmAddDataBrowser, "Select a division", 
+						ADDBrowser.divisions.values().toArray(new Division[64]));
+		List<Division> selectedDivisions = dlg.doSelect();
+		if (selectedDivisions == null)
+			return;
 		
+		String value = null;
+		for (Division div : selectedDivisions)
+		{
+			if (value == null)
+				value = "";
+			else
+				value += ", ";
+			value += "" + div.division;
+		}
+		
+		division.setText(value);
 	}
 
-	protected void doCategoryButton() {
-		// TODO Auto-generated method stub
+	protected void doCategoryButton()
+	{
+		MultiSelectDialog<Category> dlg = 
+				new MultiSelectDialog<Category>((Window)frmAddDataBrowser, "Select a category",
+						ADDBrowser.categories.values().toArray(new Category[64]));
+		List<Category> selectedCategories = dlg.doSelect();
+		if (selectedCategories == null)
+			return;
+
+		String value = null;
+		for (Category cat : selectedCategories)
+		{
+			if (value == null)
+				value = "";
+			else
+				value += ", ";
+			value += "" + cat.category;
+		}
 		
+		category.setText(value);
 	}
 
-	protected void doDivisionButton() {
-		// TODO Auto-generated method stub
+	protected void doTypeButton()
+	{
+		MultiSelectDialog<Type> dlg = 
+				new MultiSelectDialog<Type>((Window)frmAddDataBrowser, "Select a type",
+						ADDBrowser.types.values().toArray(new Type[64*64]));
+		List<Type> selectedTypes = dlg.doSelect();
+		if (selectedTypes == null)
+			return;
+
+		if (Type.typesUniform == false)
+		{
+			int div = -1;
+			for (Type type : selectedTypes)
+			{
+				if (div == -1)
+					div = type.division;
+				else if (div != type.division)
+				{
+					JOptionPane.showMessageDialog(frmAddDataBrowser, "Sorry, can't select types from different divisions unless types are uniform."
+							+ "  See the checkbox on the Connect Dialog",
+							"Type selection error", JOptionPane.ERROR_MESSAGE);
+					return;
+				}
+			}
+			division.setText("" + div);
+		}
+
+		String value = null;
+		for (Type type : selectedTypes)
+		{
+			if (value == null)
+				value = "";
+			else
+				value += ", ";
+			value += "" + type.type;
+		}
 		
+		type.setText(value);
 	}
 
+	
 	protected void doAcctSearch()
 	{
 		Map<String, String> acctQuery = new HashMap<String, String>();
@@ -856,6 +931,7 @@ public class MainWindow {
 		ADDBrowser.doAcctSearch(acctQuery);
 	}
 
+	
 	protected void doClearAcct()
 	{
 		for (JTextField field : accountQueryFields)
@@ -940,7 +1016,7 @@ public class MainWindow {
 	}
 
 	
-	private void doConnect()
+	void doConnect()
 	{
 		if (connectDialog == null)
 			connectDialog = new ConnectDialog();
@@ -957,7 +1033,8 @@ public class MainWindow {
 						new String(connectDialog.password.getPassword()),
 						Integer.parseInt(connectDialog.maxDebitPostingCode.getText()),
 						Integer.parseInt(connectDialog.maxPostingCode.getText()),
-						connectDialog.invalidPClabel.getText());
+						connectDialog.invalidPClabel.getText(),
+						connectDialog.chckbxTypesUniform.isSelected());
 				enableQueries(true);
 			}
 			catch (Exception e)
@@ -987,6 +1064,10 @@ public class MainWindow {
 //		btnAcctLogs.setEnabled(b);
 //		btnAcctDocuments.setEnabled(b);
 		btnAcctTransactions.setEnabled(b);
+		
+		btnDivision.setEnabled(b);
+		btnType.setEnabled(b);
+		btnCategory.setEnabled(b);
 		
 		for (JTextField fld : accountQueryFields)
 		{
@@ -1061,7 +1142,7 @@ public class MainWindow {
 			transactionQueryDialog.newPostingCodes(postingCodes);
 	}
 
-	public void accountResults(Set<Account> accounts)
+	public void accountResults(List<Account> accounts)
 	{
 		Account toDisplay = null;
 		if (accounts.size() == 1)
@@ -1122,17 +1203,5 @@ public class MainWindow {
 				}
 			}
 		}
-	}
-
-	public void newTypes(Map<String, Type> types)
-	{
-	}
-
-	public void newCategories(Map<Integer, Category> categories)
-	{
-	}
-
-	public void newDivisions(Map<Integer, Division> divisions)
-	{
 	}
 }

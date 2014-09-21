@@ -24,6 +24,6 @@ public class PostingCode {
 	
 	public String toString()
 	{
-		return "" + postingCode + " - " + description;
+		return "" + postingCode + ": " + description;
 	}
 }

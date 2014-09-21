@@ -68,7 +68,7 @@ public class Account
 			String title, String first_name, String middle_initial,
 			String last_name, String name_suffix, String street1,
 			String street2, String city, String state, String postal_code,
-			int division, int type, int category, BigDecimal balance) {
+			int division, Type type, int category, BigDecimal balance) {
 		this.full_account = full_account;
 		this.sort_code = sort_code;
 		this.name = name;
@@ -83,7 +83,7 @@ public class Account
 		this.state = state;
 		this.postal_code = postal_code;
 		this.division = ADDBrowser.divisions.get(division);
-		this.type = ADDBrowser.types.get("" + division + "-" + type);
+		this.type = type;
 		this.category = ADDBrowser.categories.get(category);
 		this.balance = balance;
 	}
@@ -92,6 +92,6 @@ public class Account
 	 */
 	@Override
 	public String toString() {
-		return "Account [full_account=" + full_account + ", name=" + name + "]";
+		return "full_account=" + full_account + " name=" + name;
 	}	
 }
