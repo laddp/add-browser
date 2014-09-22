@@ -37,8 +37,9 @@ import com.sybase.jdbcx.SybDriver;
 public class ADDBrowser {
 	
 	protected static MainWindow mainWindow;
-	protected static Connection dataSource = null;
+	protected static Connection dataSource  = null;
 	protected static String     tablePrefix = "";
+	protected static LogTable   logDetail   = null;
 	protected static BatchTable batchDetail = null;
 	protected static BatchTable transDetail = null;
 
@@ -163,156 +164,101 @@ public class ADDBrowser {
 		}
 	}
 
-	public static void doBatchQuery(String postingDate, String batchNum)
+	private static void fetchPostingCodes() throws SQLException
 	{
 		try {
 			Statement stmt = dataSource.createStatement();
-			String queryPrefix =
-					"SELECT " + 
-							tablePrefix + "TRANS_MAIN.event_date, " +
-							tablePrefix + "TRANS_MAIN.posting_date, " +
-							tablePrefix + "TRANS_MAIN.last_maintenance_dt, " +
-							tablePrefix + "TRANS_MAIN.batch_num, " +
-							tablePrefix + "FULL_ACCOUNT.full_account, " +
-							tablePrefix + "ACCOUNTS.name, " +
-							tablePrefix + "TYPE_INFO.name as \"type\", " +
-							tablePrefix + "TRANS_MAIN.posting_code, " +
-							tablePrefix + "POST_CODE.long_desc, " +
-							tablePrefix + "TRANS_MAIN.reference_num, " +
-							tablePrefix + "TRANS_MAIN.net_amount, " +
-							tablePrefix + "TRANS_MAIN.units, " +
-							tablePrefix + "TRANS_MAIN.ppg, " +
-							tablePrefix + "TRANS_MAIN.last_maintenance_userid " +
-					"FROM " +
-						tablePrefix + "TRANS_MAIN inner join " + tablePrefix + "FULL_ACCOUNT ON " +
-							tablePrefix + "TRANS_MAIN.account_num = " + tablePrefix + "FULL_ACCOUNT.account_num " +
-						"inner join " + tablePrefix + "ACCOUNTS ON " +
-							tablePrefix + "TRANS_MAIN.account_num = " + tablePrefix + "ACCOUNTS.account_num "+
-						"inner join " + tablePrefix + "POST_CODE ON " +
-							tablePrefix + "TRANS_MAIN.posting_code = " + tablePrefix + "POST_CODE.posting_code " +
-						"inner join " + tablePrefix + "TYPE_INFO ON " +
-							tablePrefix + "ACCOUNTS.type = " + tablePrefix + " TYPE_INFO.type and " +
-							tablePrefix + "ACCOUNTS.division = " + tablePrefix + " TYPE_INFO.division ";
-
-			String queryWhere = "WHERE "+
-					tablePrefix + "TRANS_MAIN.posting_code <= " + PostingCode.max + " and " +
-					tablePrefix + "TRANS_MAIN.status = 'A' ";
-			if (postingDate != null)
-				queryWhere += " and " + tablePrefix + "TRANS_MAIN.posting_date = '" + postingDate + "' ";
-			if (batchNum != null)
-				queryWhere += " and " + tablePrefix + "TRANS_MAIN.batch_num = " + batchNum + " ";
-			
-			String querySuffix =
-					"ORDER BY " +
-						tablePrefix + "TRANS_MAIN.posting_date, " +
-						tablePrefix + "TRANS_MAIN.batch_num, " +
-						tablePrefix + "TRANS_MAIN.account_num";
-			mainWindow.frmAddDataBrowser.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
-			ResultSet results = stmt.executeQuery(queryPrefix + queryWhere + querySuffix);
-			
-			if (batchDetail == null)
+			ResultSet results = stmt.executeQuery(
+					"SELECT posting_code, long_desc " +
+							"FROM " + tablePrefix + "POST_CODE " +
+							"WHERE posting_code < " + PostingCode.max +
+							" and " + "short_desc <> '" + PostingCode.invalLabel + "'");
+	
+			postingCodes.clear();
+			while (results.next())
 			{
-				batchDetail = new BatchTable();
-				mainWindow.batchTable.setAutoCreateRowSorter(true);
-				mainWindow.batchTable.setModel(batchDetail);
+				postingCodes.add(new PostingCode(results.getInt(1), results.getString(2)));
 			}
-			batchDetail.newResults(results, mainWindow.batchTable);
-			mainWindow.batchTotals.setText(
-					"Total: "   + NumberFormat.getCurrencyInstance().format(batchDetail.totalAmt) + " " +
-					"Credits: " + NumberFormat.getCurrencyInstance().format(batchDetail.credAmt)  + " " +
-					"Debits: "  + NumberFormat.getCurrencyInstance().format(batchDetail.debAmt)   + " " +
-					"Count: "    + batchDetail.rowCount
-					);
-			mainWindow.tabbedPane.setSelectedIndex(MainWindow.BATCH_TAB_INDEX);
-			mainWindow.setExportButtonState();
-		} 
-		catch (SQLException e) {
-			e.printStackTrace();
-			JOptionPane.showMessageDialog(mainWindow.frmAddDataBrowser, "Query failed:" + e, "Query Failed", JOptionPane.ERROR_MESSAGE);
+			mainWindow.newPostCodes(postingCodes);
 		}
-		finally
+		catch (SQLException e)
 		{
-			mainWindow.frmAddDataBrowser.setCursor(Cursor.getDefaultCursor());
+			System.out.println(e);
+			JOptionPane.showMessageDialog(mainWindow.frmAddDataBrowser, "Error fetching posting codes:" + e, "Setup problem", JOptionPane.ERROR_MESSAGE);
+			throw e;
 		}
 	}
 
-	public static void doTransactionQuery(String startDate, String endDate, String acctNum, String postCodes, String refNum)
+	private static void fetchDivisions() throws SQLException
 	{
 		try {
 			Statement stmt = dataSource.createStatement();
-			String queryPrefix =
-					"SELECT " + 
-							tablePrefix + "TRANS_MAIN.event_date, " +
-							tablePrefix + "TRANS_MAIN.posting_date, " +
-							tablePrefix + "TRANS_MAIN.last_maintenance_dt, " +
-							tablePrefix + "TRANS_MAIN.batch_num, " +
-							tablePrefix + "FULL_ACCOUNT.full_account, " +
-							tablePrefix + "ACCOUNTS.name, " +
-							tablePrefix + "TYPE_INFO.name as \"type\", " +
-							tablePrefix + "TRANS_MAIN.posting_code, " +
-							tablePrefix + "POST_CODE.long_desc, " +
-							tablePrefix + "TRANS_MAIN.reference_num, " +
-							tablePrefix + "TRANS_MAIN.net_amount, " +
-							tablePrefix + "TRANS_MAIN.units, " +
-							tablePrefix + "TRANS_MAIN.ppg, " +
-							tablePrefix + "TRANS_MAIN.last_maintenance_userid " +
-					"FROM " +
-						tablePrefix + "TRANS_MAIN inner join " + tablePrefix + "FULL_ACCOUNT ON " +
-							tablePrefix + "TRANS_MAIN.account_num = " + tablePrefix + "FULL_ACCOUNT.account_num " +
-						"inner join " + tablePrefix + "ACCOUNTS ON " +
-							tablePrefix + "TRANS_MAIN.account_num = " + tablePrefix + "ACCOUNTS.account_num "+
-						"inner join " + tablePrefix + "POST_CODE ON " +
-							tablePrefix + "TRANS_MAIN.posting_code = " + tablePrefix + "POST_CODE.posting_code " +
-						"inner join " + tablePrefix + "TYPE_INFO ON " +
-							tablePrefix + "ACCOUNTS.type = " + tablePrefix + " TYPE_INFO.type and " +
-							tablePrefix + "ACCOUNTS.division = " + tablePrefix + " TYPE_INFO.division ";
-
-			String queryWhere = "WHERE "+
-					tablePrefix + "TRANS_MAIN.posting_code <= " + PostingCode.max + " and " +
-					tablePrefix + "TRANS_MAIN.status = 'A' ";
-			if (startDate != null)
-				queryWhere += " and " + tablePrefix + "TRANS_MAIN.posting_date >= '" + startDate + "' ";
-			if (endDate != null)
-				queryWhere += " and " + tablePrefix + "TRANS_MAIN.posting_date <=  '" + endDate + "' ";
-			if (acctNum != null)
-				queryWhere += " and " + tablePrefix + "FULL_ACCOUNT.full_account = '" + acctNum + "' ";
-			if (postCodes != null)
-				queryWhere += " and " + tablePrefix + "TRANS_MAIN.posting_code in (" + postCodes + ") ";
-			if (refNum != null)
-				queryWhere += " and " + tablePrefix + "TRANS_MAIN.reference_num = " + refNum + " ";
-			
-			String querySuffix =
-					"ORDER BY " +
-						tablePrefix + "TRANS_MAIN.posting_date, " +
-						tablePrefix + "TRANS_MAIN.batch_num, " +
-						tablePrefix + "TRANS_MAIN.account_num";
-
-			mainWindow.frmAddDataBrowser.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
-			ResultSet results = stmt.executeQuery(queryPrefix + queryWhere + querySuffix);
-			
-			if (transDetail == null)
+			ResultSet results = stmt.executeQuery(
+					"SELECT division, name " +
+							"FROM " + tablePrefix + "DIVISION_INFO ");
+	
+			divisions.clear();
+			while (results.next())
 			{
-				transDetail = new BatchTable();
-				mainWindow.transTable.setAutoCreateRowSorter(true);
-				mainWindow.transTable.setModel(transDetail);
+				divisions.put(results.getInt(1), new Division(results.getInt(1), results.getString(2)));
 			}
-			transDetail.newResults(results, mainWindow.transTable);
-			mainWindow.transTotals.setText(
-					"Total: "   + NumberFormat.getCurrencyInstance().format(transDetail.totalAmt) + " " +
-					"Credits: " + NumberFormat.getCurrencyInstance().format(transDetail.credAmt)  + " " +
-					"Debits: "  + NumberFormat.getCurrencyInstance().format(transDetail.debAmt)   + " " +
-					"Count: "    + transDetail.rowCount
-					);
-			mainWindow.tabbedPane.setSelectedIndex(MainWindow.TRANS_TAB_INDEX);
-			mainWindow.setExportButtonState();
-		} 
-		catch (SQLException e) {
-			e.printStackTrace();
-			JOptionPane.showMessageDialog(mainWindow.frmAddDataBrowser, "Query failed:" + e, "Query Failed", JOptionPane.ERROR_MESSAGE);
 		}
-		finally
+		catch (SQLException e)
 		{
-			mainWindow.frmAddDataBrowser.setCursor(Cursor.getDefaultCursor());
+			System.out.println(e);
+			JOptionPane.showMessageDialog(mainWindow.frmAddDataBrowser, "Error fetching division info:" + e, "Setup problem", JOptionPane.ERROR_MESSAGE);
+			throw e;
+		}
+	}
+
+	private static void fetchTypes() throws SQLException
+	{
+		try {
+			Statement stmt = dataSource.createStatement();
+			String query = "SELECT division, type, name " +
+					"FROM " + tablePrefix + "TYPE_INFO ";
+			if (Type.typesUniform)
+				query += "WHERE division = 1";
+			ResultSet results = stmt.executeQuery(query);
+	
+			types.clear();
+			while (results.next())
+			{
+				String key;
+				if (Type.typesUniform)
+					key = "" + results.getInt(2);
+				else
+					key = "" + results.getInt(1) + "-" + results.getInt(2);
+				types.put(key, new Type(results.getInt(1), results.getInt(2), results.getString(3)));
+			}
+		}
+		catch (SQLException e)
+		{
+			System.out.println(e);
+			JOptionPane.showMessageDialog(mainWindow.frmAddDataBrowser, "Error fetching type info:" + e, "Setup problem", JOptionPane.ERROR_MESSAGE);
+			throw e;
+		}
+	}
+
+	private static void fetchCategories() throws SQLException
+	{
+		try {
+			Statement stmt = dataSource.createStatement();
+			ResultSet results = stmt.executeQuery(
+					"SELECT category, description " +
+							"FROM " + tablePrefix + "CATEGORY_INFO ");
+	
+			categories.clear();
+			while (results.next())
+			{
+				categories.put(results.getInt(1), new Category(results.getInt(1), results.getString(2)));
+			}
+		}
+		catch (SQLException e)
+		{
+			System.out.println(e);
+			JOptionPane.showMessageDialog(mainWindow.frmAddDataBrowser, "Error fetching category info:" + e, "Setup problem", JOptionPane.ERROR_MESSAGE);
+			throw e;
 		}
 	}
 
@@ -345,7 +291,7 @@ public class ADDBrowser {
 				"inner join " + tablePrefix + "TYPE_INFO ON " +
 					tablePrefix + "ACCOUNTS.type = " + tablePrefix + " TYPE_INFO.type and " +
 					tablePrefix + "ACCOUNTS.division = " + tablePrefix + " TYPE_INFO.division ";
-
+	
 		String queryWhere = null;
 		for (Map.Entry<String, String> item : acctQuery.entrySet())
 		{
@@ -436,101 +382,294 @@ public class ADDBrowser {
 		}
 	}
 
-	private static void fetchPostingCodes() throws SQLException
+	public static void doLogSearch(String full_account)
 	{
 		try {
 			Statement stmt = dataSource.createStatement();
-			ResultSet results = stmt.executeQuery(
-					"SELECT posting_code, long_desc " +
-							"FROM " + tablePrefix + "POST_CODE " +
-							"WHERE posting_code < " + PostingCode.max +
-							" and " + "short_desc <> '" + PostingCode.invalLabel + "'");
+			String queryPrefix =
+					"SELECT " + 
+						tablePrefix + "FULL_ACCOUNT.full_account, " +
+						tablePrefix + "LOG_HEADER.location_type, " +
+						tablePrefix + "LOG_HEADER.location, " +
+						tablePrefix + "LOG_HEADER.create_dt, " +
+						tablePrefix + "LOG_HEADER.create_user_id, " +
+						tablePrefix + "LOG_HEADER.resolved, " +
+						tablePrefix + "LOG_HEADER.resolved_dt, " +
+						tablePrefix + "LOG_HEADER.resolved_user_id, " +
+						tablePrefix + "LOG_HEADER.last_maintenance_dt, " +
+						tablePrefix + "LOG_HEADER.last_maintenance_userid, " +
+						tablePrefix + "LOG_TEMPLATE_HEADER.log_template_long_desc, " +
+						tablePrefix + "LOG_HEADER.note1, " +
+						tablePrefix + "LOG_HEADER.note2, " +
+						tablePrefix + "LOG_HEADER.note3, " +
+						tablePrefix + "LOG_HEADER.note4, " +
+						tablePrefix + "LOG_HEADER.resolved_note1, " +
+						tablePrefix + "LOG_HEADER.resolved_note2, " +
+						tablePrefix + "LOG_HEADER.created_time, " +
+						tablePrefix + "LOG_HEADER.account_num, " +
+						tablePrefix + "LOG_HEADER.log_header_id, " +
+						tablePrefix + "LOG_HEADER.log_template_header_id " +
+					"FROM " +
+						tablePrefix + "LOG_HEADER inner join " + tablePrefix + "FULL_ACCOUNT ON " +
+							tablePrefix + "LOG_HEADER.account_num = " + tablePrefix + "FULL_ACCOUNT.account_num " +
+						"inner join " + tablePrefix + "LOG_TEMPLATE_HEADER ON " +
+							tablePrefix + "LOG_TEMPLATE_HEADER.log_template_header_id = " + tablePrefix + "LOG_HEADER.log_template_header_id ";
+			
+			String queryWhere = "WHERE ";
+			if (full_account != null)
+				queryWhere += "full_account like '" + full_account + "' ";
+			
+			String querySuffix = "ORDER BY " + 
+					tablePrefix + "LOG_HEADER.account_num, " +
+					tablePrefix + "LOG_HEADER.create_dt, " +
+					tablePrefix + "LOG_HEADER.created_time";
+			
+			mainWindow.frmAddDataBrowser.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+			ResultSet results = stmt.executeQuery(queryPrefix + queryWhere + querySuffix);
 
-			postingCodes.clear();
-			while (results.next())
+			if (logDetail == null)
 			{
-				postingCodes.add(new PostingCode(results.getInt(1), results.getString(2)));
+				logDetail = new LogTable();
+				mainWindow.logTable.setAutoCreateRowSorter(true);
+				mainWindow.logTable.setModel(logDetail);
 			}
-			mainWindow.newPostCodes(postingCodes);
+			logDetail.newResults(results, mainWindow.logTable);
+			mainWindow.tabbedPane.setSelectedIndex(MainWindow.LOG_TAB_INDEX);
+			mainWindow.setExportButtonState();
+		} 
+		catch (SQLException e) {
+			e.printStackTrace();
+			JOptionPane.showMessageDialog(mainWindow.frmAddDataBrowser, "Query failed:" + e, "Query Failed", JOptionPane.ERROR_MESSAGE);
 		}
-		catch (SQLException e)
+		finally
 		{
-			System.out.println(e);
-			JOptionPane.showMessageDialog(mainWindow.frmAddDataBrowser, "Error fetching posting codes:" + e, "Setup problem", JOptionPane.ERROR_MESSAGE);
-			throw e;
+			mainWindow.frmAddDataBrowser.setCursor(Cursor.getDefaultCursor());
 		}
 	}
 
-	private static void fetchTypes() throws SQLException
+	public static String fullLogNote(int acct_num, int hdr_id, int tmpl_hdr_id, int noteType)
+	{
+		String rc = "";
+		try {
+			Statement stmt = dataSource.createStatement();
+			String queryPrefix = 
+					"SELECT " + 
+						tablePrefix + "LOG_NOTE.note " +
+					"FROM " + tablePrefix + "LOG_HEADER " +
+						"inner join  " + tablePrefix + "LOG_NOTE ON " +
+							tablePrefix + "LOG_HEADER.account_num = " + tablePrefix + "LOG_NOTE.account_num and " +
+							tablePrefix + "LOG_HEADER.log_header_id = " + tablePrefix + "LOG_NOTE.log_header_id ";
+			String queryWhere = "WHERE "+
+					tablePrefix + "LOG_NOTE.note_type       = " + noteType + " and " +
+					tablePrefix + "LOG_HEADER.account_num   = " + acct_num + " and " +
+					tablePrefix + "LOG_HEADER.log_header_id = " + hdr_id   + " and " +
+					tablePrefix + "LOG_HEADER.log_template_header_id = " + tmpl_hdr_id + " ";
+			String querySuffix = "ORDER BY " + tablePrefix + "LOG_NOTE.sequence_no";
+			
+			ResultSet results = stmt.executeQuery(queryPrefix + queryWhere + querySuffix);
+			
+			while (results.next())
+			{
+				rc += results.getString(1);
+			}
+		}
+		catch (SQLException e) {
+			e.printStackTrace();
+			JOptionPane.showMessageDialog(mainWindow.frmAddDataBrowser, "Query failed:" + e, "Query Failed", JOptionPane.ERROR_MESSAGE);
+		}
+		return rc;
+	}
+
+	
+	public static void doLogDetail(int acct_num, int hdr_id, int tmpl_hdr_id)
 	{
 		try {
 			Statement stmt = dataSource.createStatement();
-			String query = "SELECT division, type, name " +
-					"FROM " + tablePrefix + "TYPE_INFO ";
-			if (Type.typesUniform)
-				query += "WHERE division = 1";
-			ResultSet results = stmt.executeQuery(query);
+			String queryPrefix =
+					"SELECT " + 
+							tablePrefix + "LOG_TEMPLATE_DETAIL.sequence_no, " +
+							tablePrefix + "LOG_TEMPLATE_DETAIL.label, " +
+							tablePrefix + "LOG_DETAIL.value, " +
+							tablePrefix + "LOG_DETAIL.value_1 " +
+					"FROM " +
+						tablePrefix + "LOG_DETAIL inner join " + tablePrefix + "LOG_HEADER ON " +
+							tablePrefix + "LOG_HEADER.account_num   = " + tablePrefix + "LOG_DETAIL.account_num and " +
+							tablePrefix + "LOG_HEADER.log_header_id = " + tablePrefix + "LOG_DETAIL.log_header_id " + 
+						"inner join " + tablePrefix + "LOG_TEMPLATE_DETAIL ON " +
+							tablePrefix + "LOG_HEADER.log_template_header_id = " + tablePrefix + "LOG_TEMPLATE_DETAIL.log_template_header_id and "+
+							tablePrefix + "LOG_TEMPLATE_DETAIL.sequence_no = " + tablePrefix + "LOG_DETAIL.sequence_no ";
 
-			types.clear();
-			while (results.next())
-			{
-				String key;
-				if (Type.typesUniform)
-					key = "" + results.getInt(2);
-				else
-					key = "" + results.getInt(1) + "-" + results.getInt(2);
-				types.put(key, new Type(results.getInt(1), results.getInt(2), results.getString(3)));
-			}
+			String queryWhere = "WHERE "+
+					tablePrefix + "LOG_HEADER.account_num   = " + acct_num + " and " +
+					tablePrefix + "LOG_HEADER.log_header_id = " + hdr_id   + " and " +
+					tablePrefix + "LOG_HEADER.log_template_header_id = " + tmpl_hdr_id + " ";
+			String querySuffix = "ORDER BY " + tablePrefix + "LOG_DETAIL.sequence_no";
+			
+			ResultSet results = stmt.executeQuery(queryPrefix + queryWhere + querySuffix);
+			mainWindow.newLogDetail(results);
+		} 
+		catch (SQLException e) {
+			e.printStackTrace();
+			JOptionPane.showMessageDialog(mainWindow.frmAddDataBrowser, "Query failed:" + e, "Query Failed", JOptionPane.ERROR_MESSAGE);
 		}
-		catch (SQLException e)
+		finally
 		{
-			System.out.println(e);
-			JOptionPane.showMessageDialog(mainWindow.frmAddDataBrowser, "Error fetching type info:" + e, "Setup problem", JOptionPane.ERROR_MESSAGE);
-			throw e;
+			mainWindow.frmAddDataBrowser.setCursor(Cursor.getDefaultCursor());
 		}
 	}
 
-	private static void fetchDivisions() throws SQLException
+	public static void doBatchQuery(String postingDate, String batchNum)
 	{
 		try {
 			Statement stmt = dataSource.createStatement();
-			ResultSet results = stmt.executeQuery(
-					"SELECT division, name " +
-							"FROM " + tablePrefix + "DIVISION_INFO ");
+			String queryPrefix =
+					"SELECT " + 
+							tablePrefix + "TRANS_MAIN.event_date, " +
+							tablePrefix + "TRANS_MAIN.posting_date, " +
+							tablePrefix + "TRANS_MAIN.last_maintenance_dt, " +
+							tablePrefix + "TRANS_MAIN.batch_num, " +
+							tablePrefix + "FULL_ACCOUNT.full_account, " +
+							tablePrefix + "ACCOUNTS.name, " +
+							tablePrefix + "TYPE_INFO.name as \"type\", " +
+							tablePrefix + "TRANS_MAIN.posting_code, " +
+							tablePrefix + "POST_CODE.long_desc, " +
+							tablePrefix + "TRANS_MAIN.reference_num, " +
+							tablePrefix + "TRANS_MAIN.net_amount, " +
+							tablePrefix + "TRANS_MAIN.units, " +
+							tablePrefix + "TRANS_MAIN.ppg, " +
+							tablePrefix + "TRANS_MAIN.last_maintenance_userid " +
+					"FROM " +
+						tablePrefix + "TRANS_MAIN inner join " + tablePrefix + "FULL_ACCOUNT ON " +
+							tablePrefix + "TRANS_MAIN.account_num = " + tablePrefix + "FULL_ACCOUNT.account_num " +
+						"inner join " + tablePrefix + "ACCOUNTS ON " +
+							tablePrefix + "TRANS_MAIN.account_num = " + tablePrefix + "ACCOUNTS.account_num "+
+						"inner join " + tablePrefix + "POST_CODE ON " +
+							tablePrefix + "TRANS_MAIN.posting_code = " + tablePrefix + "POST_CODE.posting_code " +
+						"inner join " + tablePrefix + "TYPE_INFO ON " +
+							tablePrefix + "ACCOUNTS.type = " + tablePrefix + " TYPE_INFO.type and " +
+							tablePrefix + "ACCOUNTS.division = " + tablePrefix + " TYPE_INFO.division ";
 
-			divisions.clear();
-			while (results.next())
+			String queryWhere = "WHERE "+
+					tablePrefix + "TRANS_MAIN.posting_code <= " + PostingCode.max + " and " +
+					tablePrefix + "TRANS_MAIN.status = 'A' ";
+			if (postingDate != null)
+				queryWhere += " and " + tablePrefix + "TRANS_MAIN.posting_date = '" + postingDate + "' ";
+			if (batchNum != null)
+				queryWhere += " and " + tablePrefix + "TRANS_MAIN.batch_num = " + batchNum + " ";
+			
+			String querySuffix =
+					"ORDER BY " +
+						tablePrefix + "TRANS_MAIN.posting_date, " +
+						tablePrefix + "TRANS_MAIN.batch_num, " +
+						tablePrefix + "TRANS_MAIN.account_num";
+			mainWindow.frmAddDataBrowser.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+			ResultSet results = stmt.executeQuery(queryPrefix + queryWhere + querySuffix);
+			
+			if (batchDetail == null)
 			{
-				divisions.put(results.getInt(1), new Division(results.getInt(1), results.getString(2)));
+				batchDetail = new BatchTable();
+				mainWindow.batchTable.setAutoCreateRowSorter(true);
+				mainWindow.batchTable.setModel(batchDetail);
 			}
+			mainWindow.batchTotals.setText("");
+			batchDetail.newResults(results, mainWindow.batchTable);
+			mainWindow.batchTotals.setText(
+					"Total: "   + NumberFormat.getCurrencyInstance().format(batchDetail.totalAmt) + " " +
+					"Credits: " + NumberFormat.getCurrencyInstance().format(batchDetail.credAmt)  + " " +
+					"Debits: "  + NumberFormat.getCurrencyInstance().format(batchDetail.debAmt)   + " " +
+					"Count: "    + batchDetail.rowCount
+					);
+			mainWindow.tabbedPane.setSelectedIndex(MainWindow.BATCH_TAB_INDEX);
+			mainWindow.setExportButtonState();
+		} 
+		catch (SQLException e) {
+			e.printStackTrace();
+			JOptionPane.showMessageDialog(mainWindow.frmAddDataBrowser, "Query failed:" + e, "Query Failed", JOptionPane.ERROR_MESSAGE);
 		}
-		catch (SQLException e)
+		finally
 		{
-			System.out.println(e);
-			JOptionPane.showMessageDialog(mainWindow.frmAddDataBrowser, "Error fetching division info:" + e, "Setup problem", JOptionPane.ERROR_MESSAGE);
-			throw e;
+			mainWindow.frmAddDataBrowser.setCursor(Cursor.getDefaultCursor());
 		}
 	}
 
-	private static void fetchCategories() throws SQLException
+	public static void doTransactionQuery(String startDate, String endDate, String acctNum, String postCodes, String refNum)
 	{
 		try {
 			Statement stmt = dataSource.createStatement();
-			ResultSet results = stmt.executeQuery(
-					"SELECT category, description " +
-							"FROM " + tablePrefix + "CATEGORY_INFO ");
+			String queryPrefix =
+					"SELECT " + 
+							tablePrefix + "TRANS_MAIN.event_date, " +
+							tablePrefix + "TRANS_MAIN.posting_date, " +
+							tablePrefix + "TRANS_MAIN.last_maintenance_dt, " +
+							tablePrefix + "TRANS_MAIN.batch_num, " +
+							tablePrefix + "FULL_ACCOUNT.full_account, " +
+							tablePrefix + "ACCOUNTS.name, " +
+							tablePrefix + "TYPE_INFO.name as \"type\", " +
+							tablePrefix + "TRANS_MAIN.posting_code, " +
+							tablePrefix + "POST_CODE.long_desc, " +
+							tablePrefix + "TRANS_MAIN.reference_num, " +
+							tablePrefix + "TRANS_MAIN.net_amount, " +
+							tablePrefix + "TRANS_MAIN.units, " +
+							tablePrefix + "TRANS_MAIN.ppg, " +
+							tablePrefix + "TRANS_MAIN.last_maintenance_userid " +
+					"FROM " +
+						tablePrefix + "TRANS_MAIN inner join " + tablePrefix + "FULL_ACCOUNT ON " +
+							tablePrefix + "TRANS_MAIN.account_num = " + tablePrefix + "FULL_ACCOUNT.account_num " +
+						"inner join " + tablePrefix + "ACCOUNTS ON " +
+							tablePrefix + "TRANS_MAIN.account_num = " + tablePrefix + "ACCOUNTS.account_num "+
+						"inner join " + tablePrefix + "POST_CODE ON " +
+							tablePrefix + "TRANS_MAIN.posting_code = " + tablePrefix + "POST_CODE.posting_code " +
+						"inner join " + tablePrefix + "TYPE_INFO ON " +
+							tablePrefix + "ACCOUNTS.type = " + tablePrefix + " TYPE_INFO.type and " +
+							tablePrefix + "ACCOUNTS.division = " + tablePrefix + " TYPE_INFO.division ";
 
-			categories.clear();
-			while (results.next())
+			String queryWhere = "WHERE "+
+					tablePrefix + "TRANS_MAIN.posting_code <= " + PostingCode.max + " and " +
+					tablePrefix + "TRANS_MAIN.status = 'A' ";
+			if (startDate != null)
+				queryWhere += " and " + tablePrefix + "TRANS_MAIN.posting_date >= '" + startDate + "' ";
+			if (endDate != null)
+				queryWhere += " and " + tablePrefix + "TRANS_MAIN.posting_date <=  '" + endDate + "' ";
+			if (acctNum != null)
+				queryWhere += " and " + tablePrefix + "FULL_ACCOUNT.full_account = '" + acctNum + "' ";
+			if (postCodes != null)
+				queryWhere += " and " + tablePrefix + "TRANS_MAIN.posting_code in (" + postCodes + ") ";
+			if (refNum != null)
+				queryWhere += " and " + tablePrefix + "TRANS_MAIN.reference_num = " + refNum + " ";
+			
+			String querySuffix =
+					"ORDER BY " +
+						tablePrefix + "TRANS_MAIN.posting_date, " +
+						tablePrefix + "TRANS_MAIN.batch_num, " +
+						tablePrefix + "TRANS_MAIN.account_num";
+
+			mainWindow.frmAddDataBrowser.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+			ResultSet results = stmt.executeQuery(queryPrefix + queryWhere + querySuffix);
+			
+			if (transDetail == null)
 			{
-				categories.put(results.getInt(1), new Category(results.getInt(1), results.getString(2)));
+				transDetail = new BatchTable();
+				mainWindow.transTable.setAutoCreateRowSorter(true);
+				mainWindow.transTable.setModel(transDetail);
 			}
+			mainWindow.transTotals.setText("");
+			transDetail.newResults(results, mainWindow.transTable);
+			mainWindow.transTotals.setText(
+					"Total: "   + NumberFormat.getCurrencyInstance().format(transDetail.totalAmt) + " " +
+					"Credits: " + NumberFormat.getCurrencyInstance().format(transDetail.credAmt)  + " " +
+					"Debits: "  + NumberFormat.getCurrencyInstance().format(transDetail.debAmt)   + " " +
+					"Count: "    + transDetail.rowCount
+					);
+			mainWindow.tabbedPane.setSelectedIndex(MainWindow.TRANS_TAB_INDEX);
+			mainWindow.setExportButtonState();
+		} 
+		catch (SQLException e) {
+			e.printStackTrace();
+			JOptionPane.showMessageDialog(mainWindow.frmAddDataBrowser, "Query failed:" + e, "Query Failed", JOptionPane.ERROR_MESSAGE);
 		}
-		catch (SQLException e)
+		finally
 		{
-			System.out.println(e);
-			JOptionPane.showMessageDialog(mainWindow.frmAddDataBrowser, "Error fetching category info:" + e, "Setup problem", JOptionPane.ERROR_MESSAGE);
-			throw e;
+			mainWindow.frmAddDataBrowser.setCursor(Cursor.getDefaultCursor());
 		}
 	}
 }

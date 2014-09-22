@@ -33,7 +33,6 @@ public class TransactionQueryDialog extends JDialog {
 	private static final long serialVersionUID = 4425113802994773769L;
 	private TransactionQueryDialog thisDialog;
 	private final JPanel contentPanel = new JPanel();
-	private JScrollPane scrollPane;
 	
 	protected JTextField startDate;
 	protected JTextField endDate;
@@ -131,11 +130,11 @@ public class TransactionQueryDialog extends JDialog {
 			contentPanel.add(chckbxPostingCodes, "2, 8");
 		}
 		{
-			scrollPane = new JScrollPane();
-			contentPanel.add(scrollPane, "4, 8, left, fill");
+			JScrollPane postingCodeScrollPane = new JScrollPane();
+			contentPanel.add(postingCodeScrollPane, "4, 8, left, fill");
 			{
 				postingCodes = new JList<PostingCode>(postCodes);
-				scrollPane.setViewportView(postingCodes);
+				postingCodeScrollPane.setViewportView(postingCodes);
 				postingCodes.setEnabled(false);
 			}
 		}
@@ -186,9 +185,6 @@ public class TransactionQueryDialog extends JDialog {
 
 	public void newPostingCodes(Vector<PostingCode> newCodes)
 	{
-		scrollPane.remove(postingCodes);
-		postingCodes = new JList<PostingCode>(newCodes);
-		postingCodes.setEnabled(chckbxPostingCodes.isSelected());
-		scrollPane.setViewportView(postingCodes	);
+		postingCodes.setListData(newCodes);
 	}
 }

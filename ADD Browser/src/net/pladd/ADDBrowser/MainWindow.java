@@ -15,6 +15,8 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.text.NumberFormat;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -34,13 +36,18 @@ import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.JSplitPane;
 import javax.swing.JTabbedPane;
 import javax.swing.JTable;
+import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.JToolBar;
 import javax.swing.KeyStroke;
+import javax.swing.ListSelectionModel;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
 import net.pladd.ADDBrowser.E3types.Account;
@@ -58,7 +65,7 @@ public class MainWindow {
 	protected static final String VersionStr = "v1.4";
 
 	protected JPanel accountsTab;
-	protected JTable logsTable;
+	protected JTable logTable;
 	protected JTable documentsTable;
 	protected JTable batchTable;
 	protected JTable transTable;
@@ -118,6 +125,10 @@ public class MainWindow {
 	private Set<JTextField> accountQueryFields = new HashSet<JTextField>();
 	protected JLabel transTotals;
 	protected JLabel batchTotals;
+	private JPanel logsTab;
+	private JTable logDetailsTable;
+	private JTextArea logNotes;
+	private JTextArea logResolveNotes;
 	
 	/**
 	 * Create the application.
@@ -229,6 +240,11 @@ public class MainWindow {
 		toolBar.add(btnAccounts);
 		
 		btnLogs = new JButton("Logs");
+		btnLogs.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				doLogSearch();
+			}
+		});
 		btnLogs.setEnabled(false);
 		btnLogs.setIcon(new ImageIcon(MainWindow.class.getResource("/com/sun/java/swing/plaf/windows/icons/Question.gif")));
 		toolBar.add(btnLogs);
@@ -286,6 +302,7 @@ public class MainWindow {
 		buttonPanel.setLayout(new FlowLayout(FlowLayout.LEFT, 5, 5));
 		
 		btnAcctSearch = new JButton("Search");
+		btnAcctSearch.setMnemonic('S');
 		btnAcctSearch.setEnabled(false);
 		btnAcctSearch.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
@@ -295,6 +312,7 @@ public class MainWindow {
 		buttonPanel.add(btnAcctSearch);
 		
 		btnAcctClear = new JButton("Clear");
+		btnAcctClear.setMnemonic('C');
 		btnAcctClear.setEnabled(false);
 		btnAcctClear.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
@@ -304,14 +322,22 @@ public class MainWindow {
 		buttonPanel.add(btnAcctClear);
 		
 		btnAcctLogs = new JButton("Logs");
+		btnAcctLogs.setMnemonic('o');
+		btnAcctLogs.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				ADDBrowser.doLogSearch(accountNumber.getText());
+			}
+		});
 		btnAcctLogs.setEnabled(false);
 		buttonPanel.add(btnAcctLogs);
 		
 		btnAcctDocuments = new JButton("Documents");
+		btnAcctDocuments.setMnemonic('c');
 		btnAcctDocuments.setEnabled(false);
 		buttonPanel.add(btnAcctDocuments);
 		
 		btnAcctTransactions = new JButton("Transactions");
+		btnAcctTransactions.setMnemonic('r');
 		btnAcctTransactions.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				ADDBrowser.doTransactionQuery(null, null, accountNumber.getText(), null, null);
@@ -744,8 +770,10 @@ public class MainWindow {
 		gbc_lblBalance.gridx = 0;
 		gbc_lblBalance.gridy = 13;
 		accountsTab.add(lblBalance, gbc_lblBalance);
+		tabbedPane.setMnemonicAt(0, KeyEvent.VK_A);
 		
 		balance = new JTextField();
+		balance.setName("balance");
 		balance.setEditable(false);
 		GridBagConstraints gbc_balance = new GridBagConstraints();
 		gbc_balance.anchor = GridBagConstraints.SOUTHWEST;
@@ -753,12 +781,76 @@ public class MainWindow {
 		gbc_balance.gridy = 13;
 		accountsTab.add(balance, gbc_balance);
 		balance.setColumns(20);
-		tabbedPane.setMnemonicAt(0, KeyEvent.VK_A);
 		
-		logsTable = new JTable();
-		tabbedPane.addTab("Logs", null, logsTable, null);
+		logsTab = new JPanel();
+		tabbedPane.addTab("Logs", null, logsTab, null);
 		tabbedPane.setMnemonicAt(1, KeyEvent.VK_L);
 		
+		GridBagLayout gbl_logsTab = new GridBagLayout();
+		gbl_logsTab.columnWidths = new int[]{779, 0};
+		gbl_logsTab.rowHeights = new int[] {200, 200, 0, 0};
+		gbl_logsTab.columnWeights = new double[]{1.0, Double.MIN_VALUE};
+		gbl_logsTab.rowWeights = new double[]{1.0, 1.0, 1.0, Double.MIN_VALUE};
+		logsTab.setLayout(gbl_logsTab);
+		
+		JScrollPane logTableScrollPane = new JScrollPane();
+		GridBagConstraints gbc_logTableScrollPane = new GridBagConstraints();
+		gbc_logTableScrollPane.fill = GridBagConstraints.BOTH;
+		gbc_logTableScrollPane.insets = new Insets(0, 0, 5, 0);
+		gbc_logTableScrollPane.gridx = 0;
+		gbc_logTableScrollPane.gridy = 0;
+		logsTab.add(logTableScrollPane, gbc_logTableScrollPane);
+		
+		logTable = new JTable();
+		logTableScrollPane.setViewportView(logTable);
+		logTable.setFillsViewportHeight(true);
+		logTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+		logTable.setRowSelectionAllowed(true);
+		logTable.setAutoResizeMode(JTable.AUTO_RESIZE_ALL_COLUMNS);
+		logTable.getSelectionModel().addListSelectionListener(new LogListener());
+		
+		JSplitPane logSplitPane = new JSplitPane();
+		logSplitPane.setResizeWeight(0.3);
+		GridBagConstraints gbc_logSplitPane = new GridBagConstraints();
+		gbc_logSplitPane.insets = new Insets(0, 0, 5, 0);
+		gbc_logSplitPane.anchor = GridBagConstraints.SOUTH;
+		gbc_logSplitPane.fill = GridBagConstraints.BOTH;
+		gbc_logSplitPane.gridx = 0;
+		gbc_logSplitPane.gridy = 1;
+		logsTab.add(logSplitPane, gbc_logSplitPane);
+		
+		logDetailsTable = new JTable();
+		logDetailsTable.setAutoResizeMode(JTable.AUTO_RESIZE_LAST_COLUMN);
+		logDetailsTable.setFillsViewportHeight(true);
+	
+		JScrollPane logDetailsScrollPane = new JScrollPane();
+		logDetailsScrollPane.setViewportView(logDetailsTable);
+		logDetailsTable.setFillsViewportHeight(true);
+
+		logSplitPane.setRightComponent(logDetailsScrollPane);
+		
+		JSplitPane logVertSplitPane = new JSplitPane();
+		logVertSplitPane.setResizeWeight(0.5);
+		logVertSplitPane.setOrientation(JSplitPane.VERTICAL_SPLIT);
+		logSplitPane.setLeftComponent(logVertSplitPane);
+		
+		
+		logNotes = new JTextArea();
+		logNotes.setWrapStyleWord(true);
+		logNotes.setLineWrap(true);
+		logNotes.setEditable(false);
+
+		JScrollPane notesScrollPane = new JScrollPane(logNotes);
+		logVertSplitPane.setLeftComponent(notesScrollPane);
+		
+		logResolveNotes = new JTextArea();
+		logResolveNotes.setWrapStyleWord(true);
+		logResolveNotes.setLineWrap(true);
+		logResolveNotes.setEditable(false);
+
+		JScrollPane resolveScrollPane = new JScrollPane(logResolveNotes);
+		logVertSplitPane.setRightComponent(resolveScrollPane);
+
 		documentsTable = new JTable();
 		tabbedPane.addTab("Documents", null, documentsTable, null);
 		tabbedPane.setMnemonicAt(2, KeyEvent.VK_D);
@@ -770,37 +862,37 @@ public class MainWindow {
 
 		JScrollPane batchPane = new JScrollPane(batchTable);
 
-		JPanel batchSummaryPane = new JPanel();
-		batchSummaryPane.setLayout(new BorderLayout(0, 0));
+		JPanel batchSummaryTab = new JPanel();
+		batchSummaryTab.setLayout(new BorderLayout(0, 0));
 		
 		JPanel batchTotalsPanel = new JPanel();
-		batchSummaryPane.add(batchTotalsPanel, BorderLayout.NORTH);
+		batchSummaryTab.add(batchTotalsPanel, BorderLayout.NORTH);
 		
 		batchTotals = new JLabel(" ");
 		batchTotalsPanel.add(batchTotals);
-		batchSummaryPane.add(batchPane);
+		batchSummaryTab.add(batchPane);
 		
-		tabbedPane.addTab("Batches", batchSummaryPane);
+		tabbedPane.addTab("Batches", batchSummaryTab);
 		tabbedPane.setMnemonicAt(3, KeyEvent.VK_B);
 
-		JPanel transSummaryPane = new JPanel();
+		JPanel transSummaryTab = new JPanel();
+		transSummaryTab.setLayout(new BorderLayout(0, 0));
 		
-		tabbedPane.addTab("Transactions", null, transSummaryPane, null);
+		tabbedPane.addTab("Transactions", null, transSummaryTab, null);
 		
 		transTable = new JTable();
 		transTable.setRowSelectionAllowed(false);
 		transTable.setFillsViewportHeight(true);
 		transTable.addMouseListener(new TransactionMouseAdapter());
-				transSummaryPane.setLayout(new BorderLayout(0, 0));
-				
-				JPanel transTotalsPane = new JPanel();
-				transSummaryPane.add(transTotalsPane, BorderLayout.NORTH);
-				
-				transTotals = new JLabel(" ");
-				transTotalsPane.add(transTotals);
-		
-				JScrollPane transPane = new JScrollPane(transTable);
-				transSummaryPane.add(transPane);
+
+		JPanel transTotalsPane = new JPanel();
+		transSummaryTab.add(transTotalsPane, BorderLayout.NORTH);
+
+		transTotals = new JLabel(" ");
+		transTotalsPane.add(transTotals);
+
+		JScrollPane transPane = new JScrollPane(transTable);
+		transSummaryTab.add(transPane);
 		tabbedPane.setMnemonicAt(4, KeyEvent.VK_T);
 		
 
@@ -824,7 +916,223 @@ public class MainWindow {
 		accountQueryFields.add(balance);
 	}
 
+	private class TransactionMouseAdapter extends MouseAdapter 
+	{
+		public void mousePressed(MouseEvent evt)
+		{
+			if (evt.getClickCount() == 2)
+			{
+				JTable table = (JTable)evt.getSource();
+				int row = table.rowAtPoint(evt.getPoint());
+				int col = table.columnAtPoint(evt.getPoint());
+				if (col == 3)
+				{
+					ADDBrowser.doBatchQuery(
+						ADDBrowser.df.format(table.getValueAt(row, 1)), 
+						table.getValueAt(row, 3).toString());
+					tabbedPane.setSelectedIndex(BATCH_TAB_INDEX);
+				}
+				if (col == 4)
+				{
+					Map<String, String> acctQuery = new HashMap<String, String>();
+					acctQuery.put("full_account", table.getValueAt(row, 4).toString());
+					ADDBrowser.doAcctSearch(acctQuery);
+					tabbedPane.setSelectedIndex(ACCT_TAB_INDEX);
+				}
+			}
+		}
+	}
+
+	public JTable getSelectedTable()
+	{
+		switch (tabbedPane.getSelectedIndex())
+		{
+		case LOG_TAB_INDEX:   return logTable;
+		case DOC_TAB_INDEX:   return documentsTable;
+		case BATCH_TAB_INDEX: return batchTable;
+		case TRANS_TAB_INDEX: return transTable;
+		}
+		return null;
+	}
+
+	public void enableQueries(boolean b)
+		{
+			btnAccounts.setEnabled(b);
+//			btnLogs.setEnabled(b);
+	//		btnDocuments.setEnabled(b);
+			btnBatches.setEnabled(b);
+			btnTransactions.setEnabled(b);
 	
+			btnAcctSearch.setEnabled(b);
+			btnAcctClear.setEnabled(b);
+			btnAcctLogs.setEnabled(b);
+	//		btnAcctDocuments.setEnabled(b);
+			btnAcctTransactions.setEnabled(b);
+			
+			btnDivision.setEnabled(b);
+			btnType.setEnabled(b);
+			btnCategory.setEnabled(b);
+			
+			for (JTextField fld : accountQueryFields)
+			{
+				fld.setEnabled(b);
+			}
+		}
+
+	void doConnect()
+	{
+		if (connectDialog == null)
+			connectDialog = new ConnectDialog();
+		connectDialog.OKpressed = false;
+		connectDialog.setVisible(true);
+		if (connectDialog.OKpressed)
+		{
+			try {
+				ADDBrowser.doConnect((String)(connectDialog.jdbcDriver.getSelectedItem()),
+						connectDialog.serverName.getText(),
+						connectDialog.serverPort.getText(),
+						connectDialog.databaseName.getText(),
+						connectDialog.userName.getText(),
+						new String(connectDialog.password.getPassword()),
+						Integer.parseInt(connectDialog.maxDebitPostingCode.getText()),
+						Integer.parseInt(connectDialog.maxPostingCode.getText()),
+						connectDialog.invalidPClabel.getText(),
+						connectDialog.chckbxTypesUniform.isSelected());
+				enableQueries(true);
+			}
+			catch (Exception e)
+			{
+				enableQueries(false);
+			}
+			doClearAcct();
+		}
+		connectDialog.setVisible(false);
+	}
+
+	public void newPostCodes(Vector<PostingCode> postingCodes)
+	{
+		if (transactionQueryDialog != null)
+			transactionQueryDialog.newPostingCodes(postingCodes);
+	}
+
+	private void doExport()
+	{
+		if (chooser == null)
+		{
+			chooser = new JFileChooser();
+			FileNameExtensionFilter filter = new FileNameExtensionFilter("Tab Separated Values", "tsv");
+			chooser.setFileFilter(filter);
+		}
+		
+		int retval = chooser.showSaveDialog(frmAddDataBrowser);
+		if (retval == JFileChooser.APPROVE_OPTION)
+		{
+			try
+			{
+				JTable selected = getSelectedTable();
+				if (selected == null)
+					return;
+				FileWriter out = new FileWriter(chooser.getSelectedFile());
+				if (selected == batchTable || selected == transTable)
+				{
+					BatchTable tbl = (BatchTable)selected.getModel();
+					tbl.doExport(out);
+				}
+				else if (selected == logTable)
+				{
+					LogTable tbl = (LogTable)selected.getModel();
+					tbl.doExport(out);
+				}
+			} 
+			catch (IOException e) {
+				e.printStackTrace();
+				JOptionPane.showMessageDialog(frmAddDataBrowser, "File write failed:" + e, "File write failed", JOptionPane.ERROR_MESSAGE);
+			}
+		}
+	}
+
+	public void setExportButtonState()
+	{
+		JTable selected = getSelectedTable();
+		if (selected == null)
+			btnExport.setEnabled(false);
+		else if (selected.getModel().getRowCount() > 0)
+		{
+			btnExport.setEnabled(true);
+			mntmExport.setEnabled(true);
+		}
+		else
+		{
+			btnExport.setEnabled(false);
+			mntmExport.setEnabled(false);
+		}
+	}
+
+	protected void doAcctSearch()
+	{
+		Map<String, String> acctQuery = new HashMap<String, String>();
+		
+		for (JTextField fld : accountQueryFields)
+		{
+			String val  = fld.getText();
+			if (val != null && val.length() != 0)
+			{
+				acctQuery.put(fld.getName(), val);
+			}
+		}
+		
+		if (acctQuery.size() == 0)
+		{
+			JOptionPane.showMessageDialog(frmAddDataBrowser, "No query specified", "Account Query error", JOptionPane.ERROR_MESSAGE);
+			return;
+		}
+		ADDBrowser.doAcctSearch(acctQuery);
+	}
+
+	public void accountResults(List<Account> accounts)
+	{
+		Account toDisplay = null;
+		if (accounts.size() == 1)
+			toDisplay = (Account)accounts.toArray()[0];
+		else
+		{
+			toDisplay = (Account)JOptionPane.showInputDialog(this.frmAddDataBrowser, "Select an account", "Multiple Accounts Matched",
+					JOptionPane.PLAIN_MESSAGE, null, accounts.toArray(), null);
+		}
+	
+		if (toDisplay == null)
+			return;
+	
+		accountNumber.setText(toDisplay.full_account);
+		sortCode.setText(toDisplay.sort_code);
+		name.setText(toDisplay.name);
+		title.setText(toDisplay.title);
+		firstName.setText(toDisplay.first_name);
+		middleInitial.setText(toDisplay.middle_initial);
+		lastName.setText(toDisplay.last_name);
+		nameSuffix.setText(toDisplay.name_suffix);
+		street1.setText(toDisplay.street1);
+		street2.setText(toDisplay.street2);
+		city.setText(toDisplay.city);
+		state.setText(toDisplay.state);
+		zipCode.setText(toDisplay.postal_code);
+		division.setText(toDisplay.division.toString());
+		category.setText(toDisplay.category.toString());
+		type.setText(toDisplay.type.toString());
+		NumberFormat nf2 = NumberFormat.getNumberInstance();
+		nf2.setMaximumFractionDigits(2);
+		nf2.setMinimumFractionDigits(2);
+		balance.setText(nf2.format(toDisplay.balance));
+	}
+
+	protected void doClearAcct()
+	{
+		for (JTextField field : accountQueryFields)
+		{
+			field.setText("");
+		}
+	}
+
 	protected void doDivisionButton()
 	{
 		MultiSelectDialog<Division> dlg = 
@@ -910,34 +1218,49 @@ public class MainWindow {
 	}
 
 	
-	protected void doAcctSearch()
+	protected void doLogSearch()
 	{
-		Map<String, String> acctQuery = new HashMap<String, String>();
 		
-		for (JTextField fld : accountQueryFields)
-		{
-			String val  = fld.getText();
-			if (val != null && val.length() != 0)
-			{
-				acctQuery.put(fld.getName(), val);
-			}
-		}
-		
-		if (acctQuery.size() == 0)
-		{
-			JOptionPane.showMessageDialog(frmAddDataBrowser, "No query specified", "Account Query error", JOptionPane.ERROR_MESSAGE);
-			return;
-		}
-		ADDBrowser.doAcctSearch(acctQuery);
 	}
 
-	
-	protected void doClearAcct()
+	private class LogListener implements ListSelectionListener
 	{
-		for (JTextField field : accountQueryFields)
+		@Override
+		public void valueChanged(ListSelectionEvent e)
 		{
-			field.setText("");
+			int r = logTable.getSelectedRowCount();
+			if (r == 0)
+			{
+				logResolveNotes.setText("");
+			}
+			else if (r == 1)
+			{
+				int row = logTable.getSelectedRow();
+				row = logTable.convertRowIndexToModel(row);
+				LogTable lt = (LogTable)logTable.getModel();
+				logNotes.setText(lt.notes.get(row));
+				String foo = lt.resolvedNotes.get(row);
+				logResolveNotes.setText(foo);
+				ADDBrowser.doLogDetail(lt.acctNums.get(row), lt.log_hdr_ids.get(row), lt.log_tmpl_hdr_ids.get(row));
+			}
+			else
+			{
+				// whoa! should only be single select
+				logResolveNotes.setText("Multiple logs selected...");
+			}
 		}
+	}
+
+	public void newLogs(ResultSet results)
+	{
+		
+	}
+
+	public void newLogDetail(ResultSet results) throws SQLException
+	{
+		LogDetailTable dt = new LogDetailTable();
+		dt.newResults(results);
+		logDetailsTable.setModel(dt);
 	}
 
 	protected void doBatchQuery()
@@ -1016,192 +1339,8 @@ public class MainWindow {
 	}
 
 	
-	void doConnect()
-	{
-		if (connectDialog == null)
-			connectDialog = new ConnectDialog();
-		connectDialog.OKpressed = false;
-		connectDialog.setVisible(true);
-		if (connectDialog.OKpressed)
-		{
-			try {
-				ADDBrowser.doConnect((String)(connectDialog.jdbcDriver.getSelectedItem()),
-						connectDialog.serverName.getText(),
-						connectDialog.serverPort.getText(),
-						connectDialog.databaseName.getText(),
-						connectDialog.userName.getText(),
-						new String(connectDialog.password.getPassword()),
-						Integer.parseInt(connectDialog.maxDebitPostingCode.getText()),
-						Integer.parseInt(connectDialog.maxPostingCode.getText()),
-						connectDialog.invalidPClabel.getText(),
-						connectDialog.chckbxTypesUniform.isSelected());
-				enableQueries(true);
-			}
-			catch (Exception e)
-			{
-				enableQueries(false);
-			}
-			doClearAcct();
-		}
-		connectDialog.setVisible(false);
-	}
-
 	private void doExit()
 	{
 		System.exit(0);
-	}
-
-	public void enableQueries(boolean b)
-	{
-		btnAccounts.setEnabled(b);
-//		btnLogs.setEnabled(b);
-//		btnDocuments.setEnabled(b);
-		btnBatches.setEnabled(b);
-		btnTransactions.setEnabled(b);
-
-		btnAcctSearch.setEnabled(b);
-		btnAcctClear.setEnabled(b);
-//		btnAcctLogs.setEnabled(b);
-//		btnAcctDocuments.setEnabled(b);
-		btnAcctTransactions.setEnabled(b);
-		
-		btnDivision.setEnabled(b);
-		btnType.setEnabled(b);
-		btnCategory.setEnabled(b);
-		
-		for (JTextField fld : accountQueryFields)
-		{
-			fld.setEnabled(b);
-		}
-	}
-
-	public JTable getSelectedTable()
-	{
-		switch (tabbedPane.getSelectedIndex())
-		{
-		case LOG_TAB_INDEX:   return logsTable;
-		case DOC_TAB_INDEX:   return documentsTable;
-		case BATCH_TAB_INDEX: return batchTable;
-		case TRANS_TAB_INDEX: return transTable;
-		}
-		return null;
-	}
-	
-	public void setExportButtonState()
-	{
-		JTable selected = getSelectedTable();
-		if (selected == null)
-			btnExport.setEnabled(false);
-		else if (selected.getModel().getRowCount() > 0)
-		{
-			btnExport.setEnabled(true);
-			mntmExport.setEnabled(true);
-		}
-		else
-		{
-			btnExport.setEnabled(false);
-			mntmExport.setEnabled(false);
-		}
-	}
-	
-
-	private void doExport()
-	{
-		if (chooser == null)
-		{
-			chooser = new JFileChooser();
-			FileNameExtensionFilter filter = new FileNameExtensionFilter("Tab Separated Values", "tsv");
-			chooser.setFileFilter(filter);
-		}
-		
-		int retval = chooser.showSaveDialog(frmAddDataBrowser);
-		if (retval == JFileChooser.APPROVE_OPTION)
-		{
-			try
-			{
-				JTable selected = getSelectedTable();
-				if (selected == null)
-					return;
-				FileWriter out = new FileWriter(chooser.getSelectedFile());
-				if (selected == batchTable || selected == transTable)
-				{
-					BatchTable tbl = (BatchTable)selected.getModel();
-					tbl.doExport(out);
-				}
-			} 
-			catch (IOException e) {
-				e.printStackTrace();
-				JOptionPane.showMessageDialog(frmAddDataBrowser, "File write failed:" + e, "File write failed", JOptionPane.ERROR_MESSAGE);
-			}
-		}
-	}
-
-	public void newPostCodes(Vector<PostingCode> postingCodes)
-	{
-		if (transactionQueryDialog != null)
-			transactionQueryDialog.newPostingCodes(postingCodes);
-	}
-
-	public void accountResults(List<Account> accounts)
-	{
-		Account toDisplay = null;
-		if (accounts.size() == 1)
-			toDisplay = (Account)accounts.toArray()[0];
-		else
-		{
-			toDisplay = (Account)JOptionPane.showInputDialog(this.frmAddDataBrowser, "Select an account", "Multiple Accounts Matched",
-					JOptionPane.PLAIN_MESSAGE, null, accounts.toArray(), null);
-		}
-	
-		if (toDisplay == null)
-			return;
-
-		accountNumber.setText(toDisplay.full_account);
-		sortCode.setText(toDisplay.sort_code);
-		name.setText(toDisplay.name);
-		title.setText(toDisplay.title);
-		firstName.setText(toDisplay.first_name);
-		middleInitial.setText(toDisplay.middle_initial);
-		lastName.setText(toDisplay.last_name);
-		nameSuffix.setText(toDisplay.name_suffix);
-		street1.setText(toDisplay.street1);
-		street2.setText(toDisplay.street2);
-		city.setText(toDisplay.city);
-		state.setText(toDisplay.state);
-		zipCode.setText(toDisplay.postal_code);
-		division.setText(toDisplay.division.toString());
-		category.setText(toDisplay.category.toString());
-		type.setText(toDisplay.type.toString());
-		NumberFormat nf2 = NumberFormat.getNumberInstance();
-		nf2.setMaximumFractionDigits(2);
-		nf2.setMinimumFractionDigits(2);
-		balance.setText(nf2.format(toDisplay.balance));
-	}
-
-	private class TransactionMouseAdapter extends MouseAdapter 
-	{
-		public void mousePressed(MouseEvent evt)
-		{
-			if (evt.getClickCount() == 2)
-			{
-				JTable table = (JTable)evt.getSource();
-				int row = table.rowAtPoint(evt.getPoint());
-				int col = table.columnAtPoint(evt.getPoint());
-				if (col == 3)
-				{
-					ADDBrowser.doBatchQuery(
-						ADDBrowser.df.format(table.getValueAt(row, 1)), 
-						table.getValueAt(row, 3).toString());
-					tabbedPane.setSelectedIndex(BATCH_TAB_INDEX);
-				}
-				if (col == 4)
-				{
-					Map<String, String> acctQuery = new HashMap<String, String>();
-					acctQuery.put("full_account", table.getValueAt(row, 4).toString());
-					ADDBrowser.doAcctSearch(acctQuery);
-					tabbedPane.setSelectedIndex(ACCT_TAB_INDEX);
-				}
-			}
-		}
 	}
 }
