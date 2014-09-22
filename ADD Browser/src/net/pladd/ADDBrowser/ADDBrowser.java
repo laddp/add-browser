@@ -179,7 +179,7 @@ public class ADDBrowser {
 			{
 				postingCodes.add(new PostingCode(results.getInt(1), results.getString(2)));
 			}
-			mainWindow.newPostCodes(postingCodes);
+			mainWindow.newCodes(postingCodes, null, null);
 		}
 		catch (SQLException e)
 		{

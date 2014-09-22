@@ -53,6 +53,7 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 import net.pladd.ADDBrowser.E3types.Account;
 import net.pladd.ADDBrowser.E3types.Category;
 import net.pladd.ADDBrowser.E3types.Division;
+import net.pladd.ADDBrowser.E3types.LogGroup;
 import net.pladd.ADDBrowser.E3types.PostingCode;
 import net.pladd.ADDBrowser.E3types.Type;
 
@@ -82,6 +83,7 @@ public class MainWindow {
 	private TransactionQueryDialog transactionQueryDialog = null; 
 	private BatchQueryDialog batchQueryDialog = null;
 	private JFileChooser chooser = null;
+	private LogQueryDialog logQueryDialog = null; 
 
 	// Toolbar buttons
 	private JButton btnExport;
@@ -1009,10 +1011,15 @@ public class MainWindow {
 		connectDialog.setVisible(false);
 	}
 
-	public void newPostCodes(Vector<PostingCode> postingCodes)
+	public void newCodes(Vector<PostingCode> postingCodes, Vector<LogGroup> logCategories, Vector<LogGroup> logTypes)
 	{
 		if (transactionQueryDialog != null)
 			transactionQueryDialog.newPostingCodes(postingCodes);
+		if (logQueryDialog != null)
+		{
+			logQueryDialog.newCats(logCategories);
+			logQueryDialog.newTypes(logTypes);
+		}
 	}
 
 	private void doExport()
