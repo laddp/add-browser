@@ -25,6 +25,8 @@ import javax.swing.JOptionPane;
 import net.pladd.ADDBrowser.E3types.Account;
 import net.pladd.ADDBrowser.E3types.Category;
 import net.pladd.ADDBrowser.E3types.Division;
+import net.pladd.ADDBrowser.E3types.LogCategory;
+import net.pladd.ADDBrowser.E3types.LogType;
 import net.pladd.ADDBrowser.E3types.PostingCode;
 import net.pladd.ADDBrowser.E3types.Type;
 
@@ -46,10 +48,13 @@ public class ADDBrowser {
 	protected static DateFormat df = new SimpleDateFormat("yyyy-MM-dd");
 	protected static DateFormat tm = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 	
-	protected static Vector<PostingCode>    postingCodes = new Vector<PostingCode>();
-	public    static Map<Integer, Division> divisions    = new TreeMap<Integer, Division>();
-	public    static Map<Integer, Category> categories   = new TreeMap<Integer, Category>();
-	public    static Map<String,  Type>     types        = new TreeMap<String, Type>();
+	protected static Vector<PostingCode>       postingCodes  = new Vector<PostingCode>();
+	public    static Map<Integer, Division>    divisions     = new TreeMap<Integer, Division>();
+	public    static Map<Integer, Category>    categories    = new TreeMap<Integer, Category>();
+	public    static Map<String,  Type>        types         = new TreeMap<String, Type>();
+	
+	public    static Map<String,  LogCategory> logCategories = new TreeMap<String,  LogCategory>();
+	public    static Map<Integer, LogType>     logTypes      = new TreeMap<Integer, LogType>();
 	
 	/**
 	 * @param args
@@ -143,6 +148,8 @@ public class ADDBrowser {
 		fetchCategories();
 		fetchDivisions();
 		fetchTypes();
+		fetchLogCategories();
+		fetchLogTypes();
 
 		try {
 			Statement stmt = dataSource.createStatement();
@@ -258,6 +265,52 @@ public class ADDBrowser {
 		{
 			System.out.println(e);
 			JOptionPane.showMessageDialog(mainWindow.frmAddDataBrowser, "Error fetching category info:" + e, "Setup problem", JOptionPane.ERROR_MESSAGE);
+			throw e;
+		}
+	}
+
+	private static void fetchLogCategories() throws SQLException
+	{
+		try {
+			Statement stmt = dataSource.createStatement();
+			ResultSet results = stmt.executeQuery(
+					"SELECT log_group_id, log_category_id, log_category_desc " +
+							"FROM " + tablePrefix + "LOG_CATEGORY ");
+	
+			logCategories.clear();
+			while (results.next())
+			{
+				logCategories.put("" + results.getInt(1) + "-" + results.getInt(2),
+						new LogCategory(results.getInt(1), results.getInt(2), results.getString(3)));
+			}
+		}
+		catch (SQLException e)
+		{
+			System.out.println(e);
+			JOptionPane.showMessageDialog(mainWindow.frmAddDataBrowser, "Error fetching log category info:" + e, "Setup problem", JOptionPane.ERROR_MESSAGE);
+			throw e;
+		}
+	}
+
+	private static void fetchLogTypes() throws SQLException
+	{
+		try {
+			Statement stmt = dataSource.createStatement();
+			ResultSet results = stmt.executeQuery(
+					"SELECT log_template_header_id, log_template_long_desc " +
+							"FROM " + tablePrefix + "LOG_TEMPLATE_HEADER ");
+	
+			logTypes.clear();
+			while (results.next())
+			{
+				logTypes.put(results.getInt(1),
+						new LogType(results.getInt(1), results.getString(2)));
+			}
+		}
+		catch (SQLException e)
+		{
+			System.out.println(e);
+			JOptionPane.showMessageDialog(mainWindow.frmAddDataBrowser, "Error fetching log type info:" + e, "Setup problem", JOptionPane.ERROR_MESSAGE);
 			throw e;
 		}
 	}

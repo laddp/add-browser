@@ -53,7 +53,8 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 import net.pladd.ADDBrowser.E3types.Account;
 import net.pladd.ADDBrowser.E3types.Category;
 import net.pladd.ADDBrowser.E3types.Division;
-import net.pladd.ADDBrowser.E3types.LogGroup;
+import net.pladd.ADDBrowser.E3types.LogCategory;
+import net.pladd.ADDBrowser.E3types.LogType;
 import net.pladd.ADDBrowser.E3types.PostingCode;
 import net.pladd.ADDBrowser.E3types.Type;
 
@@ -1011,13 +1012,13 @@ public class MainWindow {
 		connectDialog.setVisible(false);
 	}
 
-	public void newCodes(Vector<PostingCode> postingCodes, Vector<LogGroup> logCategories, Vector<LogGroup> logTypes)
+	public void newCodes(Vector<PostingCode> postingCodes, Vector<LogCategory> logCategories, Vector<LogType> logTypes)
 	{
 		if (transactionQueryDialog != null)
 			transactionQueryDialog.newPostingCodes(postingCodes);
 		if (logQueryDialog != null)
 		{
-			logQueryDialog.newCats(logCategories);
+			logQueryDialog.newCategories(logCategories);
 			logQueryDialog.newTypes(logTypes);
 		}
 	}

@@ -20,8 +20,8 @@ import javax.swing.border.EmptyBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
-import net.pladd.ADDBrowser.E3types.LogGroup;
-import net.pladd.ADDBrowser.E3types.PostingCode;
+import net.pladd.ADDBrowser.E3types.LogCategory;
+import net.pladd.ADDBrowser.E3types.LogType;
 
 public class LogQueryDialog extends JDialog {
 
@@ -40,9 +40,9 @@ public class LogQueryDialog extends JDialog {
 	protected JCheckBox chckbxEndDate;
 	protected JTextField endDate;
 	protected JCheckBox chckbxLogCategory;
-	protected JList<LogGroup> logGroups;
+	protected JList<LogCategory> logCategories;
 	protected JCheckBox chckbxLogType;
-	protected JList<LogGroup> logType;
+	protected JList<LogType> logTypes;
 	private JCheckBox chckbxLogMessage;
 	private JTextField logMessage;
 
@@ -50,7 +50,7 @@ public class LogQueryDialog extends JDialog {
 	/**
 	 * Create the dialog.
 	 */
-	public LogQueryDialog(Vector<PostingCode> postCodes) {
+	public LogQueryDialog(Vector<LogCategory> logCat, Vector<LogType> logType) {
 		setModalExclusionType(ModalExclusionType.APPLICATION_EXCLUDE);
 		setModal(true);
 		thisDialog = this;
@@ -94,7 +94,7 @@ public class LogQueryDialog extends JDialog {
 			chckbxLogCategory = new JCheckBox("Log Category");
 			chckbxLogCategory.addChangeListener(new ChangeListener() {
 				public void stateChanged(ChangeEvent arg0) {
-					logGroups.setEnabled(chckbxLogCategory.isSelected());
+					logCategories.setEnabled(chckbxLogCategory.isSelected());
 				}
 			});
 			{
@@ -155,25 +155,25 @@ public class LogQueryDialog extends JDialog {
 			contentPanel.add(chckbxLogCategory, gbc_chckbxLogCategory);
 		}
 		{
-			JScrollPane groupScrollPane = new JScrollPane();
-			GridBagConstraints gbc_groupScrollPane = new GridBagConstraints();
-			gbc_groupScrollPane.anchor = GridBagConstraints.WEST;
-			gbc_groupScrollPane.fill = GridBagConstraints.BOTH;
-			gbc_groupScrollPane.insets = new Insets(0, 0, 5, 0);
-			gbc_groupScrollPane.gridx = 1;
-			gbc_groupScrollPane.gridy = 3;
-			contentPanel.add(groupScrollPane, gbc_groupScrollPane);
+			JScrollPane categoryScrollPane = new JScrollPane();
+			GridBagConstraints gbc_categoryScrollPane = new GridBagConstraints();
+			gbc_categoryScrollPane.anchor = GridBagConstraints.WEST;
+			gbc_categoryScrollPane.fill = GridBagConstraints.BOTH;
+			gbc_categoryScrollPane.insets = new Insets(0, 0, 5, 0);
+			gbc_categoryScrollPane.gridx = 1;
+			gbc_categoryScrollPane.gridy = 3;
+			contentPanel.add(categoryScrollPane, gbc_categoryScrollPane);
 			{
-				logGroups = new JList<LogGroup>();
-				groupScrollPane.setViewportView(logGroups);
-				logGroups.setEnabled(false);
+				logCategories = new JList<LogCategory>(logCat);
+				categoryScrollPane.setViewportView(logCategories);
+				logCategories.setEnabled(false);
 			}
 		}
 		{
 			chckbxLogType = new JCheckBox("Log Type");
 			chckbxLogType.addChangeListener(new ChangeListener() {
 				public void stateChanged(ChangeEvent arg0) {
-					logType.setEnabled(chckbxLogType.isSelected());
+					logTypes.setEnabled(chckbxLogType.isSelected());
 				}
 			});
 			GridBagConstraints gbc_chckbxLogType = new GridBagConstraints();
@@ -193,13 +193,18 @@ public class LogQueryDialog extends JDialog {
 			gbc_logTypeScrollPane.gridy = 4;
 			contentPanel.add(logTypeScrollPane, gbc_logTypeScrollPane);
 			{
-				logType = new JList<LogGroup>();
-				logTypeScrollPane.setViewportView(logType);
-				logType.setEnabled(false);
+				logTypes = new JList<LogType>(logType);
+				logTypeScrollPane.setViewportView(logTypes);
+				logTypes.setEnabled(false);
 			}
 		}
 		{
 			chckbxLogMessage = new JCheckBox("Log Message");
+			chckbxLogMessage.addChangeListener(new ChangeListener() {
+				public void stateChanged(ChangeEvent arg0) {
+					logMessage.setEnabled(chckbxLogMessage.isSelected());
+				}
+			});
 			GridBagConstraints gbc_chckbxLogMessage = new GridBagConstraints();
 			gbc_chckbxLogMessage.anchor = GridBagConstraints.WEST;
 			gbc_chckbxLogMessage.insets = new Insets(0, 0, 0, 5);
@@ -209,6 +214,7 @@ public class LogQueryDialog extends JDialog {
 		}
 		{
 			logMessage = new JTextField();
+			logMessage.setEnabled(false);
 			GridBagConstraints gbc_logMessage = new GridBagConstraints();
 			gbc_logMessage.fill = GridBagConstraints.HORIZONTAL;
 			gbc_logMessage.gridx = 1;
@@ -246,18 +252,13 @@ public class LogQueryDialog extends JDialog {
 		}
 	}
 
-	public void newPostingCodes(Vector<LogGroup> newCodes)
+	public void newCategories(Vector<LogCategory> newCodes)
 	{
-		logGroups.setListData(newCodes);
+		logCategories.setListData(newCodes);
 	}
 
-	public void newCats(Vector<LogGroup> logCategories) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	public void newTypes(Vector<LogGroup> logTypes) {
-		// TODO Auto-generated method stub
-		
+	public void newTypes(Vector<LogType> newTypes)
+	{
+		logTypes.setListData(newTypes);
 	}
 }
