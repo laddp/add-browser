@@ -522,7 +522,9 @@ public class ADDBrowser {
 					tablePrefix + "LOG_HEADER.note1 like '" + note + "' OR " +
 					tablePrefix + "LOG_HEADER.note2 like '" + note + "' OR " +
 					tablePrefix + "LOG_HEADER.note3 like '" + note + "' OR " +
-					tablePrefix + "LOG_HEADER.note4 like '" + note + "') ";
+					tablePrefix + "LOG_HEADER.note4 like '" + note + "' OR " +
+					tablePrefix + "LOG_HEADER.resolved_note1 like '" + note + "' OR " +
+					tablePrefix + "LOG_HEADER.resolved_note1 like '" + note + "') ";
 			}
 			
 			if (queryWhere.length() == 6)
