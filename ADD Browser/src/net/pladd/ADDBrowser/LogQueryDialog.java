@@ -7,7 +7,7 @@ import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.util.Vector;
+import java.util.Collection;
 
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
@@ -43,14 +43,14 @@ public class LogQueryDialog extends JDialog {
 	protected JList<LogCategory> logCategories;
 	protected JCheckBox chckbxLogType;
 	protected JList<LogType> logTypes;
-	private JCheckBox chckbxLogMessage;
-	private JTextField logMessage;
+	protected JCheckBox chckbxLogMessage;
+	protected JTextField logMessage;
 
 
 	/**
 	 * Create the dialog.
 	 */
-	public LogQueryDialog(Vector<LogCategory> logCat, Vector<LogType> logType) {
+	public LogQueryDialog(Collection<LogCategory> cats, Collection<LogType> types) {
 		setModalExclusionType(ModalExclusionType.APPLICATION_EXCLUDE);
 		setModal(true);
 		thisDialog = this;
@@ -164,7 +164,8 @@ public class LogQueryDialog extends JDialog {
 			gbc_categoryScrollPane.gridy = 3;
 			contentPanel.add(categoryScrollPane, gbc_categoryScrollPane);
 			{
-				logCategories = new JList<LogCategory>(logCat);
+				logCategories = new JList<LogCategory>();
+				logCategories.setListData(cats.toArray(new LogCategory[1]));
 				categoryScrollPane.setViewportView(logCategories);
 				logCategories.setEnabled(false);
 			}
@@ -193,7 +194,8 @@ public class LogQueryDialog extends JDialog {
 			gbc_logTypeScrollPane.gridy = 4;
 			contentPanel.add(logTypeScrollPane, gbc_logTypeScrollPane);
 			{
-				logTypes = new JList<LogType>(logType);
+				logTypes = new JList<LogType>();
+				logTypes.setListData(types.toArray(new LogType[1]));
 				logTypeScrollPane.setViewportView(logTypes);
 				logTypes.setEnabled(false);
 			}
@@ -252,12 +254,12 @@ public class LogQueryDialog extends JDialog {
 		}
 	}
 
-	public void newCategories(Vector<LogCategory> newCodes)
+	public void newCategories(LogCategory[] newCats)
 	{
-		logCategories.setListData(newCodes);
+		logCategories.setListData(newCats);
 	}
 
-	public void newTypes(Vector<LogType> newTypes)
+	public void newTypes(LogType[] newTypes)
 	{
 		logTypes.setListData(newTypes);
 	}

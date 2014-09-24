@@ -150,6 +150,7 @@ public class ADDBrowser {
 		fetchTypes();
 		fetchLogCategories();
 		fetchLogTypes();
+		mainWindow.newCodes(postingCodes, logCategories, logTypes);
 
 		try {
 			Statement stmt = dataSource.createStatement();
@@ -186,7 +187,6 @@ public class ADDBrowser {
 			{
 				postingCodes.add(new PostingCode(results.getInt(1), results.getString(2)));
 			}
-			mainWindow.newCodes(postingCodes, null, null);
 		}
 		catch (SQLException e)
 		{
@@ -435,7 +435,7 @@ public class ADDBrowser {
 		}
 	}
 
-	public static void doLogSearch(String full_account)
+	public static void doLogSearch(String full_account, String startDate, String endDate, List<LogCategory> catList, List<LogType> typeList, String note)
 	{
 		try {
 			Statement stmt = dataSource.createStatement();
@@ -470,7 +470,66 @@ public class ADDBrowser {
 			
 			String queryWhere = "WHERE ";
 			if (full_account != null)
-				queryWhere += "full_account like '" + full_account + "' ";
+				queryWhere += tablePrefix + "FULL_ACCOUNT.full_account like '" + full_account + "' ";
+			if (startDate != null)
+			{
+				if (queryWhere.length() != 6)
+					queryWhere += " AND ";
+				queryWhere += tablePrefix + "LOG_HEADER.create_dt >= '" + startDate + "' ";
+			}
+			if (endDate != null)
+			{
+				if (queryWhere.length() != 6)
+					queryWhere += " AND ";
+				queryWhere += tablePrefix + "LOG_HEADER.create_dt <= '" + endDate + "' ";
+			}
+			if (catList != null)
+			{
+				if (queryWhere.length() != 6)
+					queryWhere += " AND ";
+				queryWhere += "(";
+				boolean firstCat = true;
+				for (LogCategory cat : catList)
+				{
+					if (!firstCat)
+						queryWhere += " OR ";
+					firstCat = false;
+					queryWhere += "(" + tablePrefix + "LOG_TEMPLATE_HEADER.log_category_id = " + cat.categoryID + " and " +
+									    tablePrefix + "LOG_TEMPLATE_HEADER.log_group_id    = " + cat.groupID + ")";
+				}
+				queryWhere += ") ";
+			}
+			if (typeList != null)
+			{
+				if (queryWhere.length() != 6)
+					queryWhere += " AND ";
+				queryWhere += tablePrefix + "LOG_TEMPLATE_HEADER.log_template_header_id in (";
+				boolean firstType = true;
+				for (LogType type : typeList)
+				{
+					if (!firstType)
+						queryWhere += ", ";
+					firstType = false;
+					queryWhere += type.typeID;
+				}
+				queryWhere += ")";
+			}
+			if (note != null)
+			{
+				if (queryWhere.length() != 6)
+					queryWhere += " AND ";
+				queryWhere += "(" +
+					tablePrefix + "LOG_HEADER.note1 like '" + note + "' OR " +
+					tablePrefix + "LOG_HEADER.note2 like '" + note + "' OR " +
+					tablePrefix + "LOG_HEADER.note3 like '" + note + "' OR " +
+					tablePrefix + "LOG_HEADER.note4 like '" + note + "') ";
+			}
+			
+			if (queryWhere.length() == 6)
+			{
+				JOptionPane.showMessageDialog(mainWindow.frmAddDataBrowser, "No query specified", "Query Failed", JOptionPane.ERROR_MESSAGE);
+				return;
+			}
 			
 			String querySuffix = "ORDER BY " + 
 					tablePrefix + "LOG_HEADER.account_num, " +

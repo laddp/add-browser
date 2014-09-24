@@ -20,4 +20,9 @@ public class LogType
 		this.typeID = typeID;
 		this.description = description;
 	}
+	
+	public String toString()
+	{
+		return description;
+	}
 }

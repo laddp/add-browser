@@ -132,6 +132,7 @@ public class MainWindow {
 	private JTable logDetailsTable;
 	private JTextArea logNotes;
 	private JTextArea logResolveNotes;
+	private LogQueryDialog logQueryDlg = null;
 	
 	/**
 	 * Create the application.
@@ -328,7 +329,7 @@ public class MainWindow {
 		btnAcctLogs.setMnemonic('o');
 		btnAcctLogs.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				ADDBrowser.doLogSearch(accountNumber.getText());
+				ADDBrowser.doLogSearch(accountNumber.getText(), null, null, null, null, null);
 			}
 		});
 		btnAcctLogs.setEnabled(false);
@@ -961,7 +962,7 @@ public class MainWindow {
 	public void enableQueries(boolean b)
 		{
 			btnAccounts.setEnabled(b);
-//			btnLogs.setEnabled(b);
+			btnLogs.setEnabled(b);
 	//		btnDocuments.setEnabled(b);
 			btnBatches.setEnabled(b);
 			btnTransactions.setEnabled(b);
@@ -1012,14 +1013,14 @@ public class MainWindow {
 		connectDialog.setVisible(false);
 	}
 
-	public void newCodes(Vector<PostingCode> postingCodes, Vector<LogCategory> logCategories, Vector<LogType> logTypes)
+	public void newCodes(Vector<PostingCode> postingCodes, Map<String, LogCategory> logCategories, Map<Integer, LogType> logTypes)
 	{
 		if (transactionQueryDialog != null)
 			transactionQueryDialog.newPostingCodes(postingCodes);
 		if (logQueryDialog != null)
 		{
-			logQueryDialog.newCategories(logCategories);
-			logQueryDialog.newTypes(logTypes);
+			logQueryDialog.newCategories(logCategories.values().toArray(new LogCategory[1]));
+			logQueryDialog.newTypes(logTypes.values().toArray(new LogType[1]));
 		}
 	}
 
@@ -1228,7 +1229,19 @@ public class MainWindow {
 	
 	protected void doLogSearch()
 	{
-		
+		if (logQueryDlg == null)
+			logQueryDlg = new LogQueryDialog(ADDBrowser.logCategories.values(), ADDBrowser.logTypes.values());
+		logQueryDlg.setVisible(true);
+		if (logQueryDlg.OKpressed == true)
+		{
+			ADDBrowser.doLogSearch(
+					logQueryDlg.accountNum.isEnabled()    ? logQueryDlg.accountNum.getText() : null,
+					logQueryDlg.startDate.isEnabled()     ? logQueryDlg.startDate.getText()  : null,
+					logQueryDlg.endDate.isEnabled()       ? logQueryDlg.endDate.getText()    : null,
+					logQueryDlg.logCategories.isEnabled() ? logQueryDlg.logCategories.getSelectedValuesList() : null,
+					logQueryDlg.logTypes.isEnabled()      ? logQueryDlg.logTypes.getSelectedValuesList() : null,
+					logQueryDlg.logMessage.isEnabled()    ? logQueryDlg.logMessage.getText() : null);
+		}
 	}
 
 	private class LogListener implements ListSelectionListener
@@ -1257,11 +1270,6 @@ public class MainWindow {
 				logResolveNotes.setText("Multiple logs selected...");
 			}
 		}
-	}
-
-	public void newLogs(ResultSet results)
-	{
-		
 	}
 
 	public void newLogDetail(ResultSet results) throws SQLException
