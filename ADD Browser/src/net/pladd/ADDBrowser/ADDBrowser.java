@@ -651,7 +651,10 @@ public class ADDBrowser {
 							tablePrefix + "TRANS_MAIN.net_amount, " +
 							tablePrefix + "TRANS_MAIN.units, " +
 							tablePrefix + "TRANS_MAIN.ppg, " +
-							tablePrefix + "TRANS_MAIN.last_maintenance_userid " +
+							tablePrefix + "TRANS_MAIN.created_by, " +
+							tablePrefix + "TRANS_MAIN.last_maintenance_userid, " +
+							tablePrefix + "TRANS_MAIN.comment, " +
+							tablePrefix + "TRANS_MAIN.invoice_comment " +
 					"FROM " +
 						tablePrefix + "TRANS_MAIN inner join " + tablePrefix + "FULL_ACCOUNT ON " +
 							tablePrefix + "TRANS_MAIN.account_num = " + tablePrefix + "FULL_ACCOUNT.account_num " +
@@ -725,7 +728,10 @@ public class ADDBrowser {
 							tablePrefix + "TRANS_MAIN.net_amount, " +
 							tablePrefix + "TRANS_MAIN.units, " +
 							tablePrefix + "TRANS_MAIN.ppg, " +
-							tablePrefix + "TRANS_MAIN.last_maintenance_userid " +
+							tablePrefix + "TRANS_MAIN.created_by, " +
+							tablePrefix + "TRANS_MAIN.last_maintenance_userid, " +
+							tablePrefix + "TRANS_MAIN.comment, " +
+							tablePrefix + "TRANS_MAIN.invoice_comment " +
 					"FROM " +
 						tablePrefix + "TRANS_MAIN inner join " + tablePrefix + "FULL_ACCOUNT ON " +
 							tablePrefix + "TRANS_MAIN.account_num = " + tablePrefix + "FULL_ACCOUNT.account_num " +

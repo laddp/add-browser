@@ -35,23 +35,27 @@ public class BatchTable extends AbstractTableModel {
 			Arrays.asList("Event Date", "Posting Date", "Last Modified", "Batch #", 
 					"Full Account", "Name", "Type", 
 					"Posting Code", "Posting Code Descr", "Ref Num",
-					"Net Amount", "Credit Amount", "Debit Amount", "Units", "Price Per Gal", "User ID");
-	protected static final int COL_EVENT_DATE = 0;
-	protected static final int COL_POST_DATE  = 1;
-	protected static final int COL_TRANS_DATE = 2;
-	protected static final int COL_BATCH_NUM  = 3;
-	protected static final int COL_FULL_ACCT  = 4;
-	protected static final int COL_NAME       = 5;
-	protected static final int COL_TYPE       = 6;
-	protected static final int COL_POST_CODE  = 7;
-	protected static final int COL_POST_DESC  = 8;
-	protected static final int COL_REF_NUM    = 9;
-	protected static final int COL_AMT_NET    = 10;
-	protected static final int COL_AMT_CRED   = 11;
-	protected static final int COL_AMT_DEBIT  = 12;
-	protected static final int COL_UNITS      = 13;
-	protected static final int COL_PPG        = 14;
-	protected static final int COL_USERID     = 15;
+					"Net Amount", "Credit Amount", "Debit Amount", "Units", "Price Per Gal", "Created by", "Last User", "Comment", "Invoice Comment");
+	
+	protected static final int COL_EVENT_DATE  = 0;
+	protected static final int COL_POST_DATE   = 1;
+	protected static final int COL_TRANS_DATE  = 2;
+	protected static final int COL_BATCH_NUM   = 3;
+	protected static final int COL_FULL_ACCT   = 4;
+	protected static final int COL_NAME        = 5;
+	protected static final int COL_TYPE        = 6;
+	protected static final int COL_POST_CODE   = 7;
+	protected static final int COL_POST_DESC   = 8;
+	protected static final int COL_REF_NUM     = 9;
+	protected static final int COL_AMT_NET     = 10;
+	protected static final int COL_AMT_CRED    = 11;
+	protected static final int COL_AMT_DEBIT   = 12;
+	protected static final int COL_UNITS       = 13;
+	protected static final int COL_PPG         = 14;
+	protected static final int COL_CREATER     = 15;
+	protected static final int COL_USERID      = 16;
+	protected static final int COL_COMMENT     = 17;
+	protected static final int COL_INV_COMMENT = 18;
 
 	protected int rowCount;
 	protected BigDecimal totalAmt;
@@ -71,7 +75,10 @@ public class BatchTable extends AbstractTableModel {
 	private Vector<BigDecimal> netAmounts;
 	private Vector<BigDecimal> units;
 	private Vector<BigDecimal> ppgs;
-	private Vector<String>     userIDs;
+	private Vector<String>     createIDs;
+	private Vector<String>     lastIDs;
+	private Vector<String>     comments;
+	private Vector<String>     invComments;
 
 	public BatchTable()
 	{
@@ -89,7 +96,10 @@ public class BatchTable extends AbstractTableModel {
 		netAmounts   = new Vector<BigDecimal>();
 		units        = new Vector<BigDecimal>();
 		ppgs         = new Vector<BigDecimal>();
-		userIDs      = new Vector<String>();
+		createIDs    = new Vector<String>();
+		lastIDs      = new Vector<String>();
+		comments     = new Vector<String>();
+		invComments  = new Vector<String>();
 	}
 	
 	@Override
@@ -109,22 +119,25 @@ public class BatchTable extends AbstractTableModel {
 	{
 		switch (col)
 		{
-		case COL_EVENT_DATE: return Date.class;
-		case COL_POST_DATE:  return Date.class;
-		case COL_TRANS_DATE: return Date.class;
-		case COL_BATCH_NUM:  return Integer.class;
-		case COL_FULL_ACCT:  return Integer.class;
-		case COL_NAME:       return String.class;
-		case COL_TYPE:       return String.class;
-		case COL_POST_CODE:  return Integer.class;
-		case COL_POST_DESC:  return String.class;
-		case COL_REF_NUM:    return String.class;
-		case COL_AMT_NET:    return BigDecimal.class;
-		case COL_AMT_CRED:   return BigDecimal.class;
-		case COL_AMT_DEBIT:  return BigDecimal.class;
-		case COL_UNITS:      return BigDecimal.class;
-		case COL_PPG:        return BigDecimal.class;
-		case COL_USERID:     return String.class;
+		case COL_EVENT_DATE:  return Date.class;
+		case COL_POST_DATE:   return Date.class;
+		case COL_TRANS_DATE:  return Date.class;
+		case COL_BATCH_NUM:   return Integer.class;
+		case COL_FULL_ACCT:   return Integer.class;
+		case COL_NAME:        return String.class;
+		case COL_TYPE:        return String.class;
+		case COL_POST_CODE:   return Integer.class;
+		case COL_POST_DESC:   return String.class;
+		case COL_REF_NUM:     return String.class;
+		case COL_AMT_NET:     return BigDecimal.class;
+		case COL_AMT_CRED:    return BigDecimal.class;
+		case COL_AMT_DEBIT:   return BigDecimal.class;
+		case COL_UNITS:       return BigDecimal.class;
+		case COL_PPG:         return BigDecimal.class;
+		case COL_CREATER:     return String.class;
+		case COL_USERID:      return String.class;
+		case COL_COMMENT:     return String.class;
+		case COL_INV_COMMENT: return String.class;
 		default: return null;
 		}
 	}
@@ -166,22 +179,25 @@ public class BatchTable extends AbstractTableModel {
 	{
 		switch (col)
 		{
-		case COL_EVENT_DATE: return eventDates.get(row).getTime();
-		case COL_POST_DATE:  return postingDates.get(row).getTime();
-		case COL_TRANS_DATE: return transDates.get(row);
-		case COL_BATCH_NUM:  return batchNums.get(row);
-		case COL_FULL_ACCT:  return fullAccounts.get(row);
-		case COL_NAME:       return names.get(row);
-		case COL_TYPE:       return types.get(row);
-		case COL_POST_CODE:  return postCodes.get(row);
-		case COL_POST_DESC:  return postDescrs.get(row);
-		case COL_REF_NUM:    return refNums.get(row);
-		case COL_AMT_NET:    return amtToNet   (netAmounts.get(row), postCodes.get(row));
-		case COL_AMT_CRED:   return amtToCredit(netAmounts.get(row), postCodes.get(row));
-		case COL_AMT_DEBIT:  return amtToDebit (netAmounts.get(row), postCodes.get(row));
-		case COL_UNITS:      return units.get(row);
-		case COL_PPG:        return ppgs.get(row);
-		case COL_USERID:     return userIDs.get(row);
+		case COL_EVENT_DATE:  return eventDates.get(row).getTime();
+		case COL_POST_DATE:   return postingDates.get(row).getTime();
+		case COL_TRANS_DATE:  return transDates.get(row);
+		case COL_BATCH_NUM:   return batchNums.get(row);
+		case COL_FULL_ACCT:   return fullAccounts.get(row);
+		case COL_NAME:        return names.get(row);
+		case COL_TYPE:        return types.get(row);
+		case COL_POST_CODE:   return postCodes.get(row);
+		case COL_POST_DESC:   return postDescrs.get(row);
+		case COL_REF_NUM:     return refNums.get(row);
+		case COL_AMT_NET:     return amtToNet   (netAmounts.get(row), postCodes.get(row));
+		case COL_AMT_CRED:    return amtToCredit(netAmounts.get(row), postCodes.get(row));
+		case COL_AMT_DEBIT:   return amtToDebit (netAmounts.get(row), postCodes.get(row));
+		case COL_UNITS:       return units.get(row);
+		case COL_PPG:         return ppgs.get(row);
+		case COL_CREATER:     return createIDs.get(row);
+		case COL_USERID:      return lastIDs.get(row);
+		case COL_COMMENT:     return comments.get(row);
+		case COL_INV_COMMENT: return invComments.get(row);
 		default: return null;
 		}
 	}
@@ -206,7 +222,10 @@ public class BatchTable extends AbstractTableModel {
 		netAmounts.clear();
 		units.clear();
 		ppgs.clear();
-		userIDs.clear();
+		createIDs.clear();
+		lastIDs.clear();
+		comments.clear();
+		invComments.clear();
 		
 		while (results.next())
 		{
@@ -271,7 +290,16 @@ public class BatchTable extends AbstractTableModel {
 				ppgs.add(results.getBigDecimal(COL_AMT_NET+3).movePointLeft(2));
 			}
 			{
-				userIDs.add(results.getString(COL_AMT_NET+4));
+				createIDs.add(results.getString(COL_AMT_NET+4));
+			}
+			{
+				lastIDs.add(results.getString(COL_AMT_NET+5));
+			}
+			{
+				comments.add(results.getString(COL_AMT_NET+6));
+			}
+			{
+				invComments.add(results.getString(COL_AMT_NET+7));
 			}
 		}
 		
@@ -322,7 +350,10 @@ public class BatchTable extends AbstractTableModel {
 			out.write("$"+amtToDebit (netAmounts.get(row), postCodes.get(row))+"\t");
 			out.write(units.get(row)+"\t");
 			out.write("$"+ppgs.get(row)+"\t");
-			out.write(userIDs.get(row)+"\t");
+			out.write(createIDs.get(row)+"\t");
+			out.write(lastIDs.get(row)+"\t");
+			out.write(comments.get(row)+"\t");
+			out.write(invComments.get(row)+"\t");
 			out.write("\n");
 		}
 		out.close();
