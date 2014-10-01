@@ -52,14 +52,13 @@ public class DocTable extends AbstractTableModel {
 
 	protected int rowCount;
 	
-	
-	private Vector<Integer>  fullAccounts;
-	private Vector<Integer>  tankNums;
+	protected Vector<Integer>  fullAccounts;
+	protected Vector<Integer>  tankNums;
 	private Vector<Integer>  svcNums;
 	private Vector<String>   names;
 	private Vector<Integer>  refNums;
-	private Vector<String>   docTypes;
-	private Vector<Date>     dates;
+	protected Vector<String>   docTypes;
+	protected Vector<Date>     dates;
 	private Vector<Date>     maintDates;
 	private Vector<String>   maintUsers;
 

@@ -13,6 +13,7 @@ import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.sql.ResultSet;
@@ -86,7 +87,8 @@ public class MainWindow {
 	private ConnectDialog connectDialog = null;
 	private TransactionQueryDialog transactionQueryDialog = null; 
 	private BatchQueryDialog batchQueryDialog = null;
-	private JFileChooser chooser = null;
+	private JFileChooser tsvChooser = null;
+	private JFileChooser txtChooser = null;
 	private LogQueryDialog logQueryDlg = null;
 
 	// Toolbar buttons
@@ -138,6 +140,7 @@ public class MainWindow {
 
 	protected JTable docListTable;
 	protected JTextArea docContent;
+	private JButton btnExportDocContent;
 	
 	/**
 	 * Create the application.
@@ -347,7 +350,7 @@ public class MainWindow {
 				ADDBrowser.doDocSearch(accountNumber.getText());
 			}
 		});
-		btnAcctDocuments.setMnemonic('c');
+		btnAcctDocuments.setMnemonic('m');
 		btnAcctDocuments.setEnabled(false);
 		buttonPanel.add(btnAcctDocuments);
 		
@@ -876,16 +879,44 @@ public class MainWindow {
 		docListTable = new JTable();
 		docListTable.getSelectionModel().addListSelectionListener(new DocListener());
 		docListPane.setViewportView(docListTable);
+		JPanel docBottomHalf = new JPanel();
+		documentsTab.setRightComponent(docBottomHalf);
+		GridBagLayout gbl_docBottomHalf = new GridBagLayout();
+		gbl_docBottomHalf.columnWidths = new int[]{385, 0};
+		gbl_docBottomHalf.rowHeights = new int[]{24, 0, 0};
+		gbl_docBottomHalf.columnWeights = new double[]{1.0, Double.MIN_VALUE};
+		gbl_docBottomHalf.rowWeights = new double[]{1.0, 0.0, Double.MIN_VALUE};
+		docBottomHalf.setLayout(gbl_docBottomHalf);
 		
 		JScrollPane docContentPane = new JScrollPane();
-		documentsTab.setRightComponent(docContentPane);
+		
+		GridBagConstraints gbc_docContentPane = new GridBagConstraints();
+		gbc_docContentPane.insets = new Insets(0, 0, 5, 0);
+		gbc_docContentPane.fill = GridBagConstraints.BOTH;
+		gbc_docContentPane.gridx = 0;
+		gbc_docContentPane.gridy = 0;
+		docBottomHalf.add(docContentPane, gbc_docContentPane);
 		
 		docContent = new JTextArea();
-		docContent.setFont(new Font("Monospaced", Font.PLAIN, 13));
+		docContent.setFont(new Font("Monospaced", Font.PLAIN, 11));
 		docContent.setEditable(false);
 		DefaultCaret caret = (DefaultCaret) docContent.getCaret();
 		caret.setUpdatePolicy(DefaultCaret.NEVER_UPDATE);
 		docContentPane.setViewportView(docContent);
+		
+		btnExportDocContent = new JButton("Export...");
+		btnExportDocContent.setMnemonic('E');
+		btnExportDocContent.addActionListener(new ActionListener()
+		{
+			public void actionPerformed(ActionEvent e)
+			{
+				doExportDocContent();
+			}
+		});
+		GridBagConstraints gbc_btnExportDocContent = new GridBagConstraints();
+		gbc_btnExportDocContent.gridx = 0;
+		gbc_btnExportDocContent.gridy = 1;
+		docBottomHalf.add(btnExportDocContent, gbc_btnExportDocContent);
 		tabbedPane.setMnemonicAt(2, KeyEvent.VK_D);
 		
 		batchTable = new JTable();
@@ -1055,14 +1086,14 @@ public class MainWindow {
 
 	private void doExport()
 	{
-		if (chooser == null)
+		if (tsvChooser == null)
 		{
-			chooser = new JFileChooser();
+			tsvChooser = new JFileChooser();
 			FileNameExtensionFilter filter = new FileNameExtensionFilter("Tab Separated Values", "tsv");
-			chooser.setFileFilter(filter);
+			tsvChooser.setFileFilter(filter);
 		}
 		
-		int retval = chooser.showSaveDialog(frmAddDataBrowser);
+		int retval = tsvChooser.showSaveDialog(frmAddDataBrowser);
 		if (retval == JFileChooser.APPROVE_OPTION)
 		{
 			try
@@ -1070,7 +1101,10 @@ public class MainWindow {
 				JTable selected = getSelectedTable();
 				if (selected == null)
 					return;
-				FileWriter out = new FileWriter(chooser.getSelectedFile());
+				File f = tsvChooser.getSelectedFile();
+				if (!f.getName().endsWith(".tsv"))
+					f = new File(f.getAbsolutePath()+".tsv");
+				FileWriter out = new FileWriter(f);
 				if (selected == batchTable || selected == transTable)
 				{
 					BatchTable tbl = (BatchTable)selected.getModel();
@@ -1081,6 +1115,46 @@ public class MainWindow {
 					LogTable tbl = (LogTable)selected.getModel();
 					tbl.doExport(out);
 				}
+			} 
+			catch (IOException e) {
+				e.printStackTrace();
+				JOptionPane.showMessageDialog(frmAddDataBrowser, "File write failed:" + e, "File write failed", JOptionPane.ERROR_MESSAGE);
+			}
+		}
+	}
+
+	protected void doExportDocContent()
+	{
+		if (txtChooser == null)
+		{
+			txtChooser = new JFileChooser();
+			FileNameExtensionFilter filter = new FileNameExtensionFilter("Text Files", "txt");
+			txtChooser.setFileFilter(filter);
+		}
+
+		if (docListTable != null && docListTable.getSelectedRowCount() == 1)
+		{
+			int row = docListTable.getSelectedRow();
+			row = docListTable.convertRowIndexToModel(row);
+			DocTable dt = (DocTable)docListTable.getModel();
+			String fn = "" + dt.fullAccounts.get(row);
+			if (dt.tankNums.get(row) != 0)
+				fn += "-" + dt.tankNums.get(row);
+			fn += " - " + ADDBrowser.df.format(dt.dates.get(row)) + " " + dt.docTypes.get(row);
+			txtChooser.setSelectedFile(new File(fn));
+		}
+
+		int retval = txtChooser.showSaveDialog(frmAddDataBrowser);
+		if (retval == JFileChooser.APPROVE_OPTION)
+		{
+			try
+			{
+				File f = tsvChooser.getSelectedFile();
+				if (!f.getName().endsWith(".txt"))
+					f = new File(f.getAbsolutePath()+".txt");
+				FileWriter out = new FileWriter(f);
+				out.write(docContent.getText());
+				out.close();
 			} 
 			catch (IOException e) {
 				e.printStackTrace();
