@@ -35,6 +35,10 @@ public class DocTable extends AbstractTableModel {
 			Arrays.asList("Full Account", "Tank #", "Svc #", "Name", "Ref #", 
 					"Doc Type", "Date", "Last Maint", "Last Modified by");
 	
+	private final Object[] longValues = { new Integer("9999999"), new Integer("999"), new Integer("999"),
+			"MMMMMMMMMMMMMMMMMMMMMMMMMMMMMM", new Integer("999999"),
+			"MMMMMMMMMMMMMMMMMMMM", new Date(), new Date(), "MMMMMMMMMMMMMMM" };
+	
 	protected static final int COL_FULL_ACCT  = 0;
 	protected static final int COL_TANK_NUM   = 1;
 	protected static final int COL_SVC_NUM    = 2;
@@ -47,6 +51,7 @@ public class DocTable extends AbstractTableModel {
 	protected static final int COL_DOC_ID     = 9;
 
 	protected int rowCount;
+	
 	
 	private Vector<Integer>  fullAccounts;
 	private Vector<Integer>  tankNums;
@@ -202,6 +207,8 @@ public class DocTable extends AbstractTableModel {
 
 		table.getColumnModel().getColumn(COL_DATE)    .setCellRenderer(new FormatRenderer(ADDBrowser.tm));
 		table.getColumnModel().getColumn(COL_MAINT_DT).setCellRenderer(new FormatRenderer(ADDBrowser.tm));
+		
+		Util.initColumnSizes(table, longValues);
 	}
 	
 	protected void doExport(FileWriter out) throws IOException

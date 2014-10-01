@@ -37,6 +37,13 @@ public class LogTable extends AbstractTableModel {
 					"Resolved", "Resolved Date", "Resolved by", "Last Modified", "Last Modified by",  
 					"Log template", "Notes", "Resolved Note");
 	
+	private final Object[] longValues = {
+			new Integer("9999999"), "MMMMMMMMMMM", new Integer("999"),
+			new Date(), "MMMMMMMMMMM", 
+			new Boolean(true), new Date(), "MMMMMMMMMMM", new Date(), "MMMMMMMMMMM",
+			"MMMMMMMMMMMMMMMMM", "MMMMMMMMMMMMMMMMMMMM", "MMMMMMMMMMMMMMMMMMMM" };
+
+	
 	protected static final int COL_FULL_ACCT     = 0;
 	protected static final int COL_LOC_TYPE      = 1;
 	protected static final int COL_LOC_NUM       = 2;
@@ -309,6 +316,8 @@ public class LogTable extends AbstractTableModel {
 		table.getColumnModel().getColumn(COL_CREATE_DT)  .setCellRenderer(new FormatRenderer(ADDBrowser.tm));
 		table.getColumnModel().getColumn(COL_RESOVLED_DT).setCellRenderer(new FormatRenderer(ADDBrowser.df));
 		table.getColumnModel().getColumn(COL_MAINT_DT)   .setCellRenderer(new FormatRenderer(ADDBrowser.tm));
+		
+		Util.initColumnSizes(table, longValues);
 	}
 	
 	protected void doExport(FileWriter out) throws IOException

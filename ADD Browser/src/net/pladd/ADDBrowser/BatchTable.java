@@ -35,7 +35,16 @@ public class BatchTable extends AbstractTableModel {
 			Arrays.asList("Event Date", "Posting Date", "Last Modified", "Batch #", 
 					"Full Account", "Name", "Type", 
 					"Posting Code", "Posting Code Descr", "Ref Num",
-					"Net Amount", "Credit Amount", "Debit Amount", "Units", "Price Per Gal", "Created by", "Last User", "Comment", "Invoice Comment");
+					"Net Amount", "Credit Amount", "Debit Amount",
+					"Units", "Price Per Gal", 
+					"Created by", "Last User", "Comment", "Invoice Comment");
+	
+	private final Object[] longValues = { new Date(), new Date(), new Date(), new Integer("999"),
+			new Integer("9999999"), "MMMMMMMMMMMMMMMMM", "MMMMMMMMMMMMMM",
+			new Integer("999"), "MMMMMMMMMMMMMMMMMMMM", new Integer("999999"),
+			new BigDecimal("9999999.99"), new BigDecimal("9999999.99"), new BigDecimal("9999999.99"),
+			new BigDecimal("999999.9"), new BigDecimal("9999.99999"),
+			"MMMMMMMMMMM", "MMMMMMMMMM", "MMMMMMMMMMMMM", "MMMMMMM"};
 	
 	protected static final int COL_EVENT_DATE  = 0;
 	protected static final int COL_POST_DATE   = 1;
@@ -323,6 +332,8 @@ public class BatchTable extends AbstractTableModel {
 		NumberFormat nf5 = NumberFormat.getCurrencyInstance();
 		nf5.setMinimumFractionDigits(5);
 		table.getColumnModel().getColumn(BatchTable.COL_PPG       ).setCellRenderer(new NumberRenderer(nf5));
+		
+		Util.initColumnSizes(table, longValues);
 	}
 	
 	protected void doExport(FileWriter out) throws IOException
