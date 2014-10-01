@@ -548,6 +548,9 @@ public class ADDBrowser {
 				mainWindow.logTable.setModel(logDetail);
 			}
 			logDetail.newResults(results, mainWindow.logTable);
+			mainWindow.logNotes.setText("");
+			mainWindow.logResolveNotes.setText("");
+			mainWindow.newLogDetail(null);
 			mainWindow.tabbedPane.setSelectedIndex(MainWindow.LOG_TAB_INDEX);
 			mainWindow.setExportButtonState();
 		} 

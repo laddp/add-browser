@@ -100,7 +100,7 @@ public class LogDetailTable extends AbstractTableModel {
 		oldvals.clear();
 		newvals.clear();
 		
-		while (results.next())
+		while (results != null && results.next())
 		{
 			rowCount++;
 			{

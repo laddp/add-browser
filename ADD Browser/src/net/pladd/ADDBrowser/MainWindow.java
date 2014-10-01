@@ -130,8 +130,8 @@ public class MainWindow {
 	protected JLabel batchTotals;
 	private JPanel logsTab;
 	private JTable logDetailsTable;
-	private JTextArea logNotes;
-	private JTextArea logResolveNotes;
+	protected JTextArea logNotes;
+	protected JTextArea logResolveNotes;
 	private LogQueryDialog logQueryDlg = null;
 	
 	/**
@@ -792,9 +792,9 @@ public class MainWindow {
 		
 		GridBagLayout gbl_logsTab = new GridBagLayout();
 		gbl_logsTab.columnWidths = new int[]{779, 0};
-		gbl_logsTab.rowHeights = new int[] {200, 200, 0, 0};
+		gbl_logsTab.rowHeights = new int[] {200, 200, 0};
 		gbl_logsTab.columnWeights = new double[]{1.0, Double.MIN_VALUE};
-		gbl_logsTab.rowWeights = new double[]{1.0, 1.0, 1.0, Double.MIN_VALUE};
+		gbl_logsTab.rowWeights = new double[]{1.0, 1.0, Double.MIN_VALUE};
 		logsTab.setLayout(gbl_logsTab);
 		
 		JScrollPane logTableScrollPane = new JScrollPane();
@@ -816,7 +816,6 @@ public class MainWindow {
 		JSplitPane logSplitPane = new JSplitPane();
 		logSplitPane.setResizeWeight(0.3);
 		GridBagConstraints gbc_logSplitPane = new GridBagConstraints();
-		gbc_logSplitPane.insets = new Insets(0, 0, 5, 0);
 		gbc_logSplitPane.anchor = GridBagConstraints.SOUTH;
 		gbc_logSplitPane.fill = GridBagConstraints.BOTH;
 		gbc_logSplitPane.gridx = 0;
