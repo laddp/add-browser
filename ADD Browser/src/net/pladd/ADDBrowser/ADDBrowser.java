@@ -25,6 +25,7 @@ import javax.swing.JOptionPane;
 import net.pladd.ADDBrowser.E3types.Account;
 import net.pladd.ADDBrowser.E3types.Category;
 import net.pladd.ADDBrowser.E3types.Division;
+import net.pladd.ADDBrowser.E3types.DocType;
 import net.pladd.ADDBrowser.E3types.LogCategory;
 import net.pladd.ADDBrowser.E3types.LogType;
 import net.pladd.ADDBrowser.E3types.PostingCode;
@@ -57,6 +58,8 @@ public class ADDBrowser {
 	public    static Map<String,  LogCategory> logCategories = new TreeMap<String,  LogCategory>();
 	public    static Map<Integer, LogType>     logTypes      = new TreeMap<Integer, LogType>();
 	
+	public    static Map<Integer, DocType>     docTypes      = new TreeMap<Integer, DocType>();
+
 	/**
 	 * @param args
 	 */
@@ -151,7 +154,8 @@ public class ADDBrowser {
 		fetchTypes();
 		fetchLogCategories();
 		fetchLogTypes();
-		mainWindow.newCodes(postingCodes, logCategories, logTypes);
+		fetchDocTypes();
+		mainWindow.newCodes(postingCodes, logCategories, logTypes, docTypes);
 
 		try {
 			Statement stmt = dataSource.createStatement();
@@ -315,6 +319,30 @@ public class ADDBrowser {
 			throw e;
 		}
 	}
+
+	private static void fetchDocTypes() throws SQLException
+	{
+		try {
+			Statement stmt = dataSource.createStatement();
+			ResultSet results = stmt.executeQuery(
+					"SELECT doc_type, description " +
+							"FROM " + tablePrefix + "DOC_TYPE_GROUP ");
+	
+			docTypes.clear();
+			while (results.next())
+			{
+				docTypes.put(results.getInt(1),
+						new DocType(results.getInt(1), results.getString(2)));
+			}
+		}
+		catch (SQLException e)
+		{
+			System.out.println(e);
+			JOptionPane.showMessageDialog(mainWindow.frmAddDataBrowser, "Error fetching doc type info:" + e, "Setup problem", JOptionPane.ERROR_MESSAGE);
+			throw e;
+		}
+	}
+
 
 	public static void doAcctSearch(Map<String, String> acctQuery)
 	{
@@ -565,7 +593,8 @@ public class ADDBrowser {
 		}
 	}
 
-	public static void doDocSearch(String acctNum)
+	public static void doDocSearch(String acctNum, String refNum, 
+			String startDate, String endDate, String srchTypes)
 	{
 		try {
 			Statement stmt = dataSource.createStatement();
@@ -596,6 +625,30 @@ public class ADDBrowser {
 				if (queryWhere.length() != 6)
 					queryWhere += " AND ";
 				queryWhere += tablePrefix + "FULL_ACCOUNT.full_account like '" + acctNum + "' ";
+			}
+			if (refNum != null)
+			{
+				if (queryWhere.length() != 6)
+					queryWhere += " AND ";
+				queryWhere += tablePrefix + "DOC_HEADER.doc_reference_num = " + refNum + " ";
+			}
+			if (startDate != null)
+			{
+				if (queryWhere.length() != 6)
+					queryWhere += " AND ";
+				queryWhere += tablePrefix + "DOC_HEADER.doc_date >= '" + startDate + "' ";
+			}
+			if (endDate != null)
+			{
+				if (queryWhere.length() != 6)
+					queryWhere += " AND ";
+				queryWhere += tablePrefix + "DOC_HEADER.doc_date <= '" + endDate + "' ";
+			}
+			if (srchTypes != null)
+			{
+				if (queryWhere.length() != 6)
+					queryWhere += " AND ";
+				queryWhere += tablePrefix + "DOC_HEADER.doc_type in (" + srchTypes + ") ";
 			}
 			
 			String querySuffix =

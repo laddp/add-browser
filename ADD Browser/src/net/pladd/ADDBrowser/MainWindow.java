@@ -55,6 +55,7 @@ import javax.swing.text.DefaultCaret;
 import net.pladd.ADDBrowser.E3types.Account;
 import net.pladd.ADDBrowser.E3types.Category;
 import net.pladd.ADDBrowser.E3types.Division;
+import net.pladd.ADDBrowser.E3types.DocType;
 import net.pladd.ADDBrowser.E3types.LogCategory;
 import net.pladd.ADDBrowser.E3types.LogType;
 import net.pladd.ADDBrowser.E3types.PostingCode;
@@ -68,7 +69,7 @@ public class MainWindow {
 	protected JTabbedPane tabbedPane;
 
 	private JMenuItem mntmExport;
-	protected static final String VersionStr = "v1.6";
+	protected static final String VersionStr = "v1.6.1";
 
 	protected JPanel accountsTab;
 	protected JTable logTable;
@@ -83,13 +84,14 @@ public class MainWindow {
 	protected static final int TRANS_TAB_INDEX = 4;
 
 	// Dialogs
-	private AboutDialog aboutDialog = null;
-	private ConnectDialog connectDialog = null;
+	private AboutDialog            aboutDialog = null;
+	private ConnectDialog          connectDialog = null;
+	private JFileChooser           tsvChooser = null;
+	private JFileChooser           txtChooser = null;
+	private LogQueryDialog         logQueryDlg = null;
+	private DocQueryDialog         docQueryDialog = null;
+	private BatchQueryDialog       batchQueryDialog = null;
 	private TransactionQueryDialog transactionQueryDialog = null; 
-	private BatchQueryDialog batchQueryDialog = null;
-	private JFileChooser tsvChooser = null;
-	private JFileChooser txtChooser = null;
-	private LogQueryDialog logQueryDlg = null;
 
 	// Toolbar buttons
 	private JButton btnExport;
@@ -270,6 +272,11 @@ public class MainWindow {
 		});
 		
 		btnDocuments = new JButton("Documents");
+		btnDocuments.addActionListener(new ActionListener(){
+			public void actionPerformed(ActionEvent e) {
+				doDocSearch();
+			}
+		});
 		btnDocuments.setEnabled(false);
 		btnDocuments.setIcon(new ImageIcon(MainWindow.class.getResource("/com/sun/java/swing/plaf/windows/icons/Question.gif")));
 		toolBar.add(btnDocuments);
@@ -347,7 +354,7 @@ public class MainWindow {
 		btnAcctDocuments.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0)
 			{
-				ADDBrowser.doDocSearch(accountNumber.getText());
+				ADDBrowser.doDocSearch(accountNumber.getText(), null, null, null, null);
 			}
 		});
 		btnAcctDocuments.setMnemonic('m');
@@ -1023,7 +1030,7 @@ public class MainWindow {
 		{
 			btnAccounts.setEnabled(b);
 			btnLogs.setEnabled(b);
-	//		btnDocuments.setEnabled(b);
+			btnDocuments.setEnabled(b);
 			btnBatches.setEnabled(b);
 			btnTransactions.setEnabled(b);
 	
@@ -1073,15 +1080,17 @@ public class MainWindow {
 		connectDialog.setVisible(false);
 	}
 
-	public void newCodes(Vector<PostingCode> postingCodes, Map<String, LogCategory> logCategories, Map<Integer, LogType> logTypes)
+	public void newCodes(Vector<PostingCode> postingCodes, Map<String, LogCategory> logCategories, Map<Integer, LogType> logTypes, Map<Integer, DocType> docTypes)
 	{
-		if (transactionQueryDialog != null)
-			transactionQueryDialog.newPostingCodes(postingCodes);
 		if (logQueryDlg != null)
 		{
 			logQueryDlg.newCategories(logCategories.values().toArray(new LogCategory[1]));
 			logQueryDlg.newTypes(logTypes.values().toArray(new LogType[1]));
 		}
+		if (docQueryDialog != null)
+			docQueryDialog.newTypes(docTypes.values().toArray(new DocType[1]));
+		if (transactionQueryDialog != null)
+			transactionQueryDialog.newPostingCodes(postingCodes);
 	}
 
 	private void doExport()
@@ -1406,6 +1415,50 @@ public class MainWindow {
 		LogDetailTable dt = new LogDetailTable();
 		dt.newResults(results);
 		logDetailsTable.setModel(dt);
+	}
+
+	protected void doDocSearch()
+	{
+		if (docQueryDialog == null)
+			docQueryDialog = new DocQueryDialog(ADDBrowser.docTypes.values());
+		
+		docQueryDialog.OKpressed = false;
+		docQueryDialog.setVisible(true);
+		if (docQueryDialog.OKpressed)
+		{
+			String acctNum   = null;
+			String refNum    = null;
+			String startDate = null;
+			String endDate   = null;
+			String types     = null;
+			
+			if (docQueryDialog.chckbxAccountNumber.isSelected())
+				acctNum = docQueryDialog.accountNum.getText();
+			if (docQueryDialog.chckbxReferenceNumber.isSelected())
+				refNum = docQueryDialog.referenceNumber.getText();
+			if (docQueryDialog.chckbxStartDate.isSelected())
+				startDate = docQueryDialog.startDate.getText();
+			if (docQueryDialog.chckbxEndDate.isSelected())
+				endDate = docQueryDialog.endDate.getText();
+			if (docQueryDialog.chckbxDocType.isSelected())
+			{
+				for (DocType dt : docQueryDialog.docTypes.getSelectedValuesList())
+				{
+					if (types == null)
+						types = "" + dt.typeID;
+					else
+						types += ", " + dt.typeID;
+				}
+			}
+			
+			if (acctNum == null && refNum == null &&
+				startDate == null && endDate == null && types == null)
+			{
+				JOptionPane.showMessageDialog(frmAddDataBrowser, "No query specified", "Document Query error", JOptionPane.ERROR_MESSAGE);
+				return;
+			}
+			ADDBrowser.doDocSearch(acctNum, refNum, startDate, endDate, types);
+		}
 	}
 
 	protected void doBatchQuery()
