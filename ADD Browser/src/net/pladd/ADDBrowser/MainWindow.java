@@ -49,6 +49,7 @@ import javax.swing.event.ChangeListener;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.filechooser.FileNameExtensionFilter;
+import javax.swing.text.DefaultCaret;
 
 import net.pladd.ADDBrowser.E3types.Account;
 import net.pladd.ADDBrowser.E3types.Category;
@@ -58,17 +59,19 @@ import net.pladd.ADDBrowser.E3types.LogType;
 import net.pladd.ADDBrowser.E3types.PostingCode;
 import net.pladd.ADDBrowser.E3types.Type;
 
+import java.awt.Font;
+
 public class MainWindow {
 	// Top level structure
 	protected JFrame frmAddDataBrowser;
 	protected JTabbedPane tabbedPane;
 
 	private JMenuItem mntmExport;
-	protected static final String VersionStr = "v1.5.2";
+	protected static final String VersionStr = "v1.6";
 
 	protected JPanel accountsTab;
 	protected JTable logTable;
-	protected JTable documentsTable;
+	protected JSplitPane documentsTab;
 	protected JTable batchTable;
 	protected JTable transTable;
 	
@@ -84,7 +87,7 @@ public class MainWindow {
 	private TransactionQueryDialog transactionQueryDialog = null; 
 	private BatchQueryDialog batchQueryDialog = null;
 	private JFileChooser chooser = null;
-	private LogQueryDialog logQueryDialog = null; 
+	private LogQueryDialog logQueryDlg = null;
 
 	// Toolbar buttons
 	private JButton btnExport;
@@ -132,7 +135,9 @@ public class MainWindow {
 	private JTable logDetailsTable;
 	protected JTextArea logNotes;
 	protected JTextArea logResolveNotes;
-	private LogQueryDialog logQueryDlg = null;
+
+	protected JTable docListTable;
+	protected JTextArea docContent;
 	
 	/**
 	 * Create the application.
@@ -336,6 +341,12 @@ public class MainWindow {
 		buttonPanel.add(btnAcctLogs);
 		
 		btnAcctDocuments = new JButton("Documents");
+		btnAcctDocuments.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0)
+			{
+				ADDBrowser.doDocSearch(accountNumber.getText());
+			}
+		});
 		btnAcctDocuments.setMnemonic('c');
 		btnAcctDocuments.setEnabled(false);
 		buttonPanel.add(btnAcctDocuments);
@@ -854,8 +865,27 @@ public class MainWindow {
 		JScrollPane resolveScrollPane = new JScrollPane(logResolveNotes);
 		logVertSplitPane.setRightComponent(resolveScrollPane);
 
-		documentsTable = new JTable();
-		tabbedPane.addTab("Documents", null, documentsTable, null);
+		documentsTab = new JSplitPane();
+		documentsTab.setResizeWeight(0.5);
+		documentsTab.setOrientation(JSplitPane.VERTICAL_SPLIT);
+		tabbedPane.addTab("Documents", null, documentsTab, null);
+		
+		JScrollPane docListPane = new JScrollPane();
+		documentsTab.setLeftComponent(docListPane);
+		
+		docListTable = new JTable();
+		docListTable.getSelectionModel().addListSelectionListener(new DocListener());
+		docListPane.setViewportView(docListTable);
+		
+		JScrollPane docContentPane = new JScrollPane();
+		documentsTab.setRightComponent(docContentPane);
+		
+		docContent = new JTextArea();
+		docContent.setFont(new Font("Monospaced", Font.PLAIN, 13));
+		docContent.setEditable(false);
+		DefaultCaret caret = (DefaultCaret) docContent.getCaret();
+		caret.setUpdatePolicy(DefaultCaret.NEVER_UPDATE);
+		docContentPane.setViewportView(docContent);
 		tabbedPane.setMnemonicAt(2, KeyEvent.VK_D);
 		
 		batchTable = new JTable();
@@ -951,7 +981,7 @@ public class MainWindow {
 		switch (tabbedPane.getSelectedIndex())
 		{
 		case LOG_TAB_INDEX:   return logTable;
-		case DOC_TAB_INDEX:   return documentsTable;
+		case DOC_TAB_INDEX:   return docListTable;
 		case BATCH_TAB_INDEX: return batchTable;
 		case TRANS_TAB_INDEX: return transTable;
 		}
@@ -969,7 +999,7 @@ public class MainWindow {
 			btnAcctSearch.setEnabled(b);
 			btnAcctClear.setEnabled(b);
 			btnAcctLogs.setEnabled(b);
-	//		btnAcctDocuments.setEnabled(b);
+			btnAcctDocuments.setEnabled(b);
 			btnAcctTransactions.setEnabled(b);
 			
 			btnDivision.setEnabled(b);
@@ -1016,10 +1046,10 @@ public class MainWindow {
 	{
 		if (transactionQueryDialog != null)
 			transactionQueryDialog.newPostingCodes(postingCodes);
-		if (logQueryDialog != null)
+		if (logQueryDlg != null)
 		{
-			logQueryDialog.newCategories(logCategories.values().toArray(new LogCategory[1]));
-			logQueryDialog.newTypes(logTypes.values().toArray(new LogType[1]));
+			logQueryDlg.newCategories(logCategories.values().toArray(new LogCategory[1]));
+			logQueryDlg.newTypes(logTypes.values().toArray(new LogType[1]));
 		}
 	}
 
@@ -1271,6 +1301,32 @@ public class MainWindow {
 		}
 	}
 
+	private class DocListener implements ListSelectionListener
+	{
+		@Override
+		public void valueChanged(ListSelectionEvent e)
+		{
+			int r = docListTable.getSelectedRowCount();
+			if (r == 0)
+			{
+				docContent.setText("");
+			}
+			else if (r == 1)
+			{
+				int row = docListTable.getSelectedRow();
+				row = docListTable.convertRowIndexToModel(row);
+				DocTable dt = (DocTable)docListTable.getModel();
+				ADDBrowser.doDocContents(dt.docIDs.get(row));
+			}
+			else
+			{
+				// whoa! should only be single select
+				docContent.setText("Multiple logs selected...");
+			}
+		}
+	}
+
+	
 	public void newLogDetail(ResultSet results) throws SQLException
 	{
 		LogDetailTable dt = new LogDetailTable();

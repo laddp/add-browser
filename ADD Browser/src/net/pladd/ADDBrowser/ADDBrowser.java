@@ -42,6 +42,7 @@ public class ADDBrowser {
 	protected static Connection dataSource  = null;
 	protected static String     tablePrefix = "";
 	protected static LogTable   logDetail   = null;
+	protected static DocTable   docDetail   = null;
 	protected static BatchTable batchDetail = null;
 	protected static BatchTable transDetail = null;
 
@@ -561,6 +562,102 @@ public class ADDBrowser {
 		finally
 		{
 			mainWindow.frmAddDataBrowser.setCursor(Cursor.getDefaultCursor());
+		}
+	}
+
+	public static void doDocSearch(String acctNum)
+	{
+		try {
+			Statement stmt = dataSource.createStatement();
+			String queryPrefix =
+					"SELECT " + 
+							tablePrefix + "FULL_ACCOUNT.full_account, " +
+							tablePrefix + "DOC_HEADER.tank_num, " +
+							tablePrefix + "DOC_HEADER.service_num, " +
+							tablePrefix + "ACCOUNTS.name, " +
+							tablePrefix + "DOC_HEADER.doc_reference_num, " +
+							tablePrefix + "DOC_TYPE_GROUP.description, " +
+							tablePrefix + "DOC_HEADER.doc_date, " +
+							tablePrefix + "DOC_HEADER.doc_time, " +
+							tablePrefix + "DOC_HEADER.last_maintenance_dt, " +
+							tablePrefix + "DOC_HEADER.last_maintenance_userid, " +
+							tablePrefix + "DOC_HEADER.doc_id " +
+					"FROM " +
+						tablePrefix + "DOC_HEADER inner join " + tablePrefix + "FULL_ACCOUNT ON " +
+							tablePrefix + "DOC_HEADER.account_num = " + tablePrefix + "FULL_ACCOUNT.account_num " +
+						"inner join " + tablePrefix + "ACCOUNTS ON " +
+							tablePrefix + "DOC_HEADER.account_num = " + tablePrefix + "ACCOUNTS.account_num "+
+						"inner join " + tablePrefix + "DOC_TYPE_GROUP ON " +
+							tablePrefix + "DOC_HEADER.doc_type = " + tablePrefix + "DOC_TYPE_GROUP.doc_type ";
+
+			String queryWhere = "WHERE ";
+			if (acctNum != null)
+			{
+				if (queryWhere.length() != 6)
+					queryWhere += " AND ";
+				queryWhere += tablePrefix + "FULL_ACCOUNT.full_account like '" + acctNum + "' ";
+			}
+			
+			String querySuffix =
+					"ORDER BY " +
+						tablePrefix + "DOC_HEADER.account_num, " +
+						tablePrefix + "DOC_HEADER.doc_date, " +
+						tablePrefix + "DOC_HEADER.doc_time";
+			mainWindow.frmAddDataBrowser.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+			ResultSet results = stmt.executeQuery(queryPrefix + queryWhere + querySuffix);
+			
+			if (docDetail == null)
+			{
+				docDetail = new DocTable();
+				mainWindow.docListTable.setAutoCreateRowSorter(true);
+				mainWindow.docListTable.setModel(docDetail);
+			}
+			docDetail.newResults(results, mainWindow.docListTable);
+			mainWindow.tabbedPane.setSelectedIndex(MainWindow.DOC_TAB_INDEX);
+			mainWindow.setExportButtonState();
+		} 
+		catch (SQLException e) {
+			e.printStackTrace();
+			JOptionPane.showMessageDialog(mainWindow.frmAddDataBrowser, "Query failed:" + e, "Query Failed", JOptionPane.ERROR_MESSAGE);
+		}
+		finally
+		{
+			mainWindow.frmAddDataBrowser.setCursor(Cursor.getDefaultCursor());
+		}
+	}
+
+	public static void doDocContents(Integer docID)
+	{
+		try {
+			Statement stmt = dataSource.createStatement();
+			String queryPrefix = 
+					"SELECT " + 
+						"doc_line, doc_line_data " +
+					"FROM " + tablePrefix + "DOC_PRINT_DETAIL ";
+			String queryWhere = " WHERE "+
+					"doc_id = " + docID;
+			String querySuffix = " ORDER BY " + "doc_page, doc_line";
+			
+			ResultSet results = stmt.executeQuery(queryPrefix + queryWhere + querySuffix);
+			
+			mainWindow.docContent.setText("");
+			int oldLine = 0;
+			while (results.next())
+			{
+				int newLine = results.getInt(1);
+				String padding = "";
+				for (int i = newLine - oldLine - 1; i > 0; i--)
+					padding += "\n";
+				oldLine = newLine;
+				if (padding.length() != 0)
+					mainWindow.docContent.append(padding);
+
+				mainWindow.docContent.append(results.getString(2) + "\n");
+			}
+		}
+		catch (SQLException e) {
+			e.printStackTrace();
+			JOptionPane.showMessageDialog(mainWindow.frmAddDataBrowser, "Query failed:" + e, "Query Failed", JOptionPane.ERROR_MESSAGE);
 		}
 	}
 
