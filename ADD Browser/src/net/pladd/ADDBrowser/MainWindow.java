@@ -70,8 +70,6 @@ public class MainWindow {
 
 	private JMenuItem mntmExport;
 	protected static final String VersionStr = "v1.6.1";
-
-	protected JPanel accountsTab;
 	protected JTable logTable;
 	protected JSplitPane documentsTab;
 	protected JTable batchTable;
@@ -82,6 +80,11 @@ public class MainWindow {
 	protected static final int DOC_TAB_INDEX   = 2;
 	protected static final int BATCH_TAB_INDEX = 3;
 	protected static final int TRANS_TAB_INDEX = 4;
+	
+	protected static final int BILLING_TAB_INDEX = 0;
+	protected static final int CONTACT_TAB_INDEX = 1;
+	protected static final int TANK_TAB_INDEX    = 2;
+	protected static final int SERVICE_TAB_INDEX = 3;
 
 	// Dialogs
 	private AboutDialog            aboutDialog = null;
@@ -132,9 +135,12 @@ public class MainWindow {
 	private JButton btnCategory;
 	private JButton btnType;
 
+	protected JTable contactInfoTable;
+	private JTable tankInfoTable;
+	private JTable serviceInfoTable;
+
 	private Set<JTextField> accountQueryFields = new HashSet<JTextField>();
-	protected JLabel transTotals;
-	protected JLabel batchTotals;
+
 	private JPanel logsTab;
 	private JTable logDetailsTable;
 	protected JTextArea logNotes;
@@ -143,10 +149,11 @@ public class MainWindow {
 	protected JTable docListTable;
 	protected JTextArea docContent;
 	private JButton btnExportDocContent;
-	private JTable contactInfoTable;
-	private JTable tankInfoTable;
-	private JTable serviceInfoTable;
-	
+
+	protected JLabel transTotals;
+	protected JLabel batchTotals;
+	private JTabbedPane accountInfoTabPane;
+
 	/**
 	 * Create the application.
 	 */
@@ -304,11 +311,16 @@ public class MainWindow {
 		});
 		frmAddDataBrowser.getContentPane().add(tabbedPane, BorderLayout.CENTER);
 		
-		accountsTab = new JPanel();
+		JPanel accountsTab = new JPanel();
 		tabbedPane.addTab("Accounts", null, accountsTab, null);
 		accountsTab.setLayout(new BorderLayout(0, 0));
 		
-		JTabbedPane accountInfoTabPane = new JTabbedPane(JTabbedPane.TOP);
+		accountInfoTabPane = new JTabbedPane(JTabbedPane.TOP);
+		accountInfoTabPane.addChangeListener(new ChangeListener() {
+			public void stateChanged(ChangeEvent change) {
+				setExportButtonState();
+			}
+		});
 		accountsTab.add(accountInfoTabPane);
 		
 		JPanel billingInfoTab = new JPanel();
@@ -659,6 +671,7 @@ public class MainWindow {
 		gbc_telephone.gridy = 8;
 		billingInfoTab.add(telephone, gbc_telephone);
 		telephone.setColumns(10);
+		telephone.setName("telephone");
 		accountQueryFields.add(telephone);
 		
 		JLabel lblEmail = new JLabel("Primary Email");
@@ -677,6 +690,7 @@ public class MainWindow {
 		gbc_email.gridy = 9;
 		billingInfoTab.add(email, gbc_email);
 		email.setColumns(40);
+		email.setName("email");
 		accountQueryFields.add(email);
 		
 		JLabel lblType = new JLabel("Type");
@@ -1087,6 +1101,13 @@ public class MainWindow {
 	{
 		switch (tabbedPane.getSelectedIndex())
 		{
+		case ACCT_TAB_INDEX:
+			if (accountInfoTabPane != null)
+				switch (accountInfoTabPane.getSelectedIndex())
+				{
+				case CONTACT_TAB_INDEX: return contactInfoTable;
+				}
+			break;
 		case LOG_TAB_INDEX:   return logTable;
 		case DOC_TAB_INDEX:   return docListTable;
 		case BATCH_TAB_INDEX: return batchTable;
@@ -1191,6 +1212,11 @@ public class MainWindow {
 				else if (selected == logTable)
 				{
 					LogTable tbl = (LogTable)selected.getModel();
+					tbl.doExport(out);
+				}
+				else if (selected == contactInfoTable)
+				{
+					ContactTable tbl = (ContactTable)selected.getModel();
 					tbl.doExport(out);
 				}
 			} 
@@ -1306,6 +1332,8 @@ public class MainWindow {
 		city.setText(toDisplay.city);
 		state.setText(toDisplay.state);
 		zipCode.setText(toDisplay.postal_code);
+		telephone.setText(ADDBrowser.getAcctPrimary(toDisplay, 1));
+		email.setText(ADDBrowser.getAcctPrimary(toDisplay, 3));
 		division.setText(toDisplay.division.toString());
 		category.setText(toDisplay.category.toString());
 		type.setText(toDisplay.type.toString());
@@ -1313,6 +1341,8 @@ public class MainWindow {
 		nf2.setMaximumFractionDigits(2);
 		nf2.setMinimumFractionDigits(2);
 		balance.setText(nf2.format(toDisplay.balance));
+		
+		ADDBrowser.getAcctContactInfo(toDisplay);
 	}
 
 	protected void doClearAcct()
