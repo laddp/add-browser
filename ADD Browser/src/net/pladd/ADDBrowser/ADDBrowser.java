@@ -62,6 +62,8 @@ public class ADDBrowser {
 	public    static Map<Integer, LogType>     logTypes      = new TreeMap<Integer, LogType>();
 	
 	public    static Map<Integer, DocType>     docTypes      = new TreeMap<Integer, DocType>();
+	
+	public    static Map<Integer, String>      contactTypes  = new TreeMap<Integer, String>();
 
 	/**
 	 * @param args
@@ -151,14 +153,22 @@ public class ADDBrowser {
 			mainWindow.frmAddDataBrowser.setCursor(Cursor.getDefaultCursor());
 		}
 
-		fetchPostingCodes();
-		fetchCategories();
-		fetchDivisions();
-		fetchTypes();
-		fetchLogCategories();
-		fetchLogTypes();
-		fetchDocTypes();
-		mainWindow.newCodes(postingCodes, logCategories, logTypes, docTypes);
+		try {
+			mainWindow.frmAddDataBrowser.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+			fetchPostingCodes();
+			fetchCategories();
+			fetchDivisions();
+			fetchTypes();
+			fetchLogCategories();
+			fetchLogTypes();
+			fetchDocTypes();
+			fetchContactTypes();
+			mainWindow.newCodes(postingCodes, logCategories, logTypes, docTypes);
+		}
+		finally
+		{
+			mainWindow.frmAddDataBrowser.setCursor(Cursor.getDefaultCursor());
+		}
 
 		try {
 			Statement stmt = dataSource.createStatement();
@@ -342,6 +352,29 @@ public class ADDBrowser {
 		{
 			System.out.println(e);
 			JOptionPane.showMessageDialog(mainWindow.frmAddDataBrowser, "Error fetching doc type info:" + e, "Setup problem", JOptionPane.ERROR_MESSAGE);
+			throw e;
+		}
+	}
+
+	private static void fetchContactTypes() throws SQLException
+	{
+		try {
+			Statement stmt = dataSource.createStatement();
+			ResultSet results = stmt.executeQuery(
+					"SELECT code, description " +
+							"FROM " + tablePrefix + "CODE_DESCRIPTION_DETAIL " +
+					"WHERE table_id = 148");
+	
+			contactTypes.clear();
+			while (results.next())
+			{
+				contactTypes.put(results.getInt(1), results.getString(2));
+			}
+		}
+		catch (SQLException e)
+		{
+			System.out.println(e);
+			JOptionPane.showMessageDialog(mainWindow.frmAddDataBrowser, "Error fetching contact type info:" + e, "Setup problem", JOptionPane.ERROR_MESSAGE);
 			throw e;
 		}
 	}
@@ -551,7 +584,7 @@ public class ADDBrowser {
 			String queryPrefix =
 					"SELECT " + 
 							tablePrefix + "CONTACT_INFO_HDR.type, " +
-							tablePrefix + "CONTACT_TYPE.description, " +
+							tablePrefix + "CONTACT_INFO_HDR.contact_type_id, " +
 							tablePrefix + "CONTACT_INFO_HDR.contact_value, " +
 							tablePrefix + "CONTACT_INFO_HDR.row_status, " +
 							tablePrefix + "CONTACT_INFO_HDR.notes, " +
@@ -559,8 +592,7 @@ public class ADDBrowser {
 							tablePrefix + "CONTACT_INFO_HDR.last_maintenance_userid, " +
 							tablePrefix + "CONTACT_INFO_HDR.cust_contact_id " +
 					"FROM " +
-						tablePrefix + "CONTACT_INFO_HDR inner join " + tablePrefix + "CONTACT_TYPE ON " +
-							tablePrefix + "CONTACT_INFO_HDR.contact_type_id = " + tablePrefix + "CONTACT_TYPE.contact_type_id ";
+						tablePrefix + "CONTACT_INFO_HDR ";
 
 			String queryWhere = "WHERE "+
 					tablePrefix + "CONTACT_INFO_HDR.account_num = " + acct.account_num + " ";
@@ -574,7 +606,7 @@ public class ADDBrowser {
 
 			if (contactDetail == null)
 			{
-				contactDetail = new ContactTable();
+				contactDetail = new ContactTable(contactTypes);
 				mainWindow.contactInfoTable.setAutoCreateRowSorter(true);
 				mainWindow.contactInfoTable.setModel(contactDetail);
 			}

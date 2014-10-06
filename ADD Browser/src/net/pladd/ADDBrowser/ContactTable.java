@@ -11,6 +11,7 @@ import java.sql.Timestamp;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.Vector;
 
 import javax.swing.JTable;
@@ -57,9 +58,13 @@ public class ContactTable extends AbstractTableModel {
 	private Vector<Date>     maintDates;
 
 	protected Vector<Integer>  contactIDs;
+	
+	private Map<Integer, String> contactTypes;
 
-	public ContactTable()
+	public ContactTable(Map<Integer, String> contactTypes)
 	{
+		this.contactTypes = contactTypes;
+		
 		rowCount = 0;
 		types        = new Vector<String>();
 		descs        = new Vector<String>();
@@ -141,13 +146,12 @@ public class ContactTable extends AbstractTableModel {
 			rowCount++;
 			
 			{
-				switch (results.getInt(COL_TYPE+1))
-				{
-				case 1:  types.add("Phone");   break;
-				case 2:  types.add("Fax");     break;
-				case 3:  types.add("E-Mail");  break;
-				default: types.add("Unknown"); break;
-				}
+				int type = results.getInt(COL_TYPE+1);
+				String desc = contactTypes.get(type);
+				if (desc != null)
+					types.add(desc);
+				else
+					types.add("Unknown");
 			}
 			{
 				descs.add(results.getString(COL_DESC+1));
