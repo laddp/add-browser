@@ -18,7 +18,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
-import java.util.Vector;
 
 import javax.swing.JOptionPane;
 
@@ -46,13 +45,15 @@ public class ADDBrowser {
 	protected static DateFormat df = new SimpleDateFormat("yyyy-MM-dd");
 	protected static DateFormat tm = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
+	protected static ContactTable contactDetail = null;
+	protected static TankTable    tankDetail    = null;
+
 	protected static LogTable     logDetail     = null;
 	protected static DocTable     docDetail     = null;
 	protected static BatchTable   batchDetail   = null;
 	protected static BatchTable   transDetail   = null;
-	protected static ContactTable contactDetail = null;
 	
-	protected static Vector<PostingCode>       postingCodes  = new Vector<PostingCode>();
+	protected static Map<Integer, PostingCode> postingCodes  = new TreeMap<Integer, PostingCode>();
 	public    static Map<Integer, Division>    divisions     = new TreeMap<Integer, Division>();
 	public    static Map<Integer, Category>    categories    = new TreeMap<Integer, Category>();
 	public    static Map<String,  Type>        types         = new TreeMap<String, Type>();
@@ -192,7 +193,7 @@ public class ADDBrowser {
 			postingCodes.clear();
 			while (results.next())
 			{
-				postingCodes.add(new PostingCode(results.getInt(1), results.getString(2)));
+				postingCodes.put(results.getInt(1), new PostingCode(results.getInt(1), results.getString(2)));
 			}
 		}
 		catch (SQLException e)
@@ -625,6 +626,55 @@ public class ADDBrowser {
 			e.printStackTrace();
 			JOptionPane.showMessageDialog(mainWindow.frmAddDataBrowser, "Query failed:" + e, "Query Failed", JOptionPane.ERROR_MESSAGE);
 			return "";
+		}
+		finally
+		{
+			mainWindow.frmAddDataBrowser.setCursor(Cursor.getDefaultCursor());
+		}
+	}
+
+	public static void getTankInfo(Account acct)
+	{
+		try {
+			Statement stmt = dataSource.createStatement();
+			String queryPrefix =
+					"SELECT " + 
+							tablePrefix + "TANKS.tank_num, " +
+							tablePrefix + "TANKS.product, " +
+							tablePrefix + "TANKS.size, " +
+							tablePrefix + "TANKS.base_price_code, " +
+							tablePrefix + "TANKS.deviation, " +
+							tablePrefix + "TANKS.status, " +
+							tablePrefix + "TANKS.delivery_stop, " +
+							tablePrefix + "DAD_TEXT.dad_text, " +
+							tablePrefix + "DIN_TEXT.din_text, " +
+							tablePrefix + "TANKS.last_maintenance_userid, " +
+							tablePrefix + "TANKS.last_maintenance_dt, " +
+							tablePrefix + "TANKS.tank_seq_number " +
+					"FROM " +
+						tablePrefix + "TANKS inner join "  + tablePrefix + "DAD_TEXT ON " +
+								tablePrefix + "TANKS.tank_seq_number = " + tablePrefix + "DAD_TEXT.dad_text_owner " +
+								"inner join " + tablePrefix + "DIN_TEXT ON " +
+								tablePrefix + "TANKS.tank_seq_number = " + tablePrefix + "DIN_TEXT.din_text_owner ";
+	
+			String queryWhere = "WHERE "+
+					tablePrefix + "TANKS.account_num   = " + acct.account_num + " ";
+			
+			String querySuffix = " ORDER BY TANKS.tank_num";
+			
+			mainWindow.frmAddDataBrowser.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+			ResultSet results = stmt.executeQuery(queryPrefix + queryWhere + querySuffix);
+	
+			if (tankDetail == null)
+			{
+				tankDetail = new TankTable();
+				mainWindow.tankInfoTable.setAutoCreateRowSorter(true);
+				mainWindow.tankInfoTable.setModel(tankDetail);
+			}
+			tankDetail.newResults(results, mainWindow.tankInfoTable);
+		} 
+		catch (SQLException e)
+		{
 		}
 		finally
 		{

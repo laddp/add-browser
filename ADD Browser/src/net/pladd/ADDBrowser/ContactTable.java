@@ -31,7 +31,7 @@ public class ContactTable extends AbstractTableModel {
 	private static final long serialVersionUID = -2995147331400163594L;
 
 	protected static List<String> header =
-			Arrays.asList("Type", "Description", "Value", "Active", "Notes", "User", "Maint Date");
+			Arrays.asList("Type", "Description", "Value", "Active", "Notes", "Maint Date", "User");
 	
 	private final Object[] longValues = { "MMMMMMMMMMMMMM", "MMMMMMMMM", "MMMMMMMMMMMMMMMMMMM", true, "MMMMMMMMMMMMMMMMMMM", 
 			"MMMMMMMMM", new Date() };

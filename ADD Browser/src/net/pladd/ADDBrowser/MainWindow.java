@@ -3,6 +3,7 @@ package net.pladd.ADDBrowser;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
+import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
@@ -24,7 +25,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.Vector;
 
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
@@ -60,8 +60,6 @@ import net.pladd.ADDBrowser.E3types.LogCategory;
 import net.pladd.ADDBrowser.E3types.LogType;
 import net.pladd.ADDBrowser.E3types.PostingCode;
 import net.pladd.ADDBrowser.E3types.Type;
-
-import java.awt.Font;
 
 public class MainWindow {
 	// Top level structure
@@ -136,7 +134,7 @@ public class MainWindow {
 	private JButton btnType;
 
 	protected JTable contactInfoTable;
-	private JTable tankInfoTable;
+	protected JTable tankInfoTable;
 	private JTable serviceInfoTable;
 
 	private Set<JTextField> accountQueryFields = new HashSet<JTextField>();
@@ -1106,6 +1104,7 @@ public class MainWindow {
 				switch (accountInfoTabPane.getSelectedIndex())
 				{
 				case CONTACT_TAB_INDEX: return contactInfoTable;
+				case TANK_TAB_INDEX   : return tankInfoTable;
 				}
 			break;
 		case LOG_TAB_INDEX:   return logTable;
@@ -1170,7 +1169,7 @@ public class MainWindow {
 		connectDialog.setVisible(false);
 	}
 
-	public void newCodes(Vector<PostingCode> postingCodes, Map<String, LogCategory> logCategories, Map<Integer, LogType> logTypes, Map<Integer, DocType> docTypes)
+	public void newCodes(Map<Integer, PostingCode> postingCodes, Map<String, LogCategory> logCategories, Map<Integer, LogType> logTypes, Map<Integer, DocType> docTypes)
 	{
 		if (logQueryDlg != null)
 		{
@@ -1180,7 +1179,7 @@ public class MainWindow {
 		if (docQueryDialog != null)
 			docQueryDialog.newTypes(docTypes.values().toArray(new DocType[1]));
 		if (transactionQueryDialog != null)
-			transactionQueryDialog.newPostingCodes(postingCodes);
+			transactionQueryDialog.newPostingCodes(postingCodes.keySet());
 	}
 
 	private void doExport()
@@ -1219,6 +1218,11 @@ public class MainWindow {
 					ContactTable tbl = (ContactTable)selected.getModel();
 					tbl.doExport(out);
 				}
+				else if (selected == tankInfoTable)
+				{
+					TankTable tbl = (TankTable)selected.getModel();
+					tbl.doExport(out);
+				} 
 			} 
 			catch (IOException e) {
 				e.printStackTrace();
@@ -1343,6 +1347,7 @@ public class MainWindow {
 		balance.setText(nf2.format(toDisplay.balance));
 		
 		ADDBrowser.getAcctContactInfo(toDisplay);
+		ADDBrowser.getTankInfo(toDisplay);
 	}
 
 	protected void doClearAcct()
