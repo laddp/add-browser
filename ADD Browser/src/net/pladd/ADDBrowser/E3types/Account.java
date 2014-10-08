@@ -14,6 +14,7 @@ import net.pladd.ADDBrowser.ADDBrowser;
 public class Account
 {
 	public final String     full_account;
+	public final int		account_num;
 	public final String     sort_code;
 	public final String     name;
 	public final String     title;
@@ -64,12 +65,13 @@ public class Account
 	 * @param type
 	 * @param category
 	 */
-	public Account(String full_account, String sort_code, String name,
+	public Account(String full_account, int account_num, String sort_code, String name,
 			String title, String first_name, String middle_initial,
 			String last_name, String name_suffix, String street1,
 			String street2, String city, String state, String postal_code,
 			int division, Type type, int category, BigDecimal balance) {
 		this.full_account = full_account;
+		this.account_num = account_num;
 		this.sort_code = sort_code;
 		this.name = name;
 		this.title = title;

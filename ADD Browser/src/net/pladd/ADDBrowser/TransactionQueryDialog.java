@@ -7,7 +7,8 @@ import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.util.Vector;
+import java.util.Map;
+import java.util.Set;
 
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
@@ -46,7 +47,7 @@ public class TransactionQueryDialog extends JDialog {
 	/**
 	 * Create the dialog.
 	 */
-	public TransactionQueryDialog(Vector<PostingCode> postCodes) {
+	public TransactionQueryDialog(Map<Integer, PostingCode> currentPostCodes) {
 		setModalExclusionType(ModalExclusionType.APPLICATION_EXCLUDE);
 		setModal(true);
 		thisDialog = this;
@@ -161,7 +162,7 @@ public class TransactionQueryDialog extends JDialog {
 				gbc_postingCodeScrollPane.gridy = 3;
 				contentPanel.add(postingCodeScrollPane, gbc_postingCodeScrollPane);
 				{
-					postingCodes = new JList<PostingCode>(postCodes);
+					postingCodes = new JList<PostingCode>(currentPostCodes.values().toArray(new PostingCode[1]));
 					postingCodeScrollPane.setViewportView(postingCodes);
 					postingCodes.setEnabled(false);
 				}
@@ -222,8 +223,8 @@ public class TransactionQueryDialog extends JDialog {
 		}
 	}
 
-	public void newPostingCodes(Vector<PostingCode> newCodes)
+	public void newPostingCodes(Set<Integer> set)
 	{
-		postingCodes.setListData(newCodes);
+		postingCodes.setListData(set.toArray(new PostingCode[1]));
 	}
 }

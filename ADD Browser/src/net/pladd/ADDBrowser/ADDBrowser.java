@@ -18,7 +18,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
-import java.util.Vector;
 
 import javax.swing.JOptionPane;
 
@@ -42,15 +41,20 @@ public class ADDBrowser {
 	protected static MainWindow mainWindow;
 	protected static Connection dataSource  = null;
 	protected static String     tablePrefix = "";
-	protected static LogTable   logDetail   = null;
-	protected static DocTable   docDetail   = null;
-	protected static BatchTable batchDetail = null;
-	protected static BatchTable transDetail = null;
-
+	
 	protected static DateFormat df = new SimpleDateFormat("yyyy-MM-dd");
 	protected static DateFormat tm = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+
+	protected static ContactTable contactDetail = null;
+	protected static TankTable    tankDetail    = null;
+	protected static ServiceTable svcDetail     = null;
+
+	protected static LogTable     logDetail     = null;
+	protected static DocTable     docDetail     = null;
+	protected static BatchTable   batchDetail   = null;
+	protected static BatchTable   transDetail   = null;
 	
-	protected static Vector<PostingCode>       postingCodes  = new Vector<PostingCode>();
+	protected static Map<Integer, PostingCode> postingCodes  = new TreeMap<Integer, PostingCode>();
 	public    static Map<Integer, Division>    divisions     = new TreeMap<Integer, Division>();
 	public    static Map<Integer, Category>    categories    = new TreeMap<Integer, Category>();
 	public    static Map<String,  Type>        types         = new TreeMap<String, Type>();
@@ -59,6 +63,9 @@ public class ADDBrowser {
 	public    static Map<Integer, LogType>     logTypes      = new TreeMap<Integer, LogType>();
 	
 	public    static Map<Integer, DocType>     docTypes      = new TreeMap<Integer, DocType>();
+	
+	public    static Map<Integer, String>      contactTypes  = new TreeMap<Integer, String>();
+	public    static Map<Integer, String>      contactDescrs = new TreeMap<Integer, String>();
 
 	/**
 	 * @param args
@@ -148,14 +155,22 @@ public class ADDBrowser {
 			mainWindow.frmAddDataBrowser.setCursor(Cursor.getDefaultCursor());
 		}
 
-		fetchPostingCodes();
-		fetchCategories();
-		fetchDivisions();
-		fetchTypes();
-		fetchLogCategories();
-		fetchLogTypes();
-		fetchDocTypes();
-		mainWindow.newCodes(postingCodes, logCategories, logTypes, docTypes);
+		try {
+			mainWindow.frmAddDataBrowser.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+			fetchPostingCodes();
+			fetchCategories();
+			fetchDivisions();
+			fetchTypes();
+			fetchLogCategories();
+			fetchLogTypes();
+			fetchDocTypes();
+			fetchContactTypes();
+			mainWindow.newCodes(postingCodes, logCategories, logTypes, docTypes);
+		}
+		finally
+		{
+			mainWindow.frmAddDataBrowser.setCursor(Cursor.getDefaultCursor());
+		}
 
 		try {
 			Statement stmt = dataSource.createStatement();
@@ -190,7 +205,7 @@ public class ADDBrowser {
 			postingCodes.clear();
 			while (results.next())
 			{
-				postingCodes.add(new PostingCode(results.getInt(1), results.getString(2)));
+				postingCodes.put(results.getInt(1), new PostingCode(results.getInt(1), results.getString(2)));
 			}
 		}
 		catch (SQLException e)
@@ -343,12 +358,70 @@ public class ADDBrowser {
 		}
 	}
 
+	private static void fetchContactTypes() throws SQLException
+	{
+		try {
+			Statement stmt = dataSource.createStatement();
+			ResultSet results = stmt.executeQuery(
+					"SELECT code, description " +
+							"FROM " + tablePrefix + "CODE_DESCRIPTION_DETAIL " +
+					"WHERE table_id = 148");
+	
+			contactTypes.clear();
+			while (results.next())
+			{
+				contactTypes.put(results.getInt(1), results.getString(2));
+			}
+			
+		}
+		catch (SQLException e)
+		{
+			System.out.println(e);
+			JOptionPane.showMessageDialog(mainWindow.frmAddDataBrowser, "Error fetching contact type info:" + e, "Setup problem", JOptionPane.ERROR_MESSAGE);
+			throw e;
+		}
+		try {
+			contactDescrs.clear();
+			Statement stmt = dataSource.createStatement();
+			ResultSet results = stmt.executeQuery(
+					"SELECT contact_type_id, description " +
+							"FROM " + tablePrefix + "CONTACT_TYPE ");
+
+			while (results.next())
+			{
+				contactDescrs.put(results.getInt(1), results.getString(2));
+			}
+		}
+		catch (SQLException e)
+		{
+			try {
+				Statement stmt = dataSource.createStatement();
+				ResultSet results = stmt.executeQuery("SELECT contact_type_id " +
+						"FROM " + tablePrefix + "CONTACT_INFO_HDR " +
+						" group by contact_type_id");
+		
+				while (results.next())
+				{
+					int code = results.getInt(1);
+					contactDescrs.put(results.getInt(1), "Type: " + code);
+				}
+			}
+			catch (SQLException e1)
+			{
+				System.out.println(e1);
+				JOptionPane.showMessageDialog(mainWindow.frmAddDataBrowser, "Error fetching contact type info:" + e1, "Setup problem", JOptionPane.ERROR_MESSAGE);
+				throw e;
+			}
+		}
+	}
+
 
 	public static void doAcctSearch(Map<String, String> acctQuery)
 	{
 		String queryPrefix =
 			"SELECT " + 
 				tablePrefix + "FULL_ACCOUNT.full_account, " +
+				tablePrefix + "ACCOUNTS.account_num, " +
 				tablePrefix + "ACCOUNTS.sort_code, " +
 				tablePrefix + "ACCOUNTS.name, " +
 				tablePrefix + "ACCOUNTS.title, " +
@@ -374,16 +447,18 @@ public class ADDBrowser {
 					tablePrefix + "ACCOUNTS.type = " + tablePrefix + " TYPE_INFO.type and " +
 					tablePrefix + "ACCOUNTS.division = " + tablePrefix + " TYPE_INFO.division ";
 	
-		String queryWhere = null;
+		String queryWhere   = null;
+		String queryContact = null;
+		
 		for (Map.Entry<String, String> item : acctQuery.entrySet())
 		{
-			if (queryWhere != null)
-				queryWhere += " and ";
-			else
-				queryWhere = " WHERE ";
 			switch (item.getKey())
 			{
 			case "full_account":
+				if (queryWhere != null)
+					queryWhere += " and ";
+				else
+					queryWhere = " WHERE ";
 				queryWhere += tablePrefix + "FULL_ACCOUNT." + item.getKey() + " like '" + item.getValue() + "' ";
 				break;
 			case "sort_code":
@@ -398,40 +473,112 @@ public class ADDBrowser {
 			case "city":
 			case "state":
 			case "postal_code":
+				if (queryWhere != null)
+					queryWhere += " and ";
+				else
+					queryWhere = " WHERE ";
 				queryWhere += tablePrefix + "ACCOUNTS." + item.getKey() + " like '" + item.getValue() + "' ";
 				break;
 			case "division":
 			case "type":
 			case "category":
+				if (queryWhere != null)
+					queryWhere += " and ";
+				else
+					queryWhere = " WHERE ";
 				queryWhere += tablePrefix + "ACCOUNTS." + item.getKey() + " in (" + item.getValue() + ") ";
+				break;
+			case "telephone":
+				if (queryContact != null)
+				{
+					JOptionPane.showMessageDialog(mainWindow.frmAddDataBrowser, "Can only query email or phone, not both", "Query Failed", JOptionPane.ERROR_MESSAGE);
+					return;
+				}
+				queryContact = " WHERE " + tablePrefix + "CONTACT_INFO_HDR.type = 1 and " +
+						tablePrefix + "CONTACT_INFO_HDR.contact_value like '" + item.getValue() + "' ";
+				break;
+			case "email":
+				if (queryContact != null)
+				{
+					JOptionPane.showMessageDialog(mainWindow.frmAddDataBrowser, "Can only query email or phone, not both", "Query Failed", JOptionPane.ERROR_MESSAGE);
+					return;
+				}
+				queryContact = " WHERE " + tablePrefix + "CONTACT_INFO_HDR.type = 3 and " +
+						tablePrefix + "CONTACT_INFO_HDR.contact_value like '" + item.getValue() + "' ";
+				break;
 			default:
 				break;
 			}
 		}
 		
+		if (queryContact != null && queryWhere != null)
+		{
+			JOptionPane.showMessageDialog(mainWindow.frmAddDataBrowser, "Email & phone queries can't be combined with other queries", "Query Failed", JOptionPane.ERROR_MESSAGE);
+			return;
+		}
+		
 		String querySuffix = " ORDER BY " + tablePrefix + "ACCOUNTS.account_num";
+		
+		if (queryContact != null)
+		{
+			try
+			{
+				Statement stmt = dataSource.createStatement();
+				mainWindow.frmAddDataBrowser.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+
+				String queryContactPrefix =
+						"SELECT " + 
+								tablePrefix + "CONTACT_INFO_HDR.account_num " +
+						"FROM " +
+							tablePrefix + "CONTACT_INFO_HDR ";
+
+				ResultSet results = stmt.executeQuery(queryContactPrefix + queryContact);
+
+				while (results.next())
+				{
+					if (queryWhere == null)
+						queryWhere = "";
+					else
+						queryWhere += ", ";
+					queryWhere += results.getInt(1);
+				}
+				if (queryWhere == null)
+					throw new SQLException("No results");
+				
+				queryWhere = " WHERE ACCOUNTS.account_num in (" + queryWhere + ") ";
+			}
+			catch (SQLException e)
+			{
+				e.printStackTrace();
+				JOptionPane.showMessageDialog(mainWindow.frmAddDataBrowser, "Query failed:" + e, "Query Failed", JOptionPane.ERROR_MESSAGE);
+			}
+			finally
+			{
+				mainWindow.frmAddDataBrowser.setCursor(Cursor.getDefaultCursor());
+			}
+		}
 		
 		try
 		{
 			Statement stmt = dataSource.createStatement();
 			mainWindow.frmAddDataBrowser.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
 			ResultSet results = stmt.executeQuery(queryPrefix + queryWhere + querySuffix);
-			
+
 			List<Account> accounts = new LinkedList<Account>();
-			
+
 			while (results.next())
 			{
-				int division = results.getInt(14);
-				int typeNum  = results.getInt(15);
+				int division = results.getInt(15);
+				int typeNum  = results.getInt(16);
 				Type type;
 				if (Type.typesUniform)
 					type = ADDBrowser.types.get(""+typeNum);
 				else
 					type = ADDBrowser.types.get(""+division+"-"+typeNum);
-				
+
 				accounts.add(new Account(
 						results.getString(1),
-						results.getString(2),
+						results.getInt(2),
 						results.getString(3),
 						results.getString(4),
 						results.getString(5),
@@ -443,12 +590,13 @@ public class ADDBrowser {
 						results.getString(11),
 						results.getString(12),
 						results.getString(13),
+						results.getString(14),
 						division,
 						type,
-						results.getInt(16),
-						results.getBigDecimal(17)));
+						results.getInt(17),
+						results.getBigDecimal(18)));
 			}
-			
+
 			if (accounts.size() == 0)
 				throw new SQLException("No results");
 			mainWindow.accountResults(accounts);
@@ -457,6 +605,191 @@ public class ADDBrowser {
 		{
 			e.printStackTrace();
 			JOptionPane.showMessageDialog(mainWindow.frmAddDataBrowser, "Query failed:" + e, "Query Failed", JOptionPane.ERROR_MESSAGE);
+		}
+		finally
+		{
+			mainWindow.frmAddDataBrowser.setCursor(Cursor.getDefaultCursor());
+		}
+
+	}
+
+	public static void getAcctContactInfo(Account acct)
+	{
+		try {
+			Statement stmt = dataSource.createStatement();
+			String queryPrefix =
+					"SELECT " + 
+							tablePrefix + "CONTACT_INFO_HDR.type, " +
+							tablePrefix + "CONTACT_INFO_HDR.contact_type_id, " +
+							tablePrefix + "CONTACT_INFO_HDR.contact_value, " +
+							tablePrefix + "CONTACT_INFO_HDR.row_status, " +
+							tablePrefix + "CONTACT_INFO_HDR.notes, " +
+							tablePrefix + "CONTACT_INFO_HDR.last_maintenance_dt, " +
+							tablePrefix + "CONTACT_INFO_HDR.last_maintenance_userid, " +
+							tablePrefix + "CONTACT_INFO_HDR.cust_contact_id " +
+					"FROM " +
+						tablePrefix + "CONTACT_INFO_HDR ";
+
+			String queryWhere = "WHERE "+
+					tablePrefix + "CONTACT_INFO_HDR.account_num = " + acct.account_num + " ";
+			
+			String querySuffix =
+					"ORDER BY " +
+						tablePrefix + "CONTACT_INFO_HDR.type";
+			
+			mainWindow.frmAddDataBrowser.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+			ResultSet results = stmt.executeQuery(queryPrefix + queryWhere + querySuffix);
+
+			if (contactDetail == null)
+			{
+				contactDetail = new ContactTable(contactTypes);
+				mainWindow.contactInfoTable.setAutoCreateRowSorter(true);
+				mainWindow.contactInfoTable.setModel(contactDetail);
+			}
+
+			contactDetail.newResults(results, mainWindow.contactInfoTable);
+		} 
+		catch (SQLException e) {
+			e.printStackTrace();
+			JOptionPane.showMessageDialog(mainWindow.frmAddDataBrowser, "Query failed:" + e, "Query Failed", JOptionPane.ERROR_MESSAGE);
+		}
+		finally
+		{
+			mainWindow.frmAddDataBrowser.setCursor(Cursor.getDefaultCursor());
+		}
+	}
+
+	public static String getAcctPrimary(Account acct, int type)
+	{
+		try {
+			Statement stmt = dataSource.createStatement();
+			String queryPrefix =
+					"SELECT " + 
+							tablePrefix + "CONTACT_INFO_HDR.contact_value " +
+					"FROM " +
+						tablePrefix + "CONTACT_INFO_HDR inner join " + tablePrefix + "CONTACT_INFO_DTL ON " +
+							tablePrefix + "CONTACT_INFO_HDR.cust_contact_id = " + tablePrefix + "CONTACT_INFO_DTL.cust_contact_id ";
+	
+			String queryWhere = "WHERE "+
+					tablePrefix + "CONTACT_INFO_HDR.account_num   = " + acct.account_num + " and " +
+					tablePrefix + "CONTACT_INFO_DTL.location_type = 0 and " +
+					tablePrefix + "CONTACT_INFO_DTL.location_num  = 0 and " +
+					tablePrefix + "CONTACT_INFO_DTL.primary_flag  = 'Y' and " +
+					tablePrefix + "CONTACT_INFO_HDR.type = " + type;
+			
+			mainWindow.frmAddDataBrowser.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+			ResultSet results = stmt.executeQuery(queryPrefix + queryWhere);
+	
+			String rc = "";
+			while (results.next())
+			{
+				if (rc.length() != 0)
+					return "Error: multiple primaries!";
+				else
+					rc += results.getString(1);
+			}
+			return rc;
+		} 
+		catch (SQLException e) {
+			e.printStackTrace();
+			JOptionPane.showMessageDialog(mainWindow.frmAddDataBrowser, "Query failed:" + e, "Query Failed", JOptionPane.ERROR_MESSAGE);
+			return "";
+		}
+		finally
+		{
+			mainWindow.frmAddDataBrowser.setCursor(Cursor.getDefaultCursor());
+		}
+	}
+
+	public static void getTankInfo(Account acct)
+	{
+		try {
+			Statement stmt = dataSource.createStatement();
+			String queryPrefix =
+					"SELECT " + 
+							tablePrefix + "TANKS.tank_num, " +
+							tablePrefix + "TANKS.product, " +
+							tablePrefix + "TANKS.size, " +
+							tablePrefix + "TANKS.base_price_code, " +
+							tablePrefix + "TANKS.deviation, " +
+							tablePrefix + "TANKS.status, " +
+							tablePrefix + "TANKS.delivery_stop, " +
+							tablePrefix + "DAD_TEXT.dad_text, " +
+							tablePrefix + "DIN_TEXT.din_text, " +
+							tablePrefix + "TANKS.last_maintenance_userid, " +
+							tablePrefix + "TANKS.last_maintenance_dt, " +
+							tablePrefix + "TANKS.tank_seq_number " +
+					"FROM " +
+						tablePrefix + "TANKS inner join "  + tablePrefix + "DAD_TEXT ON " +
+								tablePrefix + "TANKS.tank_seq_number = " + tablePrefix + "DAD_TEXT.dad_text_owner " +
+								"inner join " + tablePrefix + "DIN_TEXT ON " +
+								tablePrefix + "TANKS.tank_seq_number = " + tablePrefix + "DIN_TEXT.din_text_owner ";
+	
+			String queryWhere = "WHERE "+
+					tablePrefix + "TANKS.account_num   = " + acct.account_num + " ";
+			
+			String querySuffix = " ORDER BY TANKS.tank_num";
+			
+			mainWindow.frmAddDataBrowser.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+			ResultSet results = stmt.executeQuery(queryPrefix + queryWhere + querySuffix);
+	
+			if (tankDetail == null)
+			{
+				tankDetail = new TankTable();
+				mainWindow.tankInfoTable.setAutoCreateRowSorter(true);
+				mainWindow.tankInfoTable.setModel(tankDetail);
+			}
+			tankDetail.newResults(results, mainWindow.tankInfoTable);
+		} 
+		catch (SQLException e)
+		{
+		}
+		finally
+		{
+			mainWindow.frmAddDataBrowser.setCursor(Cursor.getDefaultCursor());
+		}
+	}
+
+	public static void getSvcInfo(Account acct)
+	{
+		try {
+			Statement stmt = dataSource.createStatement();
+			String queryPrefix =
+					"SELECT " + 
+							tablePrefix + "SERVICE.service_num, " +
+							tablePrefix + "SERVICE.service_contract, " +
+							tablePrefix + "SERVICE.contract_renewal_date, " +
+							tablePrefix + "SERVICE.status, " +
+							tablePrefix + "SERVICE.last_clean_date, " +
+							tablePrefix + "SAD_TEXT.sad_text, " +
+							tablePrefix + "SIN_TEXT.sin_text, " +
+							tablePrefix + "SERVICE.last_maintenance_userid, " +
+							tablePrefix + "SERVICE.last_maintenance_dt, " +
+							tablePrefix + "SERVICE.service_seq_number " +
+					"FROM " +
+						tablePrefix + "SERVICE inner join "  + tablePrefix + "SAD_TEXT ON " +
+								tablePrefix + "SERVICE.service_seq_number = " + tablePrefix + "SAD_TEXT.sad_text_owner " +
+								"inner join " + tablePrefix + "SIN_TEXT ON " +
+								tablePrefix + "SERVICE.service_seq_number = " + tablePrefix + "SIN_TEXT.sin_text_owner ";
+	
+			String queryWhere = "WHERE "+
+					tablePrefix + "SERVICE.account_num   = " + acct.account_num + " ";
+			
+			String querySuffix = " ORDER BY SERVICE.service_num";
+			
+			mainWindow.frmAddDataBrowser.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+			ResultSet results = stmt.executeQuery(queryPrefix + queryWhere + querySuffix);
+	
+			if (svcDetail == null)
+			{
+				svcDetail = new ServiceTable();
+				mainWindow.svcInfoTable.setAutoCreateRowSorter(true);
+				mainWindow.svcInfoTable.setModel(svcDetail);
+			}
+			svcDetail.newResults(results, mainWindow.svcInfoTable);
+		} 
+		catch (SQLException e)
+		{
 		}
 		finally
 		{
