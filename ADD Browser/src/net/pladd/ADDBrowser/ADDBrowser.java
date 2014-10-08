@@ -437,7 +437,8 @@ public class ADDBrowser {
 				tablePrefix + "ACCOUNTS.division, " +
 				tablePrefix + "ACCOUNTS.type, " +
 				tablePrefix + "ACCOUNTS.category, " +
-				tablePrefix + "ACCOUNTS.balance " +
+				tablePrefix + "ACCOUNTS.balance, " +
+				tablePrefix + "GTX_TEXT.gtx_text " +
 			" FROM " +
 				tablePrefix + "FULL_ACCOUNT inner join " + tablePrefix + "ACCOUNTS ON " +
 					tablePrefix + "ACCOUNTS.account_num = " + tablePrefix + "FULL_ACCOUNT.account_num " +
@@ -445,7 +446,9 @@ public class ADDBrowser {
 					tablePrefix + "ACCOUNTS.division = " + tablePrefix + " DIVISION_INFO.division " +
 				"inner join " + tablePrefix + "TYPE_INFO ON " +
 					tablePrefix + "ACCOUNTS.type = " + tablePrefix + " TYPE_INFO.type and " +
-					tablePrefix + "ACCOUNTS.division = " + tablePrefix + " TYPE_INFO.division ";
+					tablePrefix + "ACCOUNTS.division = " + tablePrefix + " TYPE_INFO.division " +
+				"inner join " + tablePrefix + "GTX_TEXT ON " +
+					tablePrefix + "ACCOUNTS.account_num = " + tablePrefix + " GTX_TEXT.gtx_text_owner ";
 	
 		String queryWhere   = null;
 		String queryContact = null;
@@ -591,10 +594,11 @@ public class ADDBrowser {
 						results.getString(12),
 						results.getString(13),
 						results.getString(14),
-						division,
+						divisions.get(division),
 						type,
-						results.getInt(17),
-						results.getBigDecimal(18)));
+						categories.get(results.getInt(17)),
+						results.getBigDecimal(18),
+						results.getString(19)));
 			}
 
 			if (accounts.size() == 0)

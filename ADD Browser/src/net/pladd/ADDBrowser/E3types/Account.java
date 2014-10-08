@@ -5,8 +5,6 @@ package net.pladd.ADDBrowser.E3types;
 
 import java.math.BigDecimal;
 
-import net.pladd.ADDBrowser.ADDBrowser;
-
 /**
  * @author Patrick
  *
@@ -31,24 +29,11 @@ public class Account
 	public final Type       type;
 	public final Category   category;
 	public final BigDecimal balance;
+	public final String     generalText;
 	
 	/**
 	 * @param full_account
-	 * @param sort_code
-	 * @param name
-	 * @param title
-	 * @param first_name
-	 * @param middle_initial
-	 * @param last_name
-	 * @param name_suffix
-	 * @param street1
-	 * @param street2
-	 * @param city
-	 * @param state
-	 * @param postal_code
-	 */
-	/**
-	 * @param full_account
+	 * @param account_num
 	 * @param sort_code
 	 * @param name
 	 * @param title
@@ -63,13 +48,16 @@ public class Account
 	 * @param postal_code
 	 * @param division
 	 * @param type
-	 * @param category
+	 * @param cat
+	 * @param balance
+	 * @param generalText
 	 */
-	public Account(String full_account, int account_num, String sort_code, String name,
-			String title, String first_name, String middle_initial,
-			String last_name, String name_suffix, String street1,
-			String street2, String city, String state, String postal_code,
-			int division, Type type, int category, BigDecimal balance) {
+	public Account(String full_account, int account_num, String sort_code,
+			String name, String title, String first_name,
+			String middle_initial, String last_name, String name_suffix,
+			String street1, String street2, String city, String state,
+			String postal_code, Division division, Type type,
+			Category cat, BigDecimal balance, String generalText) {
 		this.full_account = full_account;
 		this.account_num = account_num;
 		this.sort_code = sort_code;
@@ -84,10 +72,11 @@ public class Account
 		this.city = city;
 		this.state = state;
 		this.postal_code = postal_code;
-		this.division = ADDBrowser.divisions.get(division);
+		this.division = division;
 		this.type = type;
-		this.category = ADDBrowser.categories.get(category);
+		this.category = cat;
 		this.balance = balance;
+		this.generalText = generalText;
 	}
 	/* (non-Javadoc)
 	 * @see java.lang.Object#toString()

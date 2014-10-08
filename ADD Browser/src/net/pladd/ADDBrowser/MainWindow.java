@@ -60,6 +60,7 @@ import net.pladd.ADDBrowser.E3types.LogCategory;
 import net.pladd.ADDBrowser.E3types.LogType;
 import net.pladd.ADDBrowser.E3types.PostingCode;
 import net.pladd.ADDBrowser.E3types.Type;
+import javax.swing.SwingConstants;
 
 public class MainWindow {
 	// Top level structure
@@ -151,6 +152,7 @@ public class MainWindow {
 	protected JLabel transTotals;
 	protected JLabel batchTotals;
 	private JTabbedPane accountInfoTabPane;
+	private JTextField generalText;
 
 	/**
 	 * Create the application.
@@ -326,9 +328,9 @@ public class MainWindow {
 		accountInfoTabPane.setEnabledAt(0, true);
 		GridBagLayout gbl_billingInfoTab = new GridBagLayout();
 		gbl_billingInfoTab.columnWidths = new int[]{0, 0, 0};
-		gbl_billingInfoTab.rowHeights = new int[]{15, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+		gbl_billingInfoTab.rowHeights = new int[]{15, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 		gbl_billingInfoTab.columnWeights = new double[]{0.0, 1.0, Double.MIN_VALUE};
-		gbl_billingInfoTab.rowWeights = new double[]{0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, Double.MIN_VALUE};
+		gbl_billingInfoTab.rowWeights = new double[]{0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, Double.MIN_VALUE};
 		billingInfoTab.setLayout(gbl_billingInfoTab);
 		
 		JPanel buttonPanel = new JPanel();
@@ -832,13 +834,14 @@ public class MainWindow {
 		JLabel lblBalance = new JLabel("Balance $");
 		GridBagConstraints gbc_lblBalance = new GridBagConstraints();
 		gbc_lblBalance.anchor = GridBagConstraints.EAST;
-		gbc_lblBalance.insets = new Insets(0, 0, 0, 5);
+		gbc_lblBalance.insets = new Insets(0, 0, 5, 5);
 		gbc_lblBalance.gridx = 0;
 		gbc_lblBalance.gridy = 13;
 		billingInfoTab.add(lblBalance, gbc_lblBalance);
 		
 		balance = new JTextField();
 		GridBagConstraints gbc_balance = new GridBagConstraints();
+		gbc_balance.insets = new Insets(0, 0, 5, 0);
 		gbc_balance.anchor = GridBagConstraints.SOUTHWEST;
 		gbc_balance.gridx = 1;
 		gbc_balance.gridy = 13;
@@ -847,6 +850,25 @@ public class MainWindow {
 		balance.setEditable(false);
 		balance.setColumns(20);
 		accountQueryFields.add(balance);
+		
+		JLabel lblGeneralText = new JLabel("General Text");
+		GridBagConstraints gbc_lblGeneralText = new GridBagConstraints();
+		gbc_lblGeneralText.anchor = GridBagConstraints.EAST;
+		gbc_lblGeneralText.insets = new Insets(0, 0, 0, 5);
+		gbc_lblGeneralText.gridx = 0;
+		gbc_lblGeneralText.gridy = 14;
+		billingInfoTab.add(lblGeneralText, gbc_lblGeneralText);
+		
+		generalText = new JTextField();
+		generalText.setHorizontalAlignment(SwingConstants.LEFT);
+		generalText.setEditable(false);
+		GridBagConstraints gbc_generalText = new GridBagConstraints();
+		gbc_generalText.gridheight = 2;
+		gbc_generalText.fill = GridBagConstraints.BOTH;
+		gbc_generalText.gridx = 1;
+		gbc_generalText.gridy = 14;
+		billingInfoTab.add(generalText, gbc_generalText);
+		generalText.setColumns(10);
 		
 		JPanel contactInfoTab = new JPanel();
 		accountInfoTabPane.addTab("Contact Info", null, contactInfoTab, null);
@@ -1351,6 +1373,7 @@ public class MainWindow {
 		nf2.setMaximumFractionDigits(2);
 		nf2.setMinimumFractionDigits(2);
 		balance.setText(nf2.format(toDisplay.balance));
+		generalText.setText(toDisplay.generalText);
 		
 		ADDBrowser.getAcctContactInfo(toDisplay);
 		ADDBrowser.getTankInfo(toDisplay);
