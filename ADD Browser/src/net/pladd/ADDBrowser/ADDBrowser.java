@@ -47,6 +47,7 @@ public class ADDBrowser {
 
 	protected static ContactTable contactDetail = null;
 	protected static TankTable    tankDetail    = null;
+	protected static ServiceTable svcDetail     = null;
 
 	protected static LogTable     logDetail     = null;
 	protected static DocTable     docDetail     = null;
@@ -739,6 +740,53 @@ public class ADDBrowser {
 				mainWindow.tankInfoTable.setModel(tankDetail);
 			}
 			tankDetail.newResults(results, mainWindow.tankInfoTable);
+		} 
+		catch (SQLException e)
+		{
+		}
+		finally
+		{
+			mainWindow.frmAddDataBrowser.setCursor(Cursor.getDefaultCursor());
+		}
+	}
+
+	public static void getSvcInfo(Account acct)
+	{
+		try {
+			Statement stmt = dataSource.createStatement();
+			String queryPrefix =
+					"SELECT " + 
+							tablePrefix + "SERVICE.service_num, " +
+							tablePrefix + "SERVICE.service_contract, " +
+							tablePrefix + "SERVICE.contract_renewal_date, " +
+							tablePrefix + "SERVICE.status, " +
+							tablePrefix + "SERVICE.last_clean_date, " +
+							tablePrefix + "SAD_TEXT.sad_text, " +
+							tablePrefix + "SIN_TEXT.sin_text, " +
+							tablePrefix + "SERVICE.last_maintenance_userid, " +
+							tablePrefix + "SERVICE.last_maintenance_dt, " +
+							tablePrefix + "SERVICE.service_seq_number " +
+					"FROM " +
+						tablePrefix + "SERVICE inner join "  + tablePrefix + "SAD_TEXT ON " +
+								tablePrefix + "SERVICE.service_seq_number = " + tablePrefix + "SAD_TEXT.sad_text_owner " +
+								"inner join " + tablePrefix + "SIN_TEXT ON " +
+								tablePrefix + "SERVICE.service_seq_number = " + tablePrefix + "SIN_TEXT.sin_text_owner ";
+	
+			String queryWhere = "WHERE "+
+					tablePrefix + "SERVICE.account_num   = " + acct.account_num + " ";
+			
+			String querySuffix = " ORDER BY SERVICE.service_num";
+			
+			mainWindow.frmAddDataBrowser.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+			ResultSet results = stmt.executeQuery(queryPrefix + queryWhere + querySuffix);
+	
+			if (svcDetail == null)
+			{
+				svcDetail = new ServiceTable();
+				mainWindow.svcInfoTable.setAutoCreateRowSorter(true);
+				mainWindow.svcInfoTable.setModel(svcDetail);
+			}
+			svcDetail.newResults(results, mainWindow.svcInfoTable);
 		} 
 		catch (SQLException e)
 		{

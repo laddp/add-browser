@@ -135,7 +135,7 @@ public class MainWindow {
 
 	protected JTable contactInfoTable;
 	protected JTable tankInfoTable;
-	private JTable serviceInfoTable;
+	protected JTable svcInfoTable;
 
 	private Set<JTextField> accountQueryFields = new HashSet<JTextField>();
 
@@ -899,8 +899,8 @@ public class MainWindow {
 		JScrollPane serviceInfoScroll = new JScrollPane();
 		serviceSplit.setLeftComponent(serviceInfoScroll);
 
-		serviceInfoTable = new JTable();
-		serviceInfoScroll.setViewportView(serviceInfoTable);
+		svcInfoTable = new JTable();
+		serviceInfoScroll.setViewportView(svcInfoTable);
 		
 		JPanel serviceDetailPanel = new JPanel();
 		serviceSplit.setRightComponent(serviceDetailPanel);
@@ -1348,6 +1348,7 @@ public class MainWindow {
 		
 		ADDBrowser.getAcctContactInfo(toDisplay);
 		ADDBrowser.getTankInfo(toDisplay);
+		ADDBrowser.getSvcInfo(toDisplay);
 	}
 
 	protected void doClearAcct()
