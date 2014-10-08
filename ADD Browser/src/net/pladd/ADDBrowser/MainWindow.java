@@ -1105,6 +1105,7 @@ public class MainWindow {
 				{
 				case CONTACT_TAB_INDEX: return contactInfoTable;
 				case TANK_TAB_INDEX   : return tankInfoTable;
+				case SERVICE_TAB_INDEX: return svcInfoTable;
 				}
 			break;
 		case LOG_TAB_INDEX:   return logTable;
@@ -1222,7 +1223,12 @@ public class MainWindow {
 				{
 					TankTable tbl = (TankTable)selected.getModel();
 					tbl.doExport(out);
-				} 
+				}
+				else if (selected == svcInfoTable)
+				{
+					ServiceTable tbl = (ServiceTable)selected.getModel();
+					tbl.doExport(out);
+				}
 			} 
 			catch (IOException e) {
 				e.printStackTrace();
