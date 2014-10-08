@@ -64,6 +64,7 @@ public class ADDBrowser {
 	public    static Map<Integer, DocType>     docTypes      = new TreeMap<Integer, DocType>();
 	
 	public    static Map<Integer, String>      contactTypes  = new TreeMap<Integer, String>();
+	public    static Map<Integer, String>      contactDescrs = new TreeMap<Integer, String>();
 
 	/**
 	 * @param args
@@ -370,12 +371,46 @@ public class ADDBrowser {
 			{
 				contactTypes.put(results.getInt(1), results.getString(2));
 			}
+			
 		}
 		catch (SQLException e)
 		{
 			System.out.println(e);
 			JOptionPane.showMessageDialog(mainWindow.frmAddDataBrowser, "Error fetching contact type info:" + e, "Setup problem", JOptionPane.ERROR_MESSAGE);
 			throw e;
+		}
+		try {
+			contactDescrs.clear();
+			Statement stmt = dataSource.createStatement();
+			ResultSet results = stmt.executeQuery(
+					"SELECT contact_type_id, description " +
+							"FROM " + tablePrefix + "CONTACT_TYPE ");
+
+			while (results.next())
+			{
+				contactDescrs.put(results.getInt(1), results.getString(2));
+			}
+		}
+		catch (SQLException e)
+		{
+			try {
+				Statement stmt = dataSource.createStatement();
+				ResultSet results = stmt.executeQuery("SELECT contact_type_id " +
+						"FROM " + tablePrefix + "CONTACT_INFO_HDR " +
+						" group by contact_type_id");
+		
+				while (results.next())
+				{
+					int code = results.getInt(1);
+					contactDescrs.put(results.getInt(1), "Type: " + code);
+				}
+			}
+			catch (SQLException e1)
+			{
+				System.out.println(e1);
+				JOptionPane.showMessageDialog(mainWindow.frmAddDataBrowser, "Error fetching contact type info:" + e1, "Setup problem", JOptionPane.ERROR_MESSAGE);
+				throw e;
+			}
 		}
 	}
 

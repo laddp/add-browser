@@ -154,7 +154,12 @@ public class ContactTable extends AbstractTableModel {
 					types.add("Unknown");
 			}
 			{
-				descs.add(results.getString(COL_DESC+1));
+				int type = results.getInt(COL_DESC+1);
+				String desc = ADDBrowser.contactDescrs.get(type);
+				if (desc != null)
+					descs.add(desc);
+				else
+					descs.add("Unknown");
 			}
 			{
 				values.add(results.getString(COL_VALUE+1));
