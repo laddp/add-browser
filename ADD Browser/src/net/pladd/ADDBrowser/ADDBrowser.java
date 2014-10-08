@@ -757,6 +757,7 @@ public class ADDBrowser {
 			String queryPrefix =
 					"SELECT " + 
 							tablePrefix + "SERVICE.service_num, " +
+							tablePrefix + "SERVICE.zone, " +
 							tablePrefix + "SERVICE.service_contract, " +
 							tablePrefix + "SERVICE.contract_base_price, " +
 							tablePrefix + "SERVICE.contract_renewal_date, " +
@@ -792,6 +793,7 @@ public class ADDBrowser {
 		} 
 		catch (SQLException e)
 		{
+			System.out.println(e);
 		}
 		finally
 		{
