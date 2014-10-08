@@ -25,13 +25,13 @@ public class ServiceTable extends AbstractTableModel {
 	private static final long serialVersionUID = -4119385912426229448L;
 
 	protected static List<String> header =
-			Arrays.asList("Service #", "Contract", "Renewal Date", "Status", "Last Cleaning",
+			Arrays.asList("Service #", "Contract", "Renewal Date", "Status", "Last Service", "Last Cleaning",
 					"Service Addr", "Service Instr",
 					"Last User", "Last Maint");
 	
 	private final Object[] longValues = { 
 			new Integer("999"), "MMM", new Date(), "MMMMMMMMM",
-			new Date(),
+			new Date(), new Date(),
 			"MMMMMMMMMMMMMMMMM", "MMMMMMMMMMMMMMMMM",
 			"MMMMMMMMMM", new Date() };
 	
@@ -39,12 +39,13 @@ public class ServiceTable extends AbstractTableModel {
 	protected static final int COL_CONTRACT   = 1;
 	protected static final int COL_CONTR_DT   = 2;
 	protected static final int COL_STATUS     = 3;
-	protected static final int COL_LAST_CLEAN = 4;
-	protected static final int COL_ADDRESS    = 5;
-	protected static final int COL_INSTRUCT   = 6;
-	protected static final int COL_LAST_USER  = 7;
-	protected static final int COL_LAST_MAINT = 8;
-	protected static final int COL_SVC_SEQ    = 9;
+	protected static final int COL_LAST_SVC   = 4;
+	protected static final int COL_LAST_CLEAN = 5;
+	protected static final int COL_ADDRESS    = 6;
+	protected static final int COL_INSTRUCT   = 7;
+	protected static final int COL_LAST_USER  = 8;
+	protected static final int COL_LAST_MAINT = 9;
+	protected static final int COL_SVC_SEQ    = 10;
 
 	protected int rowCount;
 	
@@ -52,6 +53,7 @@ public class ServiceTable extends AbstractTableModel {
 	private Vector<String>      contracts;
 	private Vector<Date>        contrDates;
 	private Vector<String>      statuses;
+	private Vector<Date>        svcDates;
 	private Vector<Date>        cleanDates;
 	private Vector<String>      svcAddrs;
 	private Vector<String>      svcInstructs;
@@ -67,6 +69,7 @@ public class ServiceTable extends AbstractTableModel {
 		contracts    = new Vector<String>();
 		contrDates   = new Vector<Date>();
 		statuses     = new Vector<String>();
+		svcDates     = new Vector<Date>();
 		cleanDates   = new Vector<Date>();
 		svcAddrs     = new Vector<String>();
 		svcInstructs = new Vector<String>();
@@ -97,6 +100,7 @@ public class ServiceTable extends AbstractTableModel {
 		case COL_CONTRACT   : return String.class;
 		case COL_CONTR_DT   : return Date.class; 
 		case COL_STATUS     : return String.class;
+		case COL_LAST_SVC   : return Date.class; 
 		case COL_LAST_CLEAN : return Date.class; 
 		case COL_ADDRESS    : return String.class;
 		case COL_INSTRUCT   : return String.class;
@@ -121,6 +125,7 @@ public class ServiceTable extends AbstractTableModel {
 		case COL_CONTRACT   : return contracts.get(row);
 		case COL_CONTR_DT   : return contrDates.get(row);
 		case COL_STATUS     : return statuses.get(row);
+		case COL_LAST_SVC   : return svcDates.get(row);
 		case COL_LAST_CLEAN : return cleanDates.get(row);
 		case COL_ADDRESS    : return svcAddrs.get(row);
 		case COL_INSTRUCT   : return svcInstructs.get(row);
@@ -139,6 +144,7 @@ public class ServiceTable extends AbstractTableModel {
 		contrDates.clear();
 		statuses.clear();
 		cleanDates.clear();
+		svcDates.clear();
 		svcAddrs.clear();
 		svcInstructs.clear();
 		maintIDs.clear();
@@ -154,13 +160,13 @@ public class ServiceTable extends AbstractTableModel {
 				svcNums.add(i);
 			}
 			{
-				contracts.add(results.getString(COL_CONTRACT+1));
+				contracts.add(results.getString(COL_CONTRACT+1)+results.getString(COL_CONTRACT+2));
 			}
 			{
-				contrDates.add(results.getDate(COL_CONTR_DT+1));
+				contrDates.add(results.getDate(COL_CONTR_DT+2));
 			}
 			{
-				String stat = results.getString(COL_STATUS+1);
+				String stat = results.getString(COL_STATUS+2);
 				switch (stat)
 				{
 				case "I": statuses.add("Inact"); break;
@@ -170,19 +176,22 @@ public class ServiceTable extends AbstractTableModel {
 				}
 			}
 			{
-				cleanDates.add(results.getDate(COL_LAST_CLEAN+1));
+				svcDates.add(results.getDate(COL_LAST_SVC+2));
 			}
 			{
-				svcAddrs.add(results.getString(COL_ADDRESS+1));
+				cleanDates.add(results.getDate(COL_LAST_CLEAN+2));
 			}
 			{
-				svcInstructs.add(results.getString(COL_INSTRUCT+1));
+				svcAddrs.add(results.getString(COL_ADDRESS+2));
 			}
 			{
-				maintIDs.add(results.getString(COL_LAST_USER+1));
+				svcInstructs.add(results.getString(COL_INSTRUCT+2));
 			}
 			{
-				maintDates.add(results.getTimestamp(COL_LAST_MAINT+1));
+				maintIDs.add(results.getString(COL_LAST_USER+2));
+			}
+			{
+				maintDates.add(results.getTimestamp(COL_LAST_MAINT+2));
 			}
 		}
 		
@@ -192,6 +201,7 @@ public class ServiceTable extends AbstractTableModel {
 			throw new SQLException("No results");
 
 		table.getColumnModel().getColumn(ServiceTable.COL_CONTR_DT  ).setCellRenderer(new FormatRenderer(ADDBrowser.df));
+		table.getColumnModel().getColumn(ServiceTable.COL_LAST_SVC  ).setCellRenderer(new FormatRenderer(ADDBrowser.df));
 		table.getColumnModel().getColumn(ServiceTable.COL_LAST_CLEAN).setCellRenderer(new FormatRenderer(ADDBrowser.df));
 		table.getColumnModel().getColumn(ServiceTable.COL_LAST_MAINT).setCellRenderer(new FormatRenderer(ADDBrowser.df));
 		
@@ -212,6 +222,7 @@ public class ServiceTable extends AbstractTableModel {
 			out.write(contracts.get(row)+"\t");
 			out.write(ADDBrowser.tm.format(contrDates.get(row))+"\t");
 			out.write(statuses.get(row)+"\t");
+			out.write(ADDBrowser.tm.format(svcDates.get(row))+"\t");
 			out.write(ADDBrowser.tm.format(cleanDates.get(row))+"\t");
 			out.write(svcAddrs.get(row)+"\t");
 			out.write(svcInstructs.get(row)+"\t");

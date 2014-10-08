@@ -758,8 +758,10 @@ public class ADDBrowser {
 					"SELECT " + 
 							tablePrefix + "SERVICE.service_num, " +
 							tablePrefix + "SERVICE.service_contract, " +
+							tablePrefix + "SERVICE.contract_base_price, " +
 							tablePrefix + "SERVICE.contract_renewal_date, " +
 							tablePrefix + "SERVICE.status, " +
+							tablePrefix + "SERVICE.date_last_service, " +
 							tablePrefix + "SERVICE.last_clean_date, " +
 							tablePrefix + "SAD_TEXT.sad_text, " +
 							tablePrefix + "SIN_TEXT.sin_text, " +
