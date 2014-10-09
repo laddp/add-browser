@@ -447,7 +447,7 @@ public class ADDBrowser {
 				"inner join " + tablePrefix + "TYPE_INFO ON " +
 					tablePrefix + "ACCOUNTS.type = " + tablePrefix + " TYPE_INFO.type and " +
 					tablePrefix + "ACCOUNTS.division = " + tablePrefix + " TYPE_INFO.division " +
-				"inner join " + tablePrefix + "GTX_TEXT ON " +
+				"left join " + tablePrefix + "GTX_TEXT ON " +
 					tablePrefix + "ACCOUNTS.account_num = " + tablePrefix + " GTX_TEXT.gtx_text_owner ";
 	
 		String queryWhere   = null;
