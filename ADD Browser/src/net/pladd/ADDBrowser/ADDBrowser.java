@@ -663,7 +663,7 @@ public class ADDBrowser {
 		}
 	}
 
-	public static String getAcctPrimary(Account acct, int type)
+	public static String getAcctPrimaryContacts(Account acct, int type)
 	{
 		try {
 			Statement stmt = dataSource.createStatement();
@@ -712,11 +712,11 @@ public class ADDBrowser {
 			String queryPrefix =
 					"SELECT " + 
 							tablePrefix + "TANKS.tank_num, " +
+							tablePrefix + "TANKS.status, " +
 							tablePrefix + "TANKS.product, " +
 							tablePrefix + "TANKS.size, " +
 							tablePrefix + "TANKS.base_price_code, " +
 							tablePrefix + "TANKS.deviation, " +
-							tablePrefix + "TANKS.status, " +
 							tablePrefix + "TANKS.delivery_stop, " +
 							tablePrefix + "DAD_TEXT.dad_text, " +
 							tablePrefix + "DIN_TEXT.din_text, " +

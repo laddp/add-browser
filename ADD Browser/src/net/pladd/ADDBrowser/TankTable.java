@@ -30,21 +30,21 @@ public class TankTable extends AbstractTableModel {
 	private static final long serialVersionUID = -4119385912426229448L;
 
 	protected static List<String> header =
-			Arrays.asList("Tank #", "Product", "Size", "Base Price", "Deviation", "Status", "Stop Code", "Deliv Addr", "Deliv Instr",
+			Arrays.asList("Tank #", "Status", "Product", "Size", "Base Price", "Deviation", "Stop Code", "Deliv Addr", "Deliv Instr",
 					"Last User", "Last Maint");
 	
 	private final Object[] longValues = { 
-			new Integer("999"), "MMMMMMMMMMMMMMMMM", new Integer("99999"), new Integer("999"), new BigDecimal("999999.9"),
+			new Integer("999"), "MMMMMMMMM", "MMMMMMMMMMMMMMMMM", new Integer("99999"), new Integer("999"), new BigDecimal("999999.9"),
 			new Integer("99"),
-			"MMMMMMMMMMMMMM", "MMMMMMMMMMMMMMMMM", "MMMMMMMMMMMMMMMMM",
+			"MMMMMMMMMMMMMMMMM", "MMMMMMMMMMMMMMMMM",
 			"MMMMMMMMMM", new Date() };
 	
 	protected static final int COL_TANK_NUM   = 0;
-	protected static final int COL_PRODUCT    = 1;
-	protected static final int COL_SIZE       = 2;
-	protected static final int COL_BASE_PRICE = 3;
-	protected static final int COL_DEVIATION  = 4;
-	protected static final int COL_STATUS     = 5;
+	protected static final int COL_STATUS     = 1;
+	protected static final int COL_PRODUCT    = 2;
+	protected static final int COL_SIZE       = 3;
+	protected static final int COL_BASE_PRICE = 4;
+	protected static final int COL_DEVIATION  = 5;
 	protected static final int COL_STOP_CODE  = 6;
 	protected static final int COL_ADDRESS    = 7;
 	protected static final int COL_INSTRUCT   = 8;
