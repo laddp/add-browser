@@ -25,21 +25,21 @@ public class ServiceTable extends AbstractTableModel {
 	private static final long serialVersionUID = -4119385912426229448L;
 
 	protected static List<String> header =
-			Arrays.asList("Service #", "Zone", "Contract", "Renewal Date", "Status", "Last Service", "Last Cleaning",
+			Arrays.asList("Service #", "Status", "Zone", "Contract", "Renewal Date", "Last Service", "Last Cleaning",
 					"Service Addr", "Service Instr",
 					"Last User", "Last Maint");
 	
 	private final Object[] longValues = { 
-			new Integer("999"), "MMMMMM", "MMM", new Date(), "MMMMMMMMM",
+			new Integer("999"), "MMMMMMMMM", "MMMMMM", "MMM", new Date(),
 			new Date(), new Date(),
 			"MMMMMMMMMMMMMMMMM", "MMMMMMMMMMMMMMMMM",
 			"MMMMMMMMMM", new Date() };
 	
 	protected static final int COL_SVC_NUM    = 0;
-	protected static final int COL_SVC_ZONE   = 1;
-	protected static final int COL_CONTRACT   = 2;
-	protected static final int COL_CONTR_DT   = 3;
-	protected static final int COL_STATUS     = 4;
+	protected static final int COL_STATUS     = 1;
+	protected static final int COL_SVC_ZONE   = 2;
+	protected static final int COL_CONTRACT   = 3;
+	protected static final int COL_CONTR_DT   = 4;
 	protected static final int COL_LAST_SVC   = 5;
 	protected static final int COL_LAST_CLEAN = 6;
 	protected static final int COL_ADDRESS    = 7;
