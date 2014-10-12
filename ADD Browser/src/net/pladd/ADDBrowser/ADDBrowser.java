@@ -1286,4 +1286,49 @@ public class ADDBrowser {
 			mainWindow.frmAddDataBrowser.setCursor(Cursor.getDefaultCursor());
 		}
 	}
+
+	public static Map<String, Map<String, Object>> getTableCounts()
+	{
+		mainWindow.frmAddDataBrowser.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+		Map<String, Map<String, Object>> rc = new TreeMap<>();
+		
+		Map <String, Object> counts = new TreeMap<>();
+		Map <String, Object> early  = new TreeMap<>();
+		Map <String, Object> last   = new TreeMap<>();
+
+		rc.put("counts", counts);
+		rc.put("early",  early);
+		rc.put("last",   last);
+
+		String[] tables = { "ACCOUNTS", "TANKS", "SERVICE", "CONTACT_INFO_HDR", "LOG_HEADER", "DOC_HEADER", "TRANS_MAIN" };
+		for (String table : tables)
+		{
+			try {
+				Statement stmt = dataSource.createStatement();
+				String queryPrefix;
+				if (table.compareTo("TRANS_MAIN") == 0)
+					queryPrefix = "SELECT count(*), min(posting_date), max(posting_date) ";
+				else
+					queryPrefix = "SELECT count(*), min(last_maintenance_dt), max(last_maintenance_dt) ";
+				String queryFrom = "FROM " + tablePrefix + table;
+				ResultSet results = stmt.executeQuery(queryPrefix + queryFrom);
+
+				while (results.next())
+				{
+					counts.put(table, results.getInt(1));
+					early .put(table, results.getTimestamp(2));
+					last  .put(table, results.getTimestamp(3));
+				}
+			}
+			catch (SQLException e)
+			{
+				System.out.println(e);
+				mainWindow.frmAddDataBrowser.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+				JOptionPane.showMessageDialog(mainWindow.frmAddDataBrowser, "Table count collection problem:" + e, "Data problem", JOptionPane.ERROR_MESSAGE);
+			}
+			mainWindow.frmAddDataBrowser.setCursor(Cursor.getDefaultCursor());
+		}
+
+		return rc;
+	}
 }

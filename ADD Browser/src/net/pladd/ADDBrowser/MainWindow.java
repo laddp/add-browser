@@ -60,6 +60,7 @@ import net.pladd.ADDBrowser.E3types.LogCategory;
 import net.pladd.ADDBrowser.E3types.LogType;
 import net.pladd.ADDBrowser.E3types.PostingCode;
 import net.pladd.ADDBrowser.E3types.Type;
+
 import javax.swing.SwingConstants;
 
 public class MainWindow {
@@ -224,6 +225,16 @@ public class MainWindow {
 		});
 		mntmAbout.setMnemonic(KeyEvent.VK_A);
 		mnHelp.add(mntmAbout);
+		
+		JMenuItem mntmTableCountsAnd = new JMenuItem("Table counts and dates...");
+		mntmTableCountsAnd.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0)
+			{
+				doTableCounts();
+			}
+		});
+		mntmTableCountsAnd.setMnemonic(KeyEvent.VK_T);
+		mnHelp.add(mntmTableCountsAnd);
 		
 		JToolBar toolBar = new JToolBar();
 		frmAddDataBrowser.getContentPane().add(toolBar, BorderLayout.NORTH);
@@ -1162,6 +1173,13 @@ public class MainWindow {
 			}
 		}
 
+	protected void doTableCounts()
+	{
+		Map<String, Map<String, Object>> counts = ADDBrowser.getTableCounts();
+		TableDatesDialog dlg = new TableDatesDialog(counts);
+		dlg.setVisible(true);
+	}
+
 	void doConnect()
 	{
 		if (connectDialog == null)
@@ -1364,8 +1382,8 @@ public class MainWindow {
 		city.setText(toDisplay.city);
 		state.setText(toDisplay.state);
 		zipCode.setText(toDisplay.postal_code);
-		telephone.setText(ADDBrowser.getAcctPrimary(toDisplay, 1));
-		email.setText(ADDBrowser.getAcctPrimary(toDisplay, 3));
+		telephone.setText(ADDBrowser.getAcctPrimaryContacts(toDisplay, 1));
+		email.setText(ADDBrowser.getAcctPrimaryContacts(toDisplay, 3));
 		division.setText(toDisplay.division.toString());
 		category.setText(toDisplay.category.toString());
 		type.setText(toDisplay.type.toString());
