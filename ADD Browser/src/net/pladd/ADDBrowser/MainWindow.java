@@ -69,7 +69,7 @@ public class MainWindow {
 	protected JTabbedPane tabbedPane;
 
 	private JMenuItem mntmExport;
-	protected static final String VersionStr = "v1.7";
+	protected static final String VersionStr = "v1.8";
 	protected JTable logTable;
 	protected JSplitPane documentsTab;
 	protected JTable batchTable;
