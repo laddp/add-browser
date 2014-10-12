@@ -1137,6 +1137,8 @@ public class ADDBrowser {
 							tablePrefix + "TRANS_MAIN.last_maintenance_dt, " +
 							tablePrefix + "TRANS_MAIN.batch_num, " +
 							tablePrefix + "FULL_ACCOUNT.full_account, " +
+							tablePrefix + "TRANS_MAIN.tank_num, " +
+							tablePrefix + "TRANS_MAIN.service_num, " +
 							tablePrefix + "ACCOUNTS.name, " +
 							tablePrefix + "TYPE_INFO.name as \"type\", " +
 							tablePrefix + "TRANS_MAIN.posting_code, " +
@@ -1214,6 +1216,8 @@ public class ADDBrowser {
 							tablePrefix + "TRANS_MAIN.last_maintenance_dt, " +
 							tablePrefix + "TRANS_MAIN.batch_num, " +
 							tablePrefix + "FULL_ACCOUNT.full_account, " +
+							tablePrefix + "TRANS_MAIN.tank_num, " +
+							tablePrefix + "TRANS_MAIN.service_num, " +
 							tablePrefix + "ACCOUNTS.name, " +
 							tablePrefix + "TYPE_INFO.name as \"type\", " +
 							tablePrefix + "TRANS_MAIN.posting_code, " +

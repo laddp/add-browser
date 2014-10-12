@@ -33,14 +33,14 @@ public class BatchTable extends AbstractTableModel {
 
 	protected static List<String> header =
 			Arrays.asList("Event Date", "Posting Date", "Last Modified", "Batch #", 
-					"Full Account", "Name", "Type", 
+					"Full Account", "Tank #", "Svc #", "Name", "Type", 
 					"Posting Code", "Posting Code Descr", "Ref Num",
 					"Net Amount", "Credit Amount", "Debit Amount",
 					"Units", "Price Per Gal", 
 					"Created by", "Last User", "Comment", "Invoice Comment");
 	
 	private final Object[] longValues = { new Date(), new Date(), new Date(), new Integer("999"),
-			new Integer("9999999"), "MMMMMMMMMMMMMMMMM", "MMMMMMMMMMMMMM",
+			new Integer("9999999"), new Integer("999"), new Integer("999"), "MMMMMMMMMMMMMMMMM", "MMMMMMMMMMMMMM",
 			new Integer("999"), "MMMMMMMMMMMMMMMMMMMM", new Integer("999999"),
 			new BigDecimal("9999999.99"), new BigDecimal("9999999.99"), new BigDecimal("9999999.99"),
 			new BigDecimal("999999.9"), new BigDecimal("9999.99999"),
@@ -51,20 +51,22 @@ public class BatchTable extends AbstractTableModel {
 	protected static final int COL_TRANS_DATE  = 2;
 	protected static final int COL_BATCH_NUM   = 3;
 	protected static final int COL_FULL_ACCT   = 4;
-	protected static final int COL_NAME        = 5;
-	protected static final int COL_TYPE        = 6;
-	protected static final int COL_POST_CODE   = 7;
-	protected static final int COL_POST_DESC   = 8;
-	protected static final int COL_REF_NUM     = 9;
-	protected static final int COL_AMT_NET     = 10;
-	protected static final int COL_AMT_CRED    = 11;
-	protected static final int COL_AMT_DEBIT   = 12;
-	protected static final int COL_UNITS       = 13;
-	protected static final int COL_PPG         = 14;
-	protected static final int COL_CREATER     = 15;
-	protected static final int COL_USERID      = 16;
-	protected static final int COL_COMMENT     = 17;
-	protected static final int COL_INV_COMMENT = 18;
+	protected static final int COL_TANK_NUM    = 5;
+	protected static final int COL_SVC_NUM     = 6;
+	protected static final int COL_NAME        = 7;
+	protected static final int COL_TYPE        = 8;
+	protected static final int COL_POST_CODE   = 9;
+	protected static final int COL_POST_DESC   = 10;
+	protected static final int COL_REF_NUM     = 11;
+	protected static final int COL_AMT_NET     = 12;
+	protected static final int COL_AMT_CRED    = 13;
+	protected static final int COL_AMT_DEBIT   = 14;
+	protected static final int COL_UNITS       = 15;
+	protected static final int COL_PPG         = 16;
+	protected static final int COL_CREATER     = 17;
+	protected static final int COL_USERID      = 18;
+	protected static final int COL_COMMENT     = 19;
+	protected static final int COL_INV_COMMENT = 20;
 
 	protected int rowCount;
 	protected BigDecimal totalAmt;
@@ -76,6 +78,8 @@ public class BatchTable extends AbstractTableModel {
 	private Vector<Date>       transDates;
 	private Vector<Integer>    batchNums;
 	private Vector<Integer>    fullAccounts;
+	private Vector<Integer>    tankNums;
+	private Vector<Integer>    svcNums;
 	private Vector<String>     names;
 	private Vector<String>     types;
 	private Vector<Integer>    postCodes;
@@ -97,6 +101,8 @@ public class BatchTable extends AbstractTableModel {
 		transDates   = new Vector<Date>();
 		batchNums    = new Vector<Integer>();
 		fullAccounts = new Vector<Integer>();
+		tankNums     = new Vector<Integer>();
+		svcNums      = new Vector<Integer>();
 		names        = new Vector<String>();
 		types        = new Vector<String>();
 		postCodes    = new Vector<Integer>();
@@ -133,6 +139,8 @@ public class BatchTable extends AbstractTableModel {
 		case COL_TRANS_DATE:  return Date.class;
 		case COL_BATCH_NUM:   return Integer.class;
 		case COL_FULL_ACCT:   return Integer.class;
+		case COL_TANK_NUM:    return Integer.class;
+		case COL_SVC_NUM:     return Integer.class;
 		case COL_NAME:        return String.class;
 		case COL_TYPE:        return String.class;
 		case COL_POST_CODE:   return Integer.class;
@@ -193,6 +201,8 @@ public class BatchTable extends AbstractTableModel {
 		case COL_TRANS_DATE:  return transDates.get(row);
 		case COL_BATCH_NUM:   return batchNums.get(row);
 		case COL_FULL_ACCT:   return fullAccounts.get(row);
+		case COL_TANK_NUM:    return tankNums.get(row);
+		case COL_SVC_NUM:     return svcNums.get(row);
 		case COL_NAME:        return names.get(row);
 		case COL_TYPE:        return types.get(row);
 		case COL_POST_CODE:   return postCodes.get(row);
@@ -223,6 +233,8 @@ public class BatchTable extends AbstractTableModel {
 		transDates.clear();
 		batchNums.clear();
 		fullAccounts.clear();
+		tankNums.clear();
+		svcNums.clear();
 		names.clear();
 		types.clear();
 		postCodes.clear();
@@ -267,6 +279,14 @@ public class BatchTable extends AbstractTableModel {
 			{
 				Integer i = new Integer(results.getInt(COL_FULL_ACCT+1));
 				fullAccounts.add(i);
+			}
+			{
+				Integer i = new Integer(results.getInt(COL_TANK_NUM+1));
+				tankNums.add(i);
+			}
+			{
+				Integer i = new Integer(results.getInt(COL_SVC_NUM+1));
+				svcNums.add(i);
 			}
 			{
 				names.add(results.getString(COL_NAME+1));
@@ -351,6 +371,8 @@ public class BatchTable extends AbstractTableModel {
 			out.write(ADDBrowser.tm.format(transDates.get(row))+"\t");
 			out.write(batchNums.get(row)+"\t");
 			out.write(fullAccounts.get(row)+"\t");
+			out.write(tankNums.get(row)+"\t");
+			out.write(svcNums.get(row)+"\t");
 			out.write(names.get(row)+"\t");
 			out.write(types.get(row)+"\t");
 			out.write(postCodes.get(row)+"\t");
