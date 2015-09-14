@@ -655,7 +655,7 @@ public class ADDBrowser {
 		} 
 		catch (SQLException e) {
 			e.printStackTrace();
-//			JOptionPane.showMessageDialog(mainWindow.frmAddDataBrowser, "Query failed:" + e, "Query Failed", JOptionPane.ERROR_MESSAGE);
+			JOptionPane.showMessageDialog(mainWindow.frmAddDataBrowser, "Query failed:" + e, "Query Failed", JOptionPane.ERROR_MESSAGE);
 		}
 		finally
 		{
@@ -782,7 +782,7 @@ public class ADDBrowser {
 			String queryWhere = "WHERE "+
 					tablePrefix + "SERVICE.account_num   = " + acct.account_num + " ";
 			
-			String querySuffix = " ORDER BY SERVICE.service_num";
+			String querySuffix = " ORDER BY " + tablePrefix + "SERVICE.service_num";
 			
 			mainWindow.frmAddDataBrowser.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
 			ResultSet results = stmt.executeQuery(queryPrefix + queryWhere + querySuffix);
