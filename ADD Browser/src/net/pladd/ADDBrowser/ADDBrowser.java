@@ -655,7 +655,7 @@ public class ADDBrowser {
 		} 
 		catch (SQLException e) {
 			e.printStackTrace();
-			JOptionPane.showMessageDialog(mainWindow.frmAddDataBrowser, "Query failed:" + e, "Query Failed", JOptionPane.ERROR_MESSAGE);
+//			JOptionPane.showMessageDialog(mainWindow.frmAddDataBrowser, "Query failed:" + e, "Query Failed", JOptionPane.ERROR_MESSAGE);
 		}
 		finally
 		{
