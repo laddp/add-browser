@@ -228,10 +228,7 @@ public class LogTable extends AbstractTableModel {
 			}
 			{
 				Boolean b = results.getBoolean(COL_RESOLVED+1);
-				if (b == null)
-					resolveds.add(Boolean.FALSE);
-				else
-					resolveds.add(b);
+				resolveds.add(b);
 			}
 			{
 				Date d = results.getDate(COL_RESOVLED_DT+1);
