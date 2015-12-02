@@ -148,6 +148,7 @@ public class ADDBrowser {
 			System.out.println(e);
 			JOptionPane.showMessageDialog(mainWindow.frmAddDataBrowser, "Connection failed:" + e, "Connection Failed", JOptionPane.ERROR_MESSAGE);
 			dataSource = null;
+			mainWindow.frmAddDataBrowser.setCursor(Cursor.getDefaultCursor());
 			throw e;
 		}
 		finally

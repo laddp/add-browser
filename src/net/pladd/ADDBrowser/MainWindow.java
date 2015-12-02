@@ -96,6 +96,9 @@ public class MainWindow {
 	private BatchQueryDialog       batchQueryDialog = null;
 	private TransactionQueryDialog transactionQueryDialog = null; 
 
+	// Menu items
+	private JMenuItem mntmTableCountsAnd;
+
 	// Toolbar buttons
 	private JButton btnExport;
 	private JButton btnAccounts;
@@ -226,7 +229,8 @@ public class MainWindow {
 		mntmAbout.setMnemonic(KeyEvent.VK_A);
 		mnHelp.add(mntmAbout);
 		
-		JMenuItem mntmTableCountsAnd = new JMenuItem("Table counts and dates...");
+		mntmTableCountsAnd = new JMenuItem("Table counts and dates...");
+		mntmTableCountsAnd.setEnabled(false);
 		mntmTableCountsAnd.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0)
 			{
@@ -1166,6 +1170,8 @@ public class MainWindow {
 			btnDivision.setEnabled(b);
 			btnType.setEnabled(b);
 			btnCategory.setEnabled(b);
+			
+			mntmTableCountsAnd.setEnabled(b);
 			
 			for (JTextField fld : accountQueryFields)
 			{
