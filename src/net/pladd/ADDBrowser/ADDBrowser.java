@@ -655,8 +655,8 @@ public class ADDBrowser {
 			contactDetail.newResults(results, mainWindow.contactInfoTable);
 		} 
 		catch (SQLException e) {
-			e.printStackTrace();
-			JOptionPane.showMessageDialog(mainWindow.frmAddDataBrowser, "Query failed:" + e, "Query Failed", JOptionPane.ERROR_MESSAGE);
+//			e.printStackTrace();
+//			JOptionPane.showMessageDialog(mainWindow.frmAddDataBrowser, "Query failed:" + e, "Query Failed", JOptionPane.ERROR_MESSAGE);
 		}
 		finally
 		{
