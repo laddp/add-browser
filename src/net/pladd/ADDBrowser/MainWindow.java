@@ -45,6 +45,7 @@ import javax.swing.JTextField;
 import javax.swing.JToolBar;
 import javax.swing.KeyStroke;
 import javax.swing.ListSelectionModel;
+import javax.swing.SwingConstants;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.event.ListSelectionEvent;
@@ -61,15 +62,13 @@ import net.pladd.ADDBrowser.E3types.LogType;
 import net.pladd.ADDBrowser.E3types.PostingCode;
 import net.pladd.ADDBrowser.E3types.Type;
 
-import javax.swing.SwingConstants;
-
 public class MainWindow {
 	// Top level structure
 	protected JFrame frmAddDataBrowser;
 	protected JTabbedPane tabbedPane;
 
 	private JMenuItem mntmExport;
-	protected static final String VersionStr = "v1.8.3";
+	protected static final String VersionStr = "v1.9";
 	protected JTable logTable;
 	protected JSplitPane documentsTab;
 	protected JTable batchTable;
@@ -966,6 +965,7 @@ public class MainWindow {
 		
 		logTable = new JTable();
 		logTableScrollPane.setViewportView(logTable);
+		logTable.addMouseListener(new TransactionMouseAdapter(-1, -1, LogTable.COL_FULL_ACCT));
 		logTable.setFillsViewportHeight(true);
 		logTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		logTable.setRowSelectionAllowed(true);
@@ -1023,6 +1023,7 @@ public class MainWindow {
 		
 		docListTable = new JTable();
 		docListTable.getSelectionModel().addListSelectionListener(new DocListener());
+		docListTable.addMouseListener(new TransactionMouseAdapter(-1, -1, DocTable.COL_FULL_ACCT));
 		docListPane.setViewportView(docListTable);
 		JPanel docBottomHalf = new JPanel();
 		documentsTab.setRightComponent(docBottomHalf);
@@ -1067,8 +1068,8 @@ public class MainWindow {
 		batchTable = new JTable();
 		batchTable.setRowSelectionAllowed(false);
 		batchTable.setFillsViewportHeight(true);
-		batchTable.addMouseListener(new TransactionMouseAdapter());
-
+		batchTable.addMouseListener(new TransactionMouseAdapter(BatchTable.COL_BATCH_NUM, BatchTable.COL_POST_DATE, BatchTable.COL_FULL_ACCT));
+		
 		JScrollPane batchPane = new JScrollPane(batchTable);
 
 		JPanel batchSummaryTab = new JPanel();
@@ -1092,7 +1093,7 @@ public class MainWindow {
 		transTable = new JTable();
 		transTable.setRowSelectionAllowed(false);
 		transTable.setFillsViewportHeight(true);
-		transTable.addMouseListener(new TransactionMouseAdapter());
+		transTable.addMouseListener(new TransactionMouseAdapter(BatchTable.COL_BATCH_NUM, BatchTable.COL_POST_DATE, BatchTable.COL_FULL_ACCT));
 
 		JPanel transTotalsPane = new JPanel();
 		transSummaryTab.add(transTotalsPane, BorderLayout.NORTH);
@@ -1107,6 +1108,17 @@ public class MainWindow {
 
 	private class TransactionMouseAdapter extends MouseAdapter 
 	{
+		public final int BatchColNum;
+		public final int BatchDateColNum;
+		public final int AcctColNum;
+		
+		public TransactionMouseAdapter(int batchCol, int batchDateCol, int acctCol)
+		{
+			BatchColNum = batchCol;
+			BatchDateColNum = batchDateCol;
+			AcctColNum = acctCol;
+		}
+		
 		public void mousePressed(MouseEvent evt)
 		{
 			if (evt.getClickCount() == 2)
@@ -1114,17 +1126,17 @@ public class MainWindow {
 				JTable table = (JTable)evt.getSource();
 				int row = table.rowAtPoint(evt.getPoint());
 				int col = table.columnAtPoint(evt.getPoint());
-				if (col == 3)
+				if (col == BatchColNum)
 				{
 					ADDBrowser.doBatchQuery(
-						ADDBrowser.df.format(table.getValueAt(row, 1)), 
-						table.getValueAt(row, 3).toString());
+						ADDBrowser.df.format(table.getValueAt(row, BatchDateColNum)), 
+						table.getValueAt(row, BatchColNum).toString());
 					tabbedPane.setSelectedIndex(BATCH_TAB_INDEX);
 				}
-				if (col == 4)
+				if (col == AcctColNum)
 				{
 					Map<String, String> acctQuery = new HashMap<String, String>();
-					acctQuery.put("full_account", table.getValueAt(row, 4).toString());
+					acctQuery.put("full_account", table.getValueAt(row, AcctColNum).toString());
 					ADDBrowser.doAcctSearch(acctQuery);
 					tabbedPane.setSelectedIndex(ACCT_TAB_INDEX);
 				}
@@ -1700,3 +1712,4 @@ public class MainWindow {
 		System.exit(0);
 	}
 }
+

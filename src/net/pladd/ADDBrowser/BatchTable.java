@@ -19,10 +19,10 @@ import java.util.Vector;
 import javax.swing.JTable;
 import javax.swing.table.AbstractTableModel;
 
-import net.pladd.ADDBrowser.E3types.PostingCode;
-
 import com.camick.FormatRenderer;
 import com.camick.NumberRenderer;
+
+import net.pladd.ADDBrowser.E3types.PostingCode;
 
 /**
  * @author Patrick
@@ -220,7 +220,7 @@ public class BatchTable extends AbstractTableModel {
 		default: return null;
 		}
 	}
-
+	
 	public void newResults(ResultSet results, JTable table) throws SQLException 
 	{
 		rowCount = 0;
@@ -337,13 +337,15 @@ public class BatchTable extends AbstractTableModel {
 		if (rowCount == 0)
 			throw new SQLException("No results");
 
-		table.getColumnModel().getColumn(BatchTable.COL_EVENT_DATE).setCellRenderer(new FormatRenderer(ADDBrowser.df));
-		table.getColumnModel().getColumn(BatchTable.COL_POST_DATE ).setCellRenderer(new FormatRenderer(ADDBrowser.df));
-		table.getColumnModel().getColumn(BatchTable.COL_TRANS_DATE).setCellRenderer(new FormatRenderer(ADDBrowser.tm));
-		table.getColumnModel().getColumn(BatchTable.COL_AMT_NET   ).setCellRenderer(NumberRenderer.getCurrencyRenderer());
-		table.getColumnModel().getColumn(BatchTable.COL_AMT_CRED  ).setCellRenderer(NumberRenderer.getCurrencyRenderer());
-		table.getColumnModel().getColumn(BatchTable.COL_AMT_DEBIT ).setCellRenderer(NumberRenderer.getCurrencyRenderer());
-		
+		table.getColumnModel().getColumn(COL_EVENT_DATE).setCellRenderer(new FormatRenderer(ADDBrowser.df));
+		table.getColumnModel().getColumn(COL_POST_DATE ).setCellRenderer(new FormatRenderer(ADDBrowser.df));
+		table.getColumnModel().getColumn(COL_TRANS_DATE).setCellRenderer(new FormatRenderer(ADDBrowser.tm));
+		table.getColumnModel().getColumn(COL_AMT_NET   ).setCellRenderer(NumberRenderer.getCurrencyRenderer());
+		table.getColumnModel().getColumn(COL_AMT_CRED  ).setCellRenderer(NumberRenderer.getCurrencyRenderer());
+		table.getColumnModel().getColumn(COL_AMT_DEBIT ).setCellRenderer(NumberRenderer.getCurrencyRenderer());
+		table.getColumnModel().getColumn(COL_FULL_ACCT ).setCellRenderer(new HighlightedColumnRenderer());
+		table.getColumnModel().getColumn(COL_BATCH_NUM ).setCellRenderer(new HighlightedColumnRenderer());
+
 		NumberFormat nf1 = NumberFormat.getNumberInstance();
 		nf1.setMaximumFractionDigits(1);
 		nf1.setMinimumFractionDigits(1);

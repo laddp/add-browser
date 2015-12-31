@@ -204,8 +204,9 @@ public class DocTable extends AbstractTableModel {
 		if (rowCount == 0)
 			throw new SQLException("No results");
 
-		table.getColumnModel().getColumn(COL_DATE)    .setCellRenderer(new FormatRenderer(ADDBrowser.tm));
-		table.getColumnModel().getColumn(COL_MAINT_DT).setCellRenderer(new FormatRenderer(ADDBrowser.tm));
+		table.getColumnModel().getColumn(COL_DATE)     .setCellRenderer(new FormatRenderer(ADDBrowser.tm));
+		table.getColumnModel().getColumn(COL_MAINT_DT) .setCellRenderer(new FormatRenderer(ADDBrowser.tm));
+		table.getColumnModel().getColumn(COL_FULL_ACCT).setCellRenderer(new HighlightedColumnRenderer());
 		
 		Util.initColumnSizes(table, longValues);
 	}

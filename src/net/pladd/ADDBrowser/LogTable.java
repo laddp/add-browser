@@ -313,6 +313,7 @@ public class LogTable extends AbstractTableModel {
 		table.getColumnModel().getColumn(COL_CREATE_DT)  .setCellRenderer(new FormatRenderer(ADDBrowser.tm));
 		table.getColumnModel().getColumn(COL_RESOVLED_DT).setCellRenderer(new FormatRenderer(ADDBrowser.df));
 		table.getColumnModel().getColumn(COL_MAINT_DT)   .setCellRenderer(new FormatRenderer(ADDBrowser.tm));
+		table.getColumnModel().getColumn(COL_FULL_ACCT)  .setCellRenderer(new HighlightedColumnRenderer());
 		
 		Util.initColumnSizes(table, longValues);
 	}
