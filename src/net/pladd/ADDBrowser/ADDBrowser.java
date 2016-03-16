@@ -1206,7 +1206,7 @@ public class ADDBrowser {
 		}
 	}
 
-	public static void doTransactionQuery(String startDate, String endDate, String acctNum, String postCodes, String refNum)
+	public static void doTransactionQuery(String startDate, String endDate, String acctNum, String postCodes, String refNum, String amount)
 	{
 		try {
 			Statement stmt = dataSource.createStatement();
@@ -1255,6 +1255,11 @@ public class ADDBrowser {
 				queryWhere += " and " + tablePrefix + "TRANS_MAIN.posting_code in (" + postCodes + ") ";
 			if (refNum != null)
 				queryWhere += " and " + tablePrefix + "TRANS_MAIN.reference_num = " + refNum + " ";
+			if (amount != null)
+			{
+				queryWhere += " and (" + tablePrefix + "TRANS_MAIN.net_amount = "  + amount
+				           +  " or " + tablePrefix + "TRANS_MAIN.net_amount = -" + amount + ") ";
+			}
 			
 			String querySuffix =
 					"ORDER BY " +

@@ -31,18 +31,26 @@ public class TransactionQueryDialog extends JDialog {
 	private static final long serialVersionUID = 4425113802994773769L;
 	private TransactionQueryDialog thisDialog;
 	private final JPanel contentPanel = new JPanel();
-	
-	protected JTextField startDate;
-	protected JTextField endDate;
-	protected JTextField accountNum;
+
+	protected boolean OKpressed;
+
 	protected JCheckBox chckbxStartDate;
+	protected JTextField startDate;
+	
+	protected JCheckBox chckbxEndDate;
+	protected JTextField endDate;
+	
+	protected JCheckBox chckbxAccountNumber;
+	protected JTextField accountNum;
+
 	protected JCheckBox chckbxPostingCodes;
 	protected JList<PostingCode> postingCodes;
-	protected JCheckBox chckbxAccountNumber;
-	protected JCheckBox chckbxEndDate;
-	protected boolean OKpressed;
+
 	protected JCheckBox chckbxReferenceNum;
 	protected JTextField referenceNumber;
+
+	protected JCheckBox chckbxTransAmount;
+	protected JTextField transAmount;
 
 	/**
 	 * Create the dialog.
@@ -191,6 +199,30 @@ public class TransactionQueryDialog extends JDialog {
 				gbc_referenceNumber.gridy = 4;
 				contentPanel.add(referenceNumber, gbc_referenceNumber);
 				referenceNumber.setColumns(10);
+			}
+			{
+				chckbxTransAmount = new JCheckBox("Amount $");
+				chckbxTransAmount.addChangeListener(new ChangeListener() {
+					public void stateChanged(ChangeEvent arg0) {
+						transAmount.setEnabled(chckbxTransAmount.isSelected());
+					}
+				});
+				GridBagConstraints gbc_chckbxTransAmount = new GridBagConstraints();
+				gbc_chckbxTransAmount.anchor = GridBagConstraints.NORTH;
+				gbc_chckbxTransAmount.fill = GridBagConstraints.HORIZONTAL;
+				gbc_chckbxTransAmount.insets = new Insets(0, 0, 0, 5);
+				gbc_chckbxTransAmount.gridx = 0;
+				gbc_chckbxTransAmount.gridy = 5;
+				contentPanel.add(chckbxTransAmount, gbc_chckbxTransAmount);
+			}
+			{
+				transAmount = new JTextField();
+				transAmount.setEnabled(false);
+				GridBagConstraints gbc_transAmount = new GridBagConstraints();
+				gbc_transAmount.fill = GridBagConstraints.HORIZONTAL;
+				gbc_transAmount.gridx = 1;
+				gbc_transAmount.gridy = 5;
+				contentPanel.add(transAmount, gbc_transAmount);
 			}
 		}
 		{

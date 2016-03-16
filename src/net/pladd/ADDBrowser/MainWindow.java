@@ -402,7 +402,7 @@ public class MainWindow {
 		btnAcctTransactions.setMnemonic('r');
 		btnAcctTransactions.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				ADDBrowser.doTransactionQuery(null, null, accountNumber.getText(), null, null);
+				ADDBrowser.doTransactionQuery(null, null, accountNumber.getText(), null, null, null);
 			}
 		});
 		btnAcctTransactions.setEnabled(false);
@@ -1672,6 +1672,7 @@ public class MainWindow {
 			String acctNum   = null;
 			String postCodes = null;
 			String refNum    = null;
+			String amount    = null;
 			
 			if (transactionQueryDialog.chckbxStartDate.isSelected())
 				startDate = transactionQueryDialog.startDate.getText();
@@ -1696,13 +1697,16 @@ public class MainWindow {
 			if (transactionQueryDialog.chckbxReferenceNum.isSelected())
 				refNum = transactionQueryDialog.referenceNumber.getText();
 			
-			if (startDate == null && endDate == null && acctNum == null && postCodes == null && refNum == null)
+			if (transactionQueryDialog.chckbxTransAmount.isSelected())
+				amount = transactionQueryDialog.transAmount.getText();
+
+			if (startDate == null && endDate == null && acctNum == null && postCodes == null && refNum == null && amount == null)
 			{
 				JOptionPane.showMessageDialog(frmAddDataBrowser, "No query specified", "Transaction Query error", JOptionPane.ERROR_MESSAGE);
 				return;
 			}
 
-			ADDBrowser.doTransactionQuery(startDate, endDate, acctNum, postCodes, refNum);
+			ADDBrowser.doTransactionQuery(startDate, endDate, acctNum, postCodes, refNum, amount);
 		}
 	}
 
