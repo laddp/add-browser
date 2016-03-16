@@ -463,7 +463,7 @@ public class ADDBrowser {
 					queryWhere += " and ";
 				else
 					queryWhere = " WHERE ";
-				queryWhere += tablePrefix + "FULL_ACCOUNT." + item.getKey() + " like '" + item.getValue() + "' ";
+				queryWhere += tablePrefix + "FULL_ACCOUNT." + item.getKey() + " like '" + item.getValue().trim() + "' ";
 				break;
 			case "sort_code":
 			case "name":
@@ -481,7 +481,7 @@ public class ADDBrowser {
 					queryWhere += " and ";
 				else
 					queryWhere = " WHERE ";
-				queryWhere += tablePrefix + "ACCOUNTS." + item.getKey() + " like '" + item.getValue() + "' ";
+				queryWhere += tablePrefix + "ACCOUNTS." + item.getKey() + " like '" + item.getValue().trim() + "' ";
 				break;
 			case "division":
 			case "type":
@@ -490,7 +490,7 @@ public class ADDBrowser {
 					queryWhere += " and ";
 				else
 					queryWhere = " WHERE ";
-				queryWhere += tablePrefix + "ACCOUNTS." + item.getKey() + " in (" + item.getValue() + ") ";
+				queryWhere += tablePrefix + "ACCOUNTS." + item.getKey() + " in (" + item.getValue().trim() + ") ";
 				break;
 			case "telephone":
 				if (queryContact != null)
@@ -499,7 +499,7 @@ public class ADDBrowser {
 					return;
 				}
 				queryContact = " WHERE " + tablePrefix + "CONTACT_INFO_HDR.type = 1 and " +
-						tablePrefix + "CONTACT_INFO_HDR.contact_value like '" + item.getValue() + "' ";
+						tablePrefix + "CONTACT_INFO_HDR.contact_value like '" + item.getValue().trim() + "' ";
 				break;
 			case "email":
 				if (queryContact != null)
@@ -508,7 +508,7 @@ public class ADDBrowser {
 					return;
 				}
 				queryContact = " WHERE " + tablePrefix + "CONTACT_INFO_HDR.type = 3 and " +
-						tablePrefix + "CONTACT_INFO_HDR.contact_value like '" + item.getValue() + "' ";
+						tablePrefix + "CONTACT_INFO_HDR.contact_value like '" + item.getValue().trim() + "' ";
 				break;
 			default:
 				break;
