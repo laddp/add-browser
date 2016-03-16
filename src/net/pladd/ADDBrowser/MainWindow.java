@@ -51,6 +51,8 @@ import javax.swing.event.ChangeListener;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.filechooser.FileNameExtensionFilter;
+import javax.swing.table.AbstractTableModel;
+import javax.swing.table.TableModel;
 import javax.swing.text.DefaultCaret;
 
 import net.pladd.ADDBrowser.E3types.Account;
@@ -1424,19 +1426,31 @@ public class MainWindow {
 		}
 		
 		// clear contact info
-		ContactTable contacts = (ContactTable)contactInfoTable.getModel();
-		contacts.clear();
-		contacts.fireTableDataChanged();
-
+		TableModel mod = contactInfoTable.getModel();
+		if (mod != null && ContactTable.class.isInstance(mod))
+		{
+			ContactTable contacts = (ContactTable)mod;
+			contacts.clear();
+			contacts.fireTableDataChanged();
+		}
+		
 		// clear tank info
-		TankTable tanks = (TankTable)tankInfoTable.getModel();
-		tanks.clear();
-		tanks.fireTableDataChanged();
-
+		mod = tankInfoTable.getModel();
+		if (mod != null && TankTable.class.isInstance(mod))
+		{
+			TankTable tanks = (TankTable)mod;
+			tanks.clear();
+			tanks.fireTableDataChanged();
+		}
+		
 		// clear service info
-		ServiceTable service = (ServiceTable)svcInfoTable.getModel();
-		service.clear();
-		service.fireTableDataChanged();
+		mod = svcInfoTable.getModel();
+		if (mod != null && ServiceTable.class.isInstance(mod))
+		{
+			ServiceTable service = (ServiceTable)mod;
+			service.clear();
+			service.fireTableDataChanged();
+		}
 	}
 
 	protected void doDivisionButton()
