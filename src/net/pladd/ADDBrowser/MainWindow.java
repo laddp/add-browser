@@ -1422,6 +1422,21 @@ public class MainWindow {
 		{
 			field.setText("");
 		}
+		
+		// clear contact info
+		ContactTable contacts = (ContactTable)contactInfoTable.getModel();
+		contacts.clear();
+		contacts.fireTableDataChanged();
+
+		// clear tank info
+		TankTable tanks = (TankTable)tankInfoTable.getModel();
+		tanks.clear();
+		tanks.fireTableDataChanged();
+
+		// clear service info
+		ServiceTable service = (ServiceTable)svcInfoTable.getModel();
+		service.clear();
+		service.fireTableDataChanged();
 	}
 
 	protected void doDivisionButton()

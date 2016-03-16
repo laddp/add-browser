@@ -128,7 +128,7 @@ public class ContactTable extends AbstractTableModel {
 		}
 	}
 
-	public void newResults(ResultSet results, JTable table) throws SQLException 
+	public void clear()
 	{
 		rowCount = 0;
 
@@ -140,6 +140,11 @@ public class ContactTable extends AbstractTableModel {
 		maintUsers   .clear();
 		maintDates   .clear();
 		contactIDs   .clear();
+	}
+	
+	public void newResults(ResultSet results, JTable table) throws SQLException 
+	{
+		clear();
 		
 		while (results.next())
 		{

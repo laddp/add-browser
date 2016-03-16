@@ -144,7 +144,7 @@ public class TankTable extends AbstractTableModel {
 		}
 	}
 
-	public void newResults(ResultSet results, JTable table) throws SQLException 
+	public void clear()
 	{
 		rowCount = 0;
 
@@ -161,6 +161,11 @@ public class TankTable extends AbstractTableModel {
 		maintDates.clear();
 
 		tankSeqs.clear();
+	}
+
+	public void newResults(ResultSet results, JTable table) throws SQLException 
+	{
+		clear();
 
 		while (results.next())
 		{

@@ -140,7 +140,7 @@ public class ServiceTable extends AbstractTableModel {
 		}
 	}
 
-	public void newResults(ResultSet results, JTable table) throws SQLException 
+	public void clear()
 	{
 		rowCount = 0;
 
@@ -157,6 +157,11 @@ public class ServiceTable extends AbstractTableModel {
 		maintDates.clear();
 
 		svcSeqs.clear();
+	}
+
+	public void newResults(ResultSet results, JTable table) throws SQLException 
+	{
+		clear();
 
 		while (results.next())
 		{
