@@ -202,6 +202,7 @@ public class TransactionQueryDialog extends JDialog {
 			}
 			{
 				chckbxTransAmount = new JCheckBox("Amount $");
+				chckbxTransAmount.setToolTipText("Warning: amount is not indexed - query could take a long time.  Consider restricting with a date range.");
 				chckbxTransAmount.addChangeListener(new ChangeListener() {
 					public void stateChanged(ChangeEvent arg0) {
 						transAmount.setEnabled(chckbxTransAmount.isSelected());
@@ -218,6 +219,7 @@ public class TransactionQueryDialog extends JDialog {
 			{
 				transAmount = new JTextField();
 				transAmount.setEnabled(false);
+				transAmount.setToolTipText("Warning: amount is not indexed - query could take a long time.  Consider restricting with a date range.");
 				GridBagConstraints gbc_transAmount = new GridBagConstraints();
 				gbc_transAmount.fill = GridBagConstraints.HORIZONTAL;
 				gbc_transAmount.gridx = 1;
