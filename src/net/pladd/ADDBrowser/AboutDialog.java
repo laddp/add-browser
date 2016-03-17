@@ -34,7 +34,7 @@ public class AboutDialog extends JDialog {
 					"<html><h1>ADD Data Browser " + MainWindow.VersionStr + "<h1>" +
 					"<br/>" +
 					"<p>Browser for ADD Systems E3 databases</p>" +
-					"<p>Written by Patrick Ladd (c)2014,2015</p>" + 
+					"<p>Written by Patrick Ladd (c)2014,2015,2016</p>" + 
 					"<p>Get the latest version from https://github.com/laddp/add-browser/releases</p>");
 			contentPanel.add(aboutLabel);
 		}

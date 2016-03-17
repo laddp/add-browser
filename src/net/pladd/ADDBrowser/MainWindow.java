@@ -69,7 +69,7 @@ public class MainWindow {
 	protected JTabbedPane tabbedPane;
 
 	private JMenuItem mntmExport;
-	protected static final String VersionStr = "v1.9";
+	protected static final String VersionStr = "v1.10";
 	protected JTable logTable;
 	protected JSplitPane documentsTab;
 	protected JTable batchTable;
@@ -1422,6 +1422,8 @@ public class MainWindow {
 		for (JTextField field : accountQueryFields)
 		{
 			field.setText("");
+			if (field.getName().equals("full_account"))
+				field.requestFocus();
 		}
 		
 		// clear contact info
