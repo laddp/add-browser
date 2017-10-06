@@ -69,7 +69,7 @@ public class MainWindow {
 	protected JTabbedPane tabbedPane;
 
 	private JMenuItem mntmExport;
-	protected static final String VersionStr = "v1.10";
+	protected static final String VersionStr = "v1.11";
 	protected JTable logTable;
 	protected JSplitPane documentsTab;
 	protected JTable batchTable;
@@ -1322,7 +1322,7 @@ public class MainWindow {
 		{
 			try
 			{
-				File f = tsvChooser.getSelectedFile();
+				File f = txtChooser.getSelectedFile();
 				if (!f.getName().endsWith(".txt"))
 					f = new File(f.getAbsolutePath()+".txt");
 				FileWriter out = new FileWriter(f);
